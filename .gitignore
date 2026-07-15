@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.pytest_cache/
+reports/regressions/*.csv
+!reports/regressions/.gitkeep
+*.log
+.DS_Store

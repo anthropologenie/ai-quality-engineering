@@ -1,0 +1,6 @@
+pytest
+deepeval
+promptfoo
+ragas
+pandas
+python-dotenv
