@@ -1,120 +1,284 @@
-# AI Quality Engineering — Learning Roadmap Baseline
+# AI Quality Engineering — Roadmap
 
 **Owner:** Karthik S R
-**Purpose:** Baseline scope document defining what to learn, build, and speak to for AI/LLM QA interview readiness. This is the reference point for all future prep — additions require a deliberate decision to expand scope, not ad-hoc tool collecting.
+**Repository:** `ai-quality-engineering`
+**Purpose:** Master execution plan for this repository — what is being built, why, in what order, how each stage is validated, and what is intentionally excluded. This document is the reference point for all future work here. Additions require a deliberate scope decision, not ad-hoc tool collecting.
 
 **Guiding principle:**
 > Become the engineer who can answer "How do we know our AI system is correct, reliable, repeatable, and production-ready?" — not an AI framework collector.
 
 ---
 
-## 1. In Scope
+## 0. Current Repository Status
 
-### 1.1 Tools (3 only)
+- **Milestone 0 (Repository Scaffold): Complete.** Directory structure exists — `docs/`, `datasets/{rag,synthetic}`, `evaluation/{deepeval,promptfoo,ragas}`, `sample_rag/`, `tests/`, `reports/{baseline,regressions}`, `scripts/`, `notebooks/`. No pipeline code has been written yet, by design — docs and data structure come first.
+- **Session 1 (LLM Core Six Baseline) and Session 2 (RAG Architecture Closure): Finalized.** Architecture is locked; no further architectural debate is scheduled. See Section 8 for a summary of decisions made in each session.
+- **Milestone 0.5 (Documentation Synchronization): In progress.** This document is part of that synchronization — bringing architectural decisions that existed only in working notes into the repository itself, so the repository is self-contained and does not depend on external chat history to be understood.
 
-| Priority | Tool | Role | Mental Model |
+---
+
+# Documentation Map
+
+These documents together form the repository documentation set:
+
+| Document | Purpose |
+|----------|---------|
+| roadmap.md | Master execution plan for the repository |
+| architecture.md | System architecture, repository boundaries, interfaces, and design decisions |
+| altm.md | AI Lifecycle Traceability Model (ALTM) and diagnostic framework |
+| glossary.md | Core terminology and metric definitions |
+| interview-notes.md | Interview narratives, resume reinterpretation, and STAR mappings |
+| learning-log.md | Historical progression of Sessions 1, 2, and future sessions |
+
+---
+
+## 1. Milestone Ordering
+
+| Milestone | Scope |
+|---|---|
+| **Milestone 0** | Repository scaffold |
+| **Milestone 0.5** | Documentation synchronization (`docs/roadmap.md`, `docs/architecture.md`, `docs/altm.md`, `docs/glossary.md`, `docs/interview-notes.md`, `docs/learning-log.md`) |
+| **Milestone 1A** | Golden Dataset → Data Quality Validation → Deterministic Retrieval Pipeline → CLI |
+| **Milestone 2** | Embeddings, Vector Retrieval, Retrieval Evaluation (Ragas), Generation Evaluation (DeepEval) |
+| **Milestone 3** | Regression (Promptfoo), Production Readiness |
+
+There is no Milestone 1B. Retrieval evaluation and generation evaluation are both Milestone 2 activities, gated behind a working deterministic pipeline from Milestone 1A — they are not a separate numbered milestone.
+
+```
+Milestone 0
+Repository Scaffold
+        │
+        ▼
+Milestone 0.5
+Documentation Synchronization
+        │
+        ▼
+Milestone 1A
+Golden Dataset
+        │
+        ▼
+Data Quality Validation
+        │
+        ▼
+Deterministic Retrieval Pipeline
+        │
+        ▼
+Milestone 2
+Embeddings
+Retrieval Evaluation
+Generation Evaluation
+        │
+        ▼
+Milestone 3
+Regression
+Production Readiness
+```
+
+---
+
+## 2. Golden Dataset Design
+
+The Golden Dataset is the reference corpus against which retrieval, generation, and evaluation are all validated. It is built before any embeddings, vector store, or LLM call — Milestone 1A implements it entirely in Python stdlib and pytest.
+
+Every metric this project eventually reports (Faithfulness, Context Precision, Context Recall, and the rest) is only as trustworthy as the ground truth it is measured against. A passing DeepEval assertion says nothing about system quality if the underlying "correct answer" was never verified. This is the same discipline that already governs ETL testing on the resume — a transformation is not trusted until the source has been validated.
+
+### 2.1 Data Sources
+
+Reverse-engineered from real, evolving production data — not authored as synthetic examples:
+
+- **Resume** — primary source of verified biographical and project fact
+- **Job Descriptions** — JobOps-sourced
+- **JobOps structured metadata** — SQLite database (application status, salary, location)
+- Cover letters and portfolio documents — **future**, not in scope until produced
+
+Real, evolving data surfaces production-realistic problems (a resume revision, a re-scraped job posting, a corrected fact) that a fixed synthetic dataset cannot, without requiring hand-maintenance of the eval set itself.
+
+### 2.2 Question Generation Strategy
+
+Core principle: **one verified fact → many question forms.**
+
+For every fact in the resume already validated as accurate, derive multiple phrasings a real evaluator might ask. This produces genuine variation without inventing any new knowledge.
+
+Example — resume fact: *"Led a cross-functional QA team of 5, owning test strategy and stakeholder communication."*
+
+| Question | Category |
+|---|---|
+| How many engineers did Karthik lead? | Exact fact / lexical |
+| Describe his leadership experience. | Summarization |
+| Which project demonstrates leadership? | Reasoning / retrieval |
+| Has he managed stakeholders? | Paraphrase |
+| Give an example of cross-functional coordination. | Semantic / reworded |
+
+This produces four question categories from a single fact — lexical, semantic, summarization, and reasoning — without a separate synthetic-question-writing effort.
+
+### 2.3 Failure Taxonomy
+
+The dataset intentionally includes difficult categories, not only happy-path questions. A dataset made only of easy factual lookups passes everything and reveals nothing.
+
+| Category | Purpose | Example |
+|---|---|---|
+| **Exact Fact** | Tests deterministic retrieval | "What is Karthik's total experience?" |
+| **Paraphrase** | Tests semantic retrieval | "What background does Karthik have in data engineering?" |
+| **Multi-hop** | Requires combining multiple resume sections | "Which project best demonstrates AI Quality Engineering?" |
+| **No Answer** | Tests abstention | "What Kubernetes cluster did he manage?" |
+| **Stale Version** | Tests freshness | Old resume version vs. current resume |
+| **Contradiction** | Tests conflict handling | Two resume versions disagree on the same fact |
+| **False Premise** | Tests hallucination resistance | "Didn't Karthik work at Microsoft?" |
+
+Each category is deliberately targeted at a different ALTM failure stage (see `docs/altm.md`) — the taxonomy gives the Milestone 1A data-quality pytest suite something concrete to validate against.
+
+### 2.4 Evidence Trace Schema
+
+A conventional golden dataset evaluates only the final answer. This is not sufficient to validate the hybrid retrieval architecture (Section 4) — a correct final answer can still hide a wrong retrieval route or an unintended reasoning shortcut.
+
+The **Evidence Trace Dataset** extends each golden dataset entry to record the expected behavior of the whole pipeline, not just the expected output:
+
+| Field | Purpose |
+|---|---|
+| Question | Test input |
+| Ground Truth / Expected Answer | Ground truth |
+| Expected Source | Correct document |
+| Expected Chunk | Retrieval validation |
+| Retrieval Evidence / Expected Route | BM25 / Vector / SQL / Hybrid |
+| Expected Reasoning Type | Single-hop / Multi-hop / Aggregation |
+| Evaluation Metrics | Faithfulness, Groundedness, Context Recall, Context Precision, Answer Relevancy |
+| Expected Outcome | Answer / Abstain / Clarify |
+
+This does not change the retrieval architecture itself — it changes what the Golden Dataset is capable of validating: whether the *architecture* behaved as designed, not only whether the *answer* happened to be correct. It is a data-schema decision, buildable entirely as labeled data in Milestone 1A — no embeddings or vector store required to define it, only to eventually validate against it in Milestone 2.
+
+**Why this dataset is foundational:** without a golden, verified reference corpus, no downstream metric — retrieval or generation — has anything meaningful to be measured against. Building it first is not a detour from the pipeline; it is the precondition for the pipeline being testable at all.
+
+---
+
+## 3. Locked Implementation Order
+
+```
+Documentation
+      │
+      ▼
+Golden Dataset
+      │
+      ▼
+Data Quality Validation
+      │
+      ▼
+Chunking
+      │
+      ▼
+Indexing
+      │
+      ▼
+Retrieval
+      │
+      ▼
+Context Assembly
+      │
+      ▼
+Evaluation
+      │
+      ▼
+Generation
+```
+
+**Why data validation precedes pipeline construction:** building a chunker, indexer, or retriever against unvalidated data risks the same failure category already surfaced during Session 2 — a stale or malformed source silently producing plausible-looking but wrong output downstream. Data Quality Validation exists to catch that before any retrieval logic is trusted, the same discipline as validating source data before an ETL transformation runs.
+
+---
+
+## 4. Architecture Summary
+
+Full detail lives in `docs/architecture.md`. Summary for roadmap context:
+
+- **Pipeline stages:** Knowledge → Index → Retrieve → Assemble → Infer → Evaluate
+- **Retrieval topology:** Hybrid — SQL structured filtering (JobOps) + BM25 + Vector search, merged via Reciprocal Rank Fusion (RRF)
+- **Repository boundary:** `jobs-application-automation` (JobOps) is the production data source, read-only from this repository's perspective. `ai-quality-engineering` is the evaluation lab — it never writes back to JobOps.
+- **Generation model (Milestone 2):** DeepSeek API
+- **Design pattern:** Interface-first — `EmbeddingProvider` and vector-store access are defined as interfaces in Milestone 1A, with deterministic stub implementations; real implementations (BGE-small, FAISS) are swapped in at Milestone 2 without changing the interface contract.
+
+The architecture describes how information flows through the system. ALTM describes how failures are localized across that lifecycle. The two are complementary: architecture explains system design; ALTM explains system diagnosis.
+
+---
+
+## 5. Evaluation Strategy
+
+Evaluation is organized in four layers, each with a distinct responsibility. A system can pass one layer and fail another — they are not substitutes for each other.
+
+| Layer | Responsibility | Tool | Notes |
 |---|---|---|---|
-| ⭐⭐⭐⭐⭐ | **DeepEval** | Primary LLM testing framework | PyTest for LLMs |
-| ⭐⭐⭐⭐⭐ | **Promptfoo** | Prompt regression & consistency testing | Regression suite for prompts |
-| ⭐⭐⭐⭐⭐ | **Ragas** | RAG / retrieval evaluation | ETL validation, but for retrieval quality |
+| **Layer 1 — Data Quality** | Is the corpus itself trustworthy? Freshness, completeness, hashing, duplicate detection, chunk validity. | PyTest | Pure data engineering. No LLM call. Runs before any retrieval exists. |
+| **Layer 2 — Retrieval Quality** | Did retrieval find the right evidence, and was it free of noise? | Ragas — Context Precision, Context Recall | Assumes the corpus itself is current — a stale corpus is a Layer 1 failure, not a Layer 2 one. |
+| **Layer 3 — Generation Quality** | Is the model's output supported by what was retrieved? | DeepEval — Faithfulness, Groundedness, Hallucination Rate, Answer Relevancy | Checks consistency with retrieved context only — never whether that context was itself current or correct. A model can be 100% faithful to a stale document. |
+| **Layer 4 — Regression** | Did a prompt, corpus, or code change silently degrade previously-correct behavior? | Promptfoo — re-run old vs. new, diff results | Not a pipeline stage at runtime. A comparison methodology applied across two full pipeline runs. |
 
-No further tools to be added to active learning until these three are demonstrable in the GitHub project (Section 3).
+This four-layer structure is the practical, tool-mapped expression of the ALTM stage-wise evaluation philosophy documented in `docs/altm.md` — each layer corresponds to specific ALTM stages, not to a specific tool's marketing scope.
 
-### 1.2 Concepts — Classical ML Evaluation
+---
 
-Know definitions **and** trade-offs, not just formulas.
+## 6. Repository Principles
 
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-- ROC-AUC
+These are locked engineering principles governing all work in this repository:
 
-**Must be able to explain:**
-- When accuracy is misleading (class imbalance)
-- The precision/recall trade-off
-- Why F1 is preferred in many real-world cases
+- **Docs before code.** Architectural and scope decisions are written down and frozen before implementation begins.
+- **Interface-first design.** Program to an interface (`EmbeddingProvider`, `retrieve()`), not to a specific implementation — implementations are swapped in later without changing calling code.
+- **Deterministic implementation before AI.** Milestone 1A uses stub logic and placeholder vectors, not real embeddings or LLM calls — correctness of pipeline plumbing is proven before non-determinism is introduced.
+- **Knowledge validation before retrieval.** Data quality is checked before it is trusted as a retrieval source (Section 3).
+- **Small, demonstrable milestones.** Each milestone produces something inspectable and testable, not a partial, unverifiable state.
+- **Evaluation-first mindset.** The evaluation plan (Section 5) is designed before the system being evaluated is built.
+- **Minimal dependencies.** Milestone 1A is Python stdlib + pytest only. Dependencies are added only when a milestone specifically requires them.
+- **Production thinking over demos.** This project is framed as a testing framework, not an AI chatbot demo — see Section 7 for what that excludes.
 
-### 1.3 Concepts — LLM Evaluation
+---
 
-**Core six (know deeply — ~80% of interview discussion):**
-- Faithfulness
-- Groundedness
-- Hallucination Rate
-- Answer Relevancy
-- Context Precision
-- Context Recall
+## 7. Scope Freeze
 
-**Conceptual only (don't need deepest expertise):**
-- Toxicity
-- Bias
+Explicitly excluded until Milestone 2 or later. Deferred intentionally, not forgotten — do not add these without a deliberate scope decision recorded in this document.
 
-### 1.4 Concepts — Agent Evaluation
+| Item | Status |
+|---|---|
+| Real embedding models (BGE-small, E5, Nomic) | Deferred to Milestone 2 |
+| Vector databases (FAISS) | Deferred to Milestone 2 |
+| Real BM25 implementation | Deferred to Milestone 2 |
+| Hybrid retrieval (RRF) execution | Deferred to Milestone 2 |
+| LangChain / LangGraph | Out of scope entirely |
+| Agent orchestration, multi-agent frameworks | Out of scope entirely |
+| MLflow | Conceptual only — not core to the 3-tool project |
+| LangSmith | Conceptual only |
+| Phoenix (Arize) | Name recognition only |
+| Production orchestration, distributed retrieval, GPU optimization | Out of scope entirely |
+| A second GitHub project | Not planned — one finished project over multiple partial ones |
 
-Priority is *above* Classical ML — this is where the resume already has direct proof points (HP RCA pipeline).
+Tool scope remains fixed at three: **DeepEval, Promptfoo, Ragas.** No further evaluation tools are added until these three are demonstrable end-to-end in this repository.
 
-- Task Completion Rate
-- Tool Success Rate
-- Retry Rate
-- Planning Accuracy
-- Reasoning Accuracy
-- Loop Detection
-- Latency
-- Cost per Task
+---
 
-### 1.5 Concepts — Production Metrics
+## 8. Session Progress Summary
 
-- P95 latency
-- Token usage
-- Cost per request
-- Failure rate
-- Drift
+### Session 1 — LLM Core Six Baseline
 
-*(User satisfaction and escalation rate: useful to know, but treated as product KPIs, not engineering metrics — lower priority.)*
+Established fluency with the six core LLM evaluation metrics, anchored to a real AAVA example (inconsistent Page Object Model generation count):
 
-### 1.6 GitHub Project — "AI Quality Evaluation Suite"
+- Context Recall, Context Precision (retrieval stage)
+- Faithfulness, Groundedness, Hallucination Rate (generation stage)
+- Answer Relevancy (orthogonal to both — the only metric independent of truthfulness)
 
-One project only. Framed as a **testing framework**, not an AI chatbot demo.
+Key corrected distinction: retrieval cannot hallucinate — only generation can. Retrieval's only failure mode is pulling in real-but-irrelevant material (noise).
 
-```
-AI Quality Evaluation Suite
-├── sample_rag/
-│   ├── retriever.py
-│   ├── generator.py
-│   └── documents/
-├── tests/
-│   ├── test_faithfulness.py
-│   ├── test_hallucination.py
-│   ├── test_consistency.py
-│   ├── test_prompt_regression.py
-│   └── test_ragas.py
-├── promptfoo/
-│   └── promptfooconfig.yaml
-├── deepeval/
-│   └── metrics.py
-├── reports/
-│   ├── evaluation_report.md
-│   └── metrics.csv
-├── github_actions/
-└── README.md
-```
+### Session 2 — RAG Architecture Closure
 
-**Required README elements:**
-- Evaluation pipeline diagram (prompt change → push → CI → Promptfoo → DeepEval → Ragas → report → pass/fail)
-- Data quality section applying ETL-style validation to AI inputs:
-  - Missing values
-  - Duplicate records
-  - Context completeness
-  - Chunk size validation
-  - Embedding coverage
-  - Metadata validation
-- Before/after results table (not just "I used DeepEval" — show numbers)
+Closed the architecture debate for this repository, triggered by a real incident (a stale mounted document producing contradictory answers across two chats):
 
-**Stretch (only after core project works):** GitHub Actions running the eval suite on push.
+- Locked the seven-stage pipeline: Knowledge → Index → Retrieve → Assemble → Generate → Regression → Task Success
+- Locked repository boundaries: `jobs-application-automation` (production, read-only source) vs. `ai-quality-engineering` (evaluation lab)
+- Locked hybrid retrieval: SQL + BM25 + Vector → RRF
+- Introduced the AI Lifecycle Traceability Model (ALTM) — a personal, explicitly-not-industry-standard framework for tracing information through an AI system stage by stage
+- Introduced the Golden Dataset concept (Section 2 above), later expanded with the Failure Taxonomy and Evidence Trace Schema following external validation against independent industry sources
 
-### 1.7 Interview Narrative — Resume Reinterpretation
+This history is preserved here as context for future contributors — no further architectural re-litigation is expected; the foundation is considered stable.
 
-Existing project experience is to be *relabeled* with AI QA vocabulary, not replaced with new stories.
+---
+
+## 9. Interview Narrative — Resume Reinterpretation
+
+Existing project experience is *relabeled* with AI QA vocabulary, not replaced with new stories. Full detail in `docs/interview-notes.md`.
 
 | Resume experience | AI Quality interpretation |
 |---|---|
@@ -127,37 +291,7 @@ Existing project experience is to be *relabeled* with AI QA vocabulary, not repl
 
 ---
 
-## 2. Out of Scope (for now)
-
-Explicitly deprioritized to avoid dilution. Revisit only if a specific interview or role calls for it.
-
-| Item | Status | Reason |
-|---|---|---|
-| LangSmith | Conceptual only, no hands-on build | Covered by knowing "traces/datasets/regression for LLMs" one-liner |
-| MLflow | Conceptual only, no hands-on build | Databricks-adjacent, but not core to the 3-tool project |
-| OpenTelemetry | Conceptual only | Bridges backend observability to AI tracing; nice-to-mention, not to build |
-| Phoenix (Arize) | Name + one-line purpose only | Observability tool, not a testing framework |
-| TruLens | Name + one-line purpose only | Overlaps with Ragas' RAG evaluation coverage |
-| Weights & Biases | Name recognition only | Experiment tracking, not core QA |
-| Evidently AI | Name + one-line purpose only | Drift/monitoring; adjacent to Production Metrics section |
-| OpenAI Evals | Conceptual understanding only | Good to know exists, not a priority to hands-on learn |
-| Second GitHub project | Not planned | One finished project > multiple partial ones |
-| Toxicity/Bias deep expertise | Conceptual only | Included in metrics list but not a focus area |
-
----
-
-## 3. Priority Order (Execution Sequence)
-
-1. **Concepts first** — Classical ML trade-offs, LLM core six, Agent metrics (map each to HP RCA pipeline as you go)
-2. **DeepEval** — pytest-style, fastest transition from existing skill set
-3. **Promptfoo** — consistency + regression testing (directly answers "how do you test AI consistency" question)
-4. **Ragas** — RAG/retrieval evaluation
-5. **GitHub project** — combine all three into the Evaluation Suite structure above, with a real results table
-6. **Interview narrative** — finalize STAR-format story connecting HP RCA project to AI QA vocabulary (Section 1.7)
-
----
-
-## 4. Success Criteria
+## 10. Success Criteria
 
 This roadmap is "done" when Karthik can:
 
@@ -166,9 +300,8 @@ This roadmap is "done" when Karthik can:
 - [ ] Map every Agent Evaluation metric to a specific HP RCA pipeline detail already on the resume
 - [ ] Run DeepEval, Promptfoo, and Ragas against the sample RAG project and produce a results report
 - [ ] Point to a live GitHub repo during an interview and walk through the evaluation pipeline end-to-end
-- [ ] Deliver the STAR narrative in Section 1.7 fluently, in under 90 seconds
+- [ ] Deliver the STAR narrative fluently, in under 90 seconds
 
 ---
 
-*This document is the baseline. Any new tool, metric, or project addition should be weighed against Section 2 (Out of Scope) before being added — the goal is depth on a small surface area, not breadth.*
-
+*This document is the baseline for the `ai-quality-engineering` repository. Any new tool, metric, or milestone addition should be weighed against Section 7 (Scope Freeze) before being added — the goal is depth on a small surface area, not breadth.*
