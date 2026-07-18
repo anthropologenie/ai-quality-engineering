@@ -111,6 +111,8 @@ This is a summary for architectural context. Stage-by-stage failure diagnosis, a
 | **Evaluation Engine** | Score outputs against the Golden Dataset across all four layers | Layer-specific: pytest / Ragas / DeepEval / Promptfoo | Golden Dataset, Generator, Retriever | 1A — Layer 1 (pytest) only | Layers 2–4 activated in Milestone 2–3 |
 | **CLI** | Provide a reproducible local entry point tying the pipeline together | Command-line invocation | All of the above | 1A | — |
 
+**Knowledge Manifest.** The Knowledge Source owns the Knowledge Manifest. `knowledge_manifest.json` is an artifact produced from the corpus, containing metadata that describes the corpus — it is not a separate pipeline component or interface. Corpus integrity and freshness validation consume this artifact directly. The canonical schema is defined in `docs/MILESTONE_1A.md`.
+
 ---
 
 ## 6. Repository Structure

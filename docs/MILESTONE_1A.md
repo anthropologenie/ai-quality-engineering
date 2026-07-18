@@ -76,7 +76,11 @@ These two tracks are built together in M1A but tracked and extended separately f
 1. **Knowledge Manifest** — `knowledge_manifest.json` cataloguing every document in the corpus. This is the single canonical description of what the corpus *is*; freshness checks validate against it rather than against scattered ad-hoc checks. The canonical schema is:
    - `manifest_version` — schema version, for forward compatibility and schema evolution only
    - `created_at` — manifest creation timestamp
-   - `documents[]` — array of entries, each with `id`, `source`, content `hash`, and `indexed` status
+   - `documents[]` — array of entries, each with:
+     - `id` — unique identifier within the manifest
+     - `source` — filesystem path relative to `sample_rag/`
+     - `hash` — SHA-256 digest of the document contents
+     - `indexed` — boolean indicating whether the document has been successfully processed by the indexing stage
 
    This versioning is documentation-level forward compatibility, not a new subsystem — the manifest remains one file.
    - Validated by: one pytest suite running hash comparison against the manifest. No separate validation subsystem — this stays a file plus a check.
