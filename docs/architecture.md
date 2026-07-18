@@ -281,6 +281,7 @@ The table below summarizes the same milestone evolution described above, capabil
 | Three evaluation tools only (DeepEval, Promptfoo, Ragas) | Matches each tool to exactly one evaluation layer; avoids tool sprawl and overlapping coverage | Some capabilities offered by out-of-scope tools (e.g., Phoenix's observability, LangSmith's tracing) are not available in this repository |
 | Minimal dependencies | Milestone 1A must be provable without external services or paid APIs | Real-world fidelity (actual retrieval quality, actual generation quality) is deferred until Milestone 2 |
 | Docs before code | Prevents architecture debates from recurring mid-implementation | Milestone 0.5 (this document and its siblings) must be complete before Milestone 1A implementation resumes |
+| Resume corpus stored as versioned `.docx` | The resume is a living knowledge source that evolves throughout the job search. `.docx` serves as the canonical, editable artifact, while PDF is generated only as a distribution format for job portals and recruiters. Versioned `.docx` files preserve traceability across evaluation experiments and eliminate synchronization between independently maintained source documents. | Knowledge ingestion operates on the canonical `.docx` corpus. PDF remains an external export artifact and is outside the scope of the evaluation pipeline. |
 
 These decisions are locked. Revisiting any of them requires a deliberate redesign discussion, not an incidental change made while implementing a later milestone.
 
