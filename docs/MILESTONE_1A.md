@@ -73,16 +73,38 @@ These two tracks are built together in M1A but tracked and extended separately f
 
 ### A. Runtime Pipeline — Build Items
 
-1. **Knowledge Manifest** — `knowledge_manifest.json` cataloguing every document in the corpus. This is the single canonical description of what the corpus *is*; freshness checks validate against it rather than against scattered ad-hoc checks. The canonical schema is:
-   - `manifest_version` — schema version, for forward compatibility and schema evolution only
-   - `created_at` — manifest creation timestamp
-   - `documents[]` — array of entries, each with:
-     - `id` — unique identifier within the manifest
-     - `source` — filesystem path relative to `sample_rag/`
-     - `hash` — SHA-256 digest of the document contents
-     - `indexed` — boolean indicating whether the document has been successfully processed by the indexing stage
+1. **Knowledge Manifest** — `knowledge_manifest.json` cataloguing every document in the corpus. This is the single canonical description of what the corpus *is*; freshness checks validate against it rather than against scattered ad-hoc checks.
 
-   This versioning is documentation-level forward compatibility, not a new subsystem — the manifest remains one file.
+   **Contract status (frozen at Sprint P1.2.0):** the schema below defines what the Knowledge Manifest *is*. How it is generated, assembled, or serialized is an implementation concern for P1.2.1 and later — not defined here.
+
+   **Schema:**
+
+   | Field | Type | Purpose |
+   |---|---|---|
+   | `manifest_version` | string, `"1.0"` | Versions the Knowledge Manifest schema itself — independent of document content and independent of document versions. Exists solely for forward compatibility and schema evolution. |
+   | `documents[]` | array | One entry per corpus document. |
+   | `documents[].id` | string | Unique identifier for the document within the manifest. |
+   | `documents[].source` | string | Filesystem path relative to `sample_rag/`. |
+   | `documents[].hash` | string | SHA-256 digest of the document contents; the basis for freshness/integrity checks. |
+   | `documents[].indexed` | boolean | Whether the document has been successfully processed by the indexing stage. |
+
+   These are the only fields in the contract. This versioning is documentation-level forward compatibility, not a new subsystem — the manifest remains one file.
+
+   **Manifest version format.** `manifest_version` is a Major.Minor string, frozen at `"1.0"`. It versions the Knowledge Manifest schema itself, independent of document versions, and exists for forward compatibility and schema evolution.
+
+   **Version Evolution.** `manifest_version` changes only when the Knowledge Manifest schema itself changes. Changes to corpus contents, document hashes, or the set of catalogued documents (additions, removals, updates) do not change `manifest_version`.
+
+   **Artifact relationship.** `manifest_version` versions the Knowledge Manifest. `schema_version` (`datasets/SCHEMA.md`) versions Golden Dataset artifacts. They are independent schema contracts.
+
+   **Deterministic artifact contract.** The Knowledge Manifest is a deterministic artifact: an identical corpus produces an identical Knowledge Manifest. Deterministic generation is a contractual requirement of this specification — every conforming implementation of the Knowledge Manifest must preserve this property.
+
+   **Contract Change — `created_at` removed.** An earlier draft of this contract included `created_at` (manifest creation timestamp). It has been intentionally removed, not silently dropped:
+   - A creation timestamp is operational provenance, not a description of the corpus, and its presence would make the manifest non-deterministic for an identical corpus generated at two different times — in direct conflict with the deterministic artifact contract above.
+   - Operational provenance is out of scope for Milestone 1A.
+   - Future schema evolution may introduce provenance metadata if a concrete need justifies it; no such mechanism is designed by this note.
+
+   **Document version responsibility.** The Knowledge Manifest schema does not carry document version information. Filenames remain the authoritative source of document versioning; the manifest intentionally does not duplicate that metadata.
+
    - Validated by: one pytest suite running hash comparison against the manifest. No separate validation subsystem — this stays a file plus a check.
 
 2. **Data Quality Validation** — resume validation, chunk validation, metadata validation, Index Coverage Validation. Index Coverage Validation ensures every chunk produced during indexing has a deterministic placeholder representation behind the `EmbeddingProvider` interface. This validates indexing completeness rather than real embedding quality. Pure Python, pure pytest, no external model calls.
