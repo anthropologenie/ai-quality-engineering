@@ -1,4 +1,4 @@
-"""Corpus discovery, metadata extraction, manifest assembly, and serialization.
+"""Corpus discovery, metadata extraction, manifest assembly, serialization, and validation.
 
 Sprint 1A.1, P1.1: discovers supported documents under sample_rag/documents/,
 normalizes their paths, computes content hashes, and builds in-memory document
@@ -8,12 +8,18 @@ Sprint 1A.1, P1.2.1: assembles those document entries into the in-memory
 Knowledge Manifest defined by the frozen contract in docs/MILESTONE_1A.md.
 
 Sprint 1A.1, P1.2.2: deterministically serializes the assembled manifest to
-the canonical sample_rag/knowledge_manifest.json artifact. Validation is a
-later milestone.
+the canonical sample_rag/knowledge_manifest.json artifact.
+
+Sprint 1A.1, P1.3: loads the persisted artifact and validates it against the
+frozen structural contract. Loading and validation are separate
+responsibilities — validation never touches the filesystem and accepts any
+already-loaded, mapping-like manifest. Semantic validation is a later
+milestone.
 """
 
 import json
 import hashlib
+from collections.abc import Mapping
 from pathlib import Path
 
 SAMPLE_RAG_ROOT = Path(__file__).resolve().parent.parent / "sample_rag"
@@ -22,6 +28,16 @@ SUPPORTED_EXTENSIONS = {".docx", ".md", ".txt"}
 HASH_CHUNK_SIZE = 8192
 MANIFEST_VERSION = "1.0"
 KNOWLEDGE_MANIFEST_PATH = SAMPLE_RAG_ROOT / "knowledge_manifest.json"
+REQUIRED_DOCUMENT_FIELDS = {
+    "id": str,
+    "source": str,
+    "hash": str,
+    "indexed": bool,
+}
+
+
+class ManifestValidationError(Exception):
+    """Raised when a Knowledge Manifest cannot be loaded or fails structural validation."""
 
 
 def discover_documents(documents_root: Path) -> list[Path]:
@@ -94,6 +110,73 @@ def write_manifest(manifest: dict) -> None:
     """
     serialized = json.dumps(manifest, indent=2) + "\n"
     KNOWLEDGE_MANIFEST_PATH.write_text(serialized, encoding="utf-8")
+
+
+def load_manifest() -> Mapping:
+    """Read and parse the canonical persisted Knowledge Manifest.
+
+    Reads sample_rag/knowledge_manifest.json and parses it as JSON. Performs
+    no structural contract validation and no mutation or repair. Any failure
+    to read or parse the artifact surfaces as ManifestValidationError.
+    """
+    try:
+        raw = KNOWLEDGE_MANIFEST_PATH.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ManifestValidationError(
+            f"Unable to read manifest at {KNOWLEDGE_MANIFEST_PATH}: {exc}"
+        ) from exc
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ManifestValidationError(
+            f"Manifest at {KNOWLEDGE_MANIFEST_PATH} is not valid JSON: {exc}"
+        ) from exc
+
+
+def validate_manifest(manifest: Mapping) -> Mapping:
+    """Verify that `manifest` conforms to the frozen Knowledge Manifest structural contract.
+
+    Read-only: performs no mutation, normalization, or copying. Returns the
+    exact same object on success. Raises ManifestValidationError on any
+    structural contract violation, so this function never depends on
+    filesystem I/O and can validate persisted manifests, test fixtures, or
+    synthetic malformed manifests alike.
+    """
+    if "manifest_version" not in manifest:
+        raise ManifestValidationError("Manifest is missing required field 'manifest_version'.")
+    if "documents" not in manifest:
+        raise ManifestValidationError("Manifest is missing required field 'documents'.")
+
+    manifest_version = manifest["manifest_version"]
+    if not isinstance(manifest_version, str):
+        raise ManifestValidationError("Manifest field 'manifest_version' must be a string.")
+    if manifest_version != MANIFEST_VERSION:
+        raise ManifestValidationError(
+            f"Manifest field 'manifest_version' must equal {MANIFEST_VERSION!r}, "
+            f"got {manifest_version!r}."
+        )
+
+    documents = manifest["documents"]
+    if not isinstance(documents, list):
+        raise ManifestValidationError("Manifest field 'documents' must be a list.")
+
+    for index, entry in enumerate(documents):
+        if not isinstance(entry, Mapping):
+            raise ManifestValidationError(f"Document entry at index {index} must be an object.")
+        for field, expected_type in REQUIRED_DOCUMENT_FIELDS.items():
+            if field not in entry:
+                raise ManifestValidationError(
+                    f"Document entry at index {index} is missing required field '{field}'."
+                )
+            value = entry[field]
+            if not isinstance(value, expected_type):
+                raise ManifestValidationError(
+                    f"Document entry at index {index} field '{field}' must be of type "
+                    f"{expected_type.__name__}."
+                )
+
+    return manifest
 
 
 def main() -> None:
