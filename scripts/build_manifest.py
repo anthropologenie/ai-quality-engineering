@@ -1,4 +1,4 @@
-"""Corpus discovery, metadata extraction, and manifest assembly.
+"""Corpus discovery, metadata extraction, manifest assembly, and serialization.
 
 Sprint 1A.1, P1.1: discovers supported documents under sample_rag/documents/,
 normalizes their paths, computes content hashes, and builds in-memory document
@@ -6,9 +6,13 @@ entries.
 
 Sprint 1A.1, P1.2.1: assembles those document entries into the in-memory
 Knowledge Manifest defined by the frozen contract in docs/MILESTONE_1A.md.
-Serialization and validation are later milestones.
+
+Sprint 1A.1, P1.2.2: deterministically serializes the assembled manifest to
+the canonical sample_rag/knowledge_manifest.json artifact. Validation is a
+later milestone.
 """
 
+import json
 import hashlib
 from pathlib import Path
 
@@ -17,6 +21,7 @@ DOCUMENTS_ROOT = SAMPLE_RAG_ROOT / "documents"
 SUPPORTED_EXTENSIONS = {".docx", ".md", ".txt"}
 HASH_CHUNK_SIZE = 8192
 MANIFEST_VERSION = "1.0"
+KNOWLEDGE_MANIFEST_PATH = SAMPLE_RAG_ROOT / "knowledge_manifest.json"
 
 
 def discover_documents(documents_root: Path) -> list[Path]:
@@ -79,6 +84,18 @@ def assemble_manifest(document_entries: list[dict]) -> dict:
     }
 
 
+def write_manifest(manifest: dict) -> None:
+    """Deterministically serialize the assembled manifest to the canonical artifact.
+
+    Persists `manifest` to sample_rag/knowledge_manifest.json exactly as
+    received: UTF-8 encoding, 2-space JSON indentation, insertion-order keys
+    (no sorting), and a trailing newline. Performs no validation,
+    recomputation, or structural transformation.
+    """
+    serialized = json.dumps(manifest, indent=2) + "\n"
+    KNOWLEDGE_MANIFEST_PATH.write_text(serialized, encoding="utf-8")
+
+
 def main() -> None:
     discovered_paths = discover_documents(DOCUMENTS_ROOT)
     normalized_sources = sorted(
@@ -93,7 +110,7 @@ def main() -> None:
         entries.append(build_document_entry(document_id, source, file_hash))
 
     manifest = assemble_manifest(entries)
-    print(manifest)
+    write_manifest(manifest)
 
 
 if __name__ == "__main__":

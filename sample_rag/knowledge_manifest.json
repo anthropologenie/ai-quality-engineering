@@ -1,0 +1,11 @@
+{
+  "manifest_version": "1.0",
+  "documents": [
+    {
+      "id": "3f3797c1134c",
+      "source": "documents/resume/Karthik_SR_Resume_v2_2.docx",
+      "hash": "e06f5cc2248d20356f809749c2f1d6ded896723748540343d683b479cf0c2958",
+      "indexed": false
+    }
+  ]
+}
