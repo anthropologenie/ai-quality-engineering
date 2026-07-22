@@ -1,9 +1,12 @@
-"""Corpus discovery and metadata extraction (Sprint 1A.1, P1.1).
+"""Corpus discovery, metadata extraction, and manifest assembly.
 
-Discovers supported documents under sample_rag/documents/, normalizes their
-paths, computes content hashes, and builds in-memory document entries. This
-is the first stage of the Knowledge Manifest Generator — manifest assembly,
-serialization, and validation are later milestones (see docs/MILESTONE_1A.md).
+Sprint 1A.1, P1.1: discovers supported documents under sample_rag/documents/,
+normalizes their paths, computes content hashes, and builds in-memory document
+entries.
+
+Sprint 1A.1, P1.2.1: assembles those document entries into the in-memory
+Knowledge Manifest defined by the frozen contract in docs/MILESTONE_1A.md.
+Serialization and validation are later milestones.
 """
 
 import hashlib
@@ -13,6 +16,7 @@ SAMPLE_RAG_ROOT = Path(__file__).resolve().parent.parent / "sample_rag"
 DOCUMENTS_ROOT = SAMPLE_RAG_ROOT / "documents"
 SUPPORTED_EXTENSIONS = {".docx", ".md", ".txt"}
 HASH_CHUNK_SIZE = 8192
+MANIFEST_VERSION = "1.0"
 
 
 def discover_documents(documents_root: Path) -> list[Path]:
@@ -61,6 +65,20 @@ def build_document_entry(document_id: str, source: str, file_hash: str) -> dict:
     }
 
 
+def assemble_manifest(document_entries: list[dict]) -> dict:
+    """Assemble the in-memory Knowledge Manifest from document entries.
+
+    Pure transformation: wraps the document entries produced by corpus
+    discovery (P1.1) in the frozen manifest contract (`manifest_version` +
+    `documents[]`), preserving entry values and ordering exactly as received.
+    Performs no filesystem I/O, serialization, or validation.
+    """
+    return {
+        "manifest_version": MANIFEST_VERSION,
+        "documents": list(document_entries),
+    }
+
+
 def main() -> None:
     discovered_paths = discover_documents(DOCUMENTS_ROOT)
     normalized_sources = sorted(
@@ -74,8 +92,8 @@ def main() -> None:
         document_id = generate_document_id(source)
         entries.append(build_document_entry(document_id, source, file_hash))
 
-    for entry in entries:
-        print(entry)
+    manifest = assemble_manifest(entries)
+    print(manifest)
 
 
 if __name__ == "__main__":
