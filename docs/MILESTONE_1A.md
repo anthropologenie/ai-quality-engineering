@@ -111,6 +111,8 @@ These two tracks are built together in M1A but tracked and extended separately f
 
 3. **Indexing** — structure-aware chunking (primary strategy: section/field-based boundaries — resume headers, JD fields like Responsibilities/Requirements). Recursive-character chunking exists only as a fallback for unstructured overflow, never the default. Deterministic placeholder vectors/hashes stand in for real embeddings, behind the `EmbeddingProvider` interface.
 
+   **Contract status (frozen at Sprint P2.1):** the canonical Chunk Data Model and Chunk Contract are defined in `docs/CHUNK_CONTRACT.md`, not here.
+
 4. **Retrieval** — SQL-filter stage implemented for real (JobOps structured queries: salary, location, application status, exclusion criteria per `Career_Strategy_and_Search_Preferences.md` §4). Semantic stage stubbed behind the retriever interface.
    - **Contract:** `retrieve(query, filters) -> RetrievalResult`, not a bare `List[Chunk]`. `RetrievalResult` carries `chunks`, `retrieval_route`, `score`, and `diagnostics` — all populated with deterministic placeholder values in M1A, not `None`. Example:
      ```python
