@@ -107,6 +107,8 @@ These two tracks are built together in M1A but tracked and extended separately f
 
    - Validated by: one pytest suite running hash comparison against the manifest. No separate validation subsystem — this stays a file plus a check.
 
+   **Document contract status (frozen at Sprint P2.5):** `Document` — the runtime entity `KnowledgeSource.load()` returns, distinct from the `documents[]` catalogue entries above — is defined in `docs/DOCUMENT_CONTRACT.md`, not here.
+
 2. **Data Quality Validation** — resume validation, chunk validation, metadata validation, Index Coverage Validation. Index Coverage Validation ensures every chunk produced during indexing has a deterministic placeholder representation behind the `EmbeddingProvider` interface. This validates indexing completeness rather than real embedding quality. Pure Python, pure pytest, no external model calls.
 
 3. **Indexing** — structure-aware chunking (primary strategy: section/field-based boundaries — resume headers, JD fields like Responsibilities/Requirements). Recursive-character chunking exists only as a fallback for unstructured overflow, never the default. Deterministic placeholder vectors/hashes stand in for real embeddings, behind the `EmbeddingProvider` interface.

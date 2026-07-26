@@ -113,6 +113,8 @@ This is a summary for architectural context. Stage-by-stage failure diagnosis, a
 
 **Knowledge Manifest.** The Knowledge Source owns the Knowledge Manifest. `knowledge_manifest.json` is an artifact produced from the corpus, containing metadata that describes the corpus — it is not a separate pipeline component or interface. Corpus integrity and freshness validation consume this artifact directly. The canonical schema is defined in `docs/MILESTONE_1A.md`.
 
+**Document.** The Knowledge Source component's output, consumed by the `Chunker`. The canonical Document Data Model and Contract are defined in `docs/DOCUMENT_CONTRACT.md`.
+
 **Chunk.** The `Chunker` component's output, consumed by the `Indexer`. The canonical Chunk Data Model and Contract are defined in `docs/CHUNK_CONTRACT.md`.
 
 ---
