@@ -1,7 +1,7 @@
 # Document Construction — Implementation Plan
 
 **Repository:** `ai-quality-engineering`
-**Status:** Planning (Construction Readiness Review — Sprint P3.0)
+**Status:** Executed. Planned at Sprint P3.0; implemented at Sprint P3.1 (`sample_rag/document.py`, `sample_rag/knowledge_source.py`); validated at Sprint P3.1.5; specified at Sprint P3.1.6; independently reviewed at Sprint P3.1.7 and evidence-verified at Sprint P3.1.7.1; reconciled with the repository at Sprint P3.1.7.2 (Assurance Remediation). **Every decision this plan deferred is now closed — see §20.** This document remains the authoritative record of construction boundaries and rationale; it is no longer a forward-looking plan.
 **Related documents:** `docs/DOCUMENT_CONTRACT.md` (approved v1.0 — the only source of `Document` field/invariant truth), `docs/DOCUMENT_CONTRACT_REVIEW.md` (accepted independent review — Outcome A; findings F1–F8), `docs/architecture.md` (§2 Principles, §5 Component Architecture, §6 Repository Structure, §10 Architectural Decisions), `docs/roadmap.md` (§6 Repository Principles, §7 Scope Freeze), `docs/MILESTONE_1A.md` (build items 1–3, 6; Libraries; Acceptance Criteria), `docs/CHUNK_BUILDER_IMPLEMENTATION_PLAN.md` (the repository's reference Construction-planning precedent), `docs/CHUNK_VALIDATION_PLAN.md` (§P5 coupling precedent, §P1.4 capability-limit precedent), `scripts/build_manifest.py` (the repository's only implemented deterministic-artifact builder), `sample_rag/chunker.py` (the one existing consumer of a `Document`-shaped input)
 
 This document plans **how** Sprint P3.1 will construct `Document` instances conforming to the approved Document Contract. It does not define what a `Document` is (`docs/DOCUMENT_CONTRACT.md`'s job, unchanged here), does not reopen architectural ownership (settled by `docs/DOCUMENT_CONTRACT_REVIEW.md`), selects no parser or dependency, and authorizes no implementation work by itself. It is a planning artifact only.
@@ -480,14 +480,15 @@ Repository precedent for a post-freeze synchronization pass is commit `994f7b1` 
 
 - **`docs/DOCUMENT_CONTRACT.md` — accepted review corrections F1 and F4–F8 applied, and header status updated to `Approved v1.0` / `Contract Version: 1.0`.** Performed at Sprint P2.5.1, with the pass recorded in that document's own Correction Record and its schema (§8.2–§8.7) verified byte-for-byte unchanged. The repository no longer carries two answers on F1 (§P0.2).
 
-**Remaining:**
+**Also completed** *(status corrected at Sprint P3.1.7.2 per Decision Gate finding D-4, which recorded these as stale — they were performed at commit `8839802`, "docs(document): synchronize repository with Document Contract", and this section continued to list them as outstanding):*
 
-1. **`docs/glossary.md` §3** — a `Document Contract` entry, alongside the existing `Chunk Contract` entry, per the glossary's own rule that terms are *"added here first, then referenced"* (§10).
-2. **`docs/architecture.md` §5, Knowledge Source row** — a one-line pointer to `docs/DOCUMENT_CONTRACT.md`, matching the existing `**Chunk.**` and `**Knowledge Manifest.**` pointer pattern. A pointer is not a decision change, so `docs/architecture.md` §13's stability rule is respected.
-3. **`docs/MILESTONE_1A.md`** — a "Contract status" pointer under the Knowledge build item, mirroring build item 3's existing Chunk pointer.
-4. **`docs/roadmap.md` §7** — only if §12.3 step 2 is triggered.
+1. ✅ **`docs/glossary.md` §3** — `Document Contract` entry present (`docs/glossary.md:105`).
+2. ✅ **`docs/architecture.md`** — pointer to `docs/DOCUMENT_CONTRACT.md` present (`docs/architecture.md:116`).
+3. ✅ **`docs/MILESTONE_1A.md`** — "Document contract status" pointer present (`docs/MILESTONE_1A.md:110`).
 
-None of the remaining edits is performed by this document, and none blocks Sprint P3.1: each is a cross-reference pointer, not a decision.
+**Not triggered:**
+
+4. **`docs/roadmap.md` §7** — required only if §12.3 step 2 is reached. It was not: construction is Python-standard-library only (`json`, `re`, `xml.etree.ElementTree`, `zipfile`, `pathlib`, `dataclasses`), so no Dependency Governance Decision was owed and `requirements.txt` is unchanged. Verified at Sprint P3.1.7.1 (finding G-5).
 
 ### 14.3 Implementation implications
 
@@ -615,7 +616,70 @@ This document does not, and must not be read to:
 
 ---
 
+## 20. Resolved Construction Decisions and Normalization Specification
+
+*Added at Sprint P3.1.7.2 (Assurance Remediation). Resolves Decision Gate findings **D-3** (normalization rules existed only in source), **D-5** (contract wording versus a normalizing extractor), and **G-1** (this document's own Decision Register was never closed), and records **ADR-P3.1.7.2-F2**. Sections §1–§19 are unchanged; this section records outcomes those sections deferred, in the venue that deferred them.*
+
+### 20.1 Normalization Specification — rules N1–N5
+
+§15 deferred *"Extraction mechanism and text-normalization rules"* to Sprint P3.1. That sprint resolved them but recorded them only in `sample_rag/knowledge_source.py`'s docstrings. The substantive definition of `Document.text` — the reference frame every `Chunk.character_start`/`character_end` is computed against (`docs/CHUNK_CONTRACT.md` §13) — therefore existed nowhere in `docs/`. It is promoted here.
+
+Rules apply in the order listed. Each is a total function of its input: no clock, locale, environment, randomness, or filesystem state participates, satisfying Contract §8.7 invariant 3 as scoped by §11.1.
+
+| Rule | Stage | Definition | Rationale |
+|---|---|---|---|
+| **N1** | Extraction (`.docx` only) | Each block-level `w:p` becomes one text block; blocks are joined by a single blank line (`"\n\n"`). `.md`/`.txt` already carry their own block structure and receive no equivalent step. | A `w:p` is block-level, so a blank line is the plain-text rendering that preserves the source's own structure. Joining with a single newline instead leaves the committed resume with no blank line anywhere, collapsing it to one ~10.5k span and making the Chunker's recursive-character fallback the only path ever taken — which `docs/MILESTONE_1A.md` build item 3 states must be *"never the default path."* Measured at Sprint P3.1.2 §8 and re-measured at Sprint P3.1.7.1 (86 structural chunks → 11 uniform fallback chunks). |
+| **N2** | Normalization | `\r\n` and a lone `\r` become `\n`. | Identical content normalizes identically regardless of how the source encodes line endings. |
+| **N3** | Normalization | Spaces and tabs at end of line are removed. | Makes a visually blank line textually blank — and therefore visible to N4. |
+| **N4** | Normalization | Runs of three or more newlines collapse to exactly two. | Yields one uniform block separator across all formats. |
+| **N5** | Normalization | Leading and trailing whitespace is removed from the document as a whole. | The value does not vary with an incidental trailing newline. |
+
+N1 and N4 together are what make a blank line a meaningful boundary in the output. Chunk granularity itself remains the Chunker's concern, not Construction's.
+
+**Executable specifications.** N1 is specified by `tests/test_knowledge_source_construction.py` (`test_ah2_n1_separates_docx_paragraphs_with_exactly_one_blank_line`, and end-to-end into the Chunk Layer by `test_ah2_n1_boundaries_survive_into_the_chunk_layer`). N2–N5 are specified in isolation by `test_b8_each_normalization_rule_behaves_in_isolation` and jointly on the real corpus by `test_b7_constructed_text_satisfies_every_normalization_rule`.
+
+### 20.2 Scope of "full, deterministic plain-text content" (Contract §8.2)
+
+Contract §8.2 and §8.7 describe `text` as the document's *"full, deterministic plain-text content."* Read alone, that admits two implementations — verbatim extraction, or normalized extraction. The repository implements **normalized** extraction: N1–N5 above discard trailing whitespace, collapse blank-line runs, and trim the document.
+
+"Full" is therefore to be read as *complete in content* — no part of the source's text is dropped — and not as *byte-for-byte verbatim*, which N3 and N5 would contradict. This is a **documentation clarification of existing, validated behaviour, not a contract change**: `docs/DOCUMENT_CONTRACT.md` §8.2–§8.7 remain byte-for-byte frozen, and nothing here alters a field, type, invariant, or deferral. Should the repository wish the contract itself to state this, that is a separate governance action (a contract erratum), not one this document performs.
+
+### 20.3 Decision Register closure — §15
+
+Every decision §15 deferred **to Sprint P3.1** is now closed. Decisions deferred to later sprints remain open and are restated as such.
+
+| §15 decision | Status | Resolution |
+|---|---|---|
+| Parser / extraction dependency selection | **Closed — not triggered** | No non-stdlib dependency was introduced; §12.3 step 1 was satisfied by the stdlib branch, so no `docs/roadmap.md` §7 entry was owed. |
+| Whether a non-stdlib dependency is required at all | **Closed — no** | `zipfile` + `xml.etree.ElementTree` for `.docx`; `pathlib`/`json`/`re` elsewhere. `requirements.txt` unchanged. |
+| Extraction mechanism and text-normalization rules | **Closed** | OOXML package read, `w:p`-ordered `w:t` concatenation, then N1–N5 (§20.1). |
+| Identity strategy S1 / S2 / S3 | **Closed — S1** | The Manifest, not the filesystem, is the corpus enumeration; `Document.id` is read from `documents[].id` and never derived. Accepted consequence: `load()` depends on the Manifest artifact at runtime. |
+| Corpus-and-Manifest disagreement behaviour | **Closed** | Asymmetric, deliberately: a file present but unmanifested is **silently excluded** (detecting it needs the corpus/Manifest diff deferred to Data Quality Validation); a manifest entry whose file is absent **raises**. Specified as Case A / Case B. |
+| Module organisation, file location, naming | **Closed** | `sample_rag/document.py` (runtime value) and `sample_rag/knowledge_source.py` (construction), per §14.3 and `docs/architecture.md` §6. |
+| Construction exception type name | **Closed** | `DocumentConstructionError`, a direct `Exception` subclass, per §10.2's flat pattern. |
+| `List[Document]` ordering key | **Closed** | The Manifest's own `documents[]` order, preserved and never re-sorted — already deterministic because `scripts/build_manifest.py` `main()` produced it through `sorted(...)`. |
+| Whether a defensive construction-time self-check is implemented | **Closed — no** | One was implemented at Sprint P3.1, but Sprint P3.1.7.1 (finding I-3) established it as unreachable — `normalize_text` is total and always returns `str`, and coverage confirmed the branch as the module's only uncovered line. It was removed at Sprint P3.1.7.2 (AH-8). Contract conformance is instead protected by the Executable Specification Suite, which §6.2 always intended as the durable mechanism. |
+| Document persistence / serialization | **Still deferred** | Unresolved by the approved contract (Phase 10, Outstanding Question 4). Blocks Validation's shape (§13.1 V2). |
+| Document Validation design | **Still deferred** | Preconditions only are stated here (§13). |
+| `Document.id` ↔ Manifest referential integrity | **Still deferred** | Data Quality Validation (A8, Contract §8.5). Tracked with finding F-1. |
+| Extracted-text drift detection | **Still deferred** | Data Quality Validation / future milestone (§11.3). |
+| Determinism verification strategy | **Closed** | Two-run and cross-process comparison, committed as executable specifications at Sprint P3.1.6 (`test_b2_…`, `test_invariant_3_determinism_holds_across_independent_processes`). |
+| Build orchestration / CLI wiring | **Still deferred** | `docs/MILESTONE_1A.md` build item 6. |
+| `document_type` / `source` field promotion | **Still deferred** | Revisit at corpus expansion; `sample_rag/documents/jobs/` is still empty. |
+| JobOps-as-`Document` classification | **Still deferred** | Outstanding Question 3; structurally excluded today. |
+| Performance / optimisation of extraction | **Still deferred** | Out of scope for Milestone 1A. |
+
+### 20.4 Corpus-root containment — ADR-P3.1.7.2-F2
+
+§4.1 defines the corpus root as fixing *"which filesystem items are corpus items at all,"* but until Sprint P3.1.7.2 `resolve_source_path` enforced only the extension half of that gate: an absolute or `..`-escaping `documents[].source` resolved and loaded a file from outside `sample_rag/` (finding F-2, CONFIRMED at Sprint P3.1.7.1).
+
+**ADR-P3.1.7.2-F2 accepted Option A — Construction.** Containment is an intra-artifact invariant, decidable from the configured corpus root and the single manifest entry being processed, requiring no corpus-wide analysis; that is the criterion Contract §8.5 uses to route *cross-artifact* checks to Data Quality Validation instead. `resolve_source_path` now rejects an escaping source as an Input failure under §10.1. See `docs/adr/ADR-P3.1.7.2-F2-corpus-root-containment.md`.
+
+---
+
 ## Stop Condition
+
+*Historical — this section records the state at Sprint P3.0, when this document was written as a forward-looking plan. It is preserved rather than rewritten, per the repository's practice of recording corrections instead of applying them silently (`docs/DOCUMENT_CONTRACT.md` Correction Record). The plan has since been executed; see the Status header and §20.*
 
 Per the sprint's own governing instruction, this document ends here.
 
