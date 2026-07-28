@@ -120,11 +120,31 @@ def resolve_source_path(source: str) -> Path:
 
     `source` is stored relative to `sample_rag/` with POSIX separators
     (`scripts/build_manifest.py` `normalize_source_path`), so resolution is a
-    deterministic join. Raises when the extension is outside the approved set
-    or when the Manifest names a file the corpus does not contain — both are
-    Input failures under Construction Plan §10.1.
+    deterministic join. Raises when the source escapes the corpus root, when the
+    extension is outside the approved set, or when the Manifest names a file the
+    corpus does not contain — all Input failures under Construction Plan §10.1.
     """
-    path = SAMPLE_RAG_ROOT / Path(source)
+    relative = Path(source)
+
+    # Corpus-root containment (ADR-P3.1.7.2-F2, accepted Option A). Construction
+    # Plan §4.1 defines the corpus root as fixing "which filesystem items are
+    # corpus items at all"; the extension gate below enforces one half of that
+    # boundary and this enforces the other. It belongs to Construction rather
+    # than Data Quality Validation because it is an *intra-artifact* invariant:
+    # it reads only the configured corpus root and the single manifest entry
+    # being processed, never the corpus as a whole — the criterion Contract §8.5
+    # uses to route cross-artifact checks elsewhere.
+    #
+    # Deliberately a check on the manifest *value* rather than on resolved
+    # filesystem state: `SAMPLE_RAG_ROOT / Path(source)` silently discards the
+    # root when `source` is absolute, and `..` traverses out of it.
+    if relative.is_absolute() or ".." in relative.parts:
+        raise DocumentConstructionError(
+            f"Manifest source {source!r} escapes the corpus root at {SAMPLE_RAG_ROOT}; "
+            f"a corpus item must resolve beneath it."
+        )
+
+    path = SAMPLE_RAG_ROOT / relative
 
     if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
         raise DocumentConstructionError(
@@ -274,11 +294,6 @@ class KnowledgeSource:
             document_id = entry["id"]
             path = resolve_source_path(entry["source"])
             text = normalize_text(extract_text(path))
-
-            if not isinstance(text, str):
-                raise DocumentConstructionError(
-                    f"Extraction for {entry['source']!r} produced {type(text).__name__}, not str."
-                )
 
             documents.append(Document(id=document_id, text=text))
 
