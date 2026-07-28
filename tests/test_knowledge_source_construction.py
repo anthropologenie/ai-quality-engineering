@@ -15,8 +15,18 @@ under one extraction mechanism; `docs/DOCUMENT_CONTRACT.md` §8.8 and
 mechanism-relative, so freezing a digest would specify something the contract
 does not guarantee and would break on a legitimate mechanism change.
 
-Deferred findings F-1 and F-2 are excluded from this suite; see the permanent
-record in tests/conftest.py.
+Sprint P3.1.7.2 (Assurance Remediation) extended this family with the AH-1,
+AH-2, and AH-3 specifications below. Sprint P3.1.7.1 Evidence Verification
+demonstrated that everything above protects the *shape* of `Document.text`
+without constraining its *content*: a mutation reducing the committed corpus's
+text from 10,591 characters to the empty string left all 77 specifications
+passing, because every predicate applied to `text` — `isinstance`, "no `\\r`",
+"no `\\n\\n\\n`", "equals its own `strip()`" — is satisfied vacuously by `""`
+(Decision Gate findings EV-1 and EV-2, both CONFIRMED). The AH specifications
+close that gap by asserting content positively.
+
+Only F-1 (duplicate manifest ids) remains deferred; F-2 was resolved at this
+sprint by ADR-P3.1.7.2-F2. See the record in tests/conftest.py.
 """
 
 import json
@@ -26,7 +36,9 @@ import sys
 
 import pytest
 
+from sample_rag.chunker import Chunker
 from sample_rag.knowledge_source import (
+    DocumentConstructionError,
     KnowledgeSource,
     extract_text,
     normalize_text,
@@ -238,3 +250,167 @@ def test_case_a_corpus_file_absent_from_the_manifest_is_silently_excluded(synthe
     assert len(list(synthetic_corpus.root.glob("documents/*.txt"))) == 4
     assert len(documents) == 3
     assert all("ghost" not in d.text for d in documents)
+
+
+# --- AH-1: Document.text content, not merely its shape ---------------------
+#
+# Decision Gate finding EV-2 (CONFIRMED): no specification constrained what
+# `Document.text` contains, so extraction could yield "" undetected. Each
+# specification below asserts an exact expected value, which no empty or
+# truncated extraction can satisfy.
+
+
+def test_ah1_docx_construction_round_trips_paragraph_content(synthetic_corpus):
+    """AH-1 — a .docx's paragraph text reaches `Document.text` intact.
+
+    The committed corpus is a .docx, so before this specification the entire
+    extraction path had no positive content assertion anywhere in the suite.
+    """
+    synthetic_corpus.docx(
+        "documents/ah1.docx", ["First paragraph.", "Second paragraph.", "Third paragraph."]
+    )
+    synthetic_corpus.entries(("id-ah1-docx", "documents/ah1.docx"))
+
+    (document,) = synthetic_corpus.load()
+
+    assert document.text == "First paragraph.\n\nSecond paragraph.\n\nThird paragraph."
+
+
+def test_ah1_markdown_construction_round_trips_content(synthetic_corpus):
+    """AH-1 — `.md` is an approved corpus extension and was never exercised."""
+    synthetic_corpus.text_file(
+        "documents/ah1.md", "# Heading\n\nA markdown paragraph.\n\n- item one\n- item two\n"
+    )
+    synthetic_corpus.entries(("id-ah1-md", "documents/ah1.md"))
+
+    (document,) = synthetic_corpus.load()
+
+    assert document.text == "# Heading\n\nA markdown paragraph.\n\n- item one\n- item two"
+
+
+def test_ah1_plain_text_construction_round_trips_content(synthetic_corpus):
+    """AH-1 — `.txt` content survives extraction and normalization verbatim."""
+    synthetic_corpus.text_file("documents/ah1.txt", "Line one.\nLine two.\n\nSecond block.\n")
+    synthetic_corpus.entries(("id-ah1-txt", "documents/ah1.txt"))
+
+    (document,) = synthetic_corpus.load()
+
+    assert document.text == "Line one.\nLine two.\n\nSecond block."
+
+
+def test_ah1_real_corpus_document_carries_substantive_text(real_documents):
+    """AH-1 — the committed corpus yields real content, not a vacuous value.
+
+    Deliberately not a digest: `docs/DOCUMENT_CONTRACT.md` §8.8 records
+    invariant 3 as mechanism-relative, so freezing a hash would specify
+    something the contract does not guarantee. Non-emptiness and the presence
+    of alphanumeric content are properties any correct extraction of this
+    corpus must have, under any mechanism.
+    """
+    for document in real_documents:
+        assert document.text, "extraction produced no text for a committed corpus item"
+        assert any(character.isalnum() for character in document.text)
+        assert document.text.split(), "text contains no words"
+
+
+# --- AH-2: normalization rule N1 and the boundaries it exists to create ----
+#
+# Decision Gate finding EV-1 (CONFIRMED): reducing PARAGRAPH_SEPARATOR from
+# "\n\n" to "\n" collapsed the corpus from 86 blank-line blocks to 1 and drove
+# the Chunker onto its fallback path, with all 77 specifications still passing.
+
+
+def test_ah2_n1_separates_docx_paragraphs_with_exactly_one_blank_line(synthetic_corpus):
+    """N1 — each `w:p` becomes one block; blocks are blank-line separated."""
+    paragraphs = ["Alpha block.", "Beta block.", "Gamma block."]
+    synthetic_corpus.docx("documents/ah2.docx", paragraphs)
+    synthetic_corpus.entries(("id-ah2", "documents/ah2.docx"))
+
+    (document,) = synthetic_corpus.load()
+
+    assert document.text.split("\n\n") == paragraphs
+    assert "\n\n\n" not in document.text, "N4 — separators never exceed one blank line"
+
+
+def test_ah2_n1_boundaries_survive_into_the_chunk_layer(synthetic_corpus):
+    """N1's documented purpose: the Chunker receives paragraph boundaries.
+
+    `sample_rag/chunker.py` splits on blank lines as its primary strategy, with
+    recursive-character splitting reserved as a fallback `docs/MILESTONE_1A.md`
+    build item 3 states is "never the default path". This specification asserts
+    the full chain — .docx paragraphs → N1 → `Document.text` → structural
+    chunks — because that chain, not the separator constant itself, is what N1
+    exists to protect.
+    """
+    paragraphs = ["Summary section.", "Experience section.", "Education section."]
+    synthetic_corpus.docx("documents/ah2-chain.docx", paragraphs)
+    synthetic_corpus.entries(("id-ah2-chain", "documents/ah2-chain.docx"))
+
+    (document,) = synthetic_corpus.load()
+    chunks = Chunker().chunk(document)
+
+    assert [chunk.text for chunk in chunks] == paragraphs
+
+
+def test_ah2_real_corpus_text_retains_blank_line_structure(real_documents):
+    """N1 on the committed corpus: structure survives, so the fallback is not the path."""
+    for document in real_documents:
+        assert "\n\n" in document.text, "no blank-line boundary survived extraction"
+        assert len(document.text.split("\n\n")) > 1
+
+
+# --- AH-3: empty text is legal; an absent corpus item is not ---------------
+#
+# Decision Gate finding I-5 (CONFIRMED): `Document(id=…, text="")` was
+# specified, but empty text was never specified *through* `load()`, so making
+# empty text illegal at construction went undetected.
+
+
+@pytest.mark.parametrize(
+    ("name", "content"),
+    [
+        pytest.param("documents/empty.txt", "", id="empty-file"),
+        pytest.param("documents/blank.txt", "   \t\n  \n\t ", id="whitespace-only-file"),
+    ],
+)
+def test_ah3_empty_text_is_a_legal_constructed_document(synthetic_corpus, name, content):
+    """AH-3 — a corpus item yielding no text produces a legal `Document`.
+
+    Contract §8.3 deliberately omits a non-empty guarantee and invariant 2
+    permits empty `text`; `docs/CHUNK_CONTRACT.md` §11 makes a zero-chunk
+    document legal. Construction must therefore not reject it.
+    """
+    synthetic_corpus.text_file(name, content)
+    synthetic_corpus.entries(("id-ah3", name))
+
+    (document,) = synthetic_corpus.load()
+
+    assert document.text == ""
+    assert document.id == "id-ah3"
+
+
+def test_ah3_docx_without_paragraphs_is_a_legal_empty_document(synthetic_corpus):
+    """AH-3 — the same legality holds for a .docx carrying no paragraph text."""
+    synthetic_corpus.docx("documents/ah3-empty.docx", [])
+    synthetic_corpus.entries(("id-ah3-docx", "documents/ah3-empty.docx"))
+
+    (document,) = synthetic_corpus.load()
+
+    assert document.text == ""
+
+
+def test_ah3_empty_text_is_legal_but_an_absent_corpus_item_is_not(synthetic_corpus):
+    """AH-3 — the boundary: empty content is legal, an absent file is an Input failure.
+
+    Both could loosely be called "no content". The repository treats them
+    differently on purpose (`docs/DOCUMENT_CONSTRUCTION_PLAN.md` §10.1), and
+    specifying them together is what makes the distinction executable rather
+    than implied.
+    """
+    synthetic_corpus.text_file("documents/present-but-empty.txt", "")
+    synthetic_corpus.entries(("id-empty", "documents/present-but-empty.txt"))
+    assert synthetic_corpus.load()[0].text == ""
+
+    synthetic_corpus.entries(("id-absent", "documents/never-written.txt"))
+    with pytest.raises(DocumentConstructionError):
+        synthetic_corpus.load()

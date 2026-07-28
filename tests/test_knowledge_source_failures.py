@@ -18,11 +18,19 @@ dedicated, direct `Exception` subclass per responsibility, no shared base) is
 specified here too, since a later sprint introducing a shared hierarchy would
 silently widen every `except DocumentConstructionError` in the repository.
 
-Deferred findings F-1 and F-2 are excluded from this suite; see the permanent
-record in tests/conftest.py. In particular, no specification below asserts that
-a `..`-escaping or absolute `documents[].source` is rejected — under approved
-repository behaviour it is not (F-2), and writing a failing specification for
-unapproved behaviour is out of scope for this sprint.
+Sprint P3.1.7.2 added the AH-7 corpus-containment specifications and the AH-9
+admissibility-gate specification below.
+
+Corpus-root containment is now part of that failure surface. Sprint P3.1.7.1
+confirmed finding EV-3 (F-2): a `..`-escaping or absolute `documents[].source`
+resolved and loaded a file from outside `sample_rag/`. ADR-P3.1.7.2-F2 accepted
+Option A — the check belongs to Construction, because it is an intra-artifact
+invariant reading only the corpus root and the manifest entry being processed,
+not the corpus as a whole. The rejection is therefore approved behaviour and is
+specified here.
+
+Only F-1 (duplicate manifest ids) remains deferred, to Sprint P3.1.8; no
+specification below asserts identifier uniqueness. See tests/conftest.py.
 """
 
 import json
@@ -32,9 +40,11 @@ import zipfile
 
 import pytest
 
+from scripts.build_manifest import SUPPORTED_EXTENSIONS as BUILDER_SUPPORTED_EXTENSIONS
 from scripts.build_manifest import ManifestValidationError
 
 from sample_rag.chunker import ChunkConstructionError
+from sample_rag.knowledge_source import SUPPORTED_EXTENSIONS as CONSTRUCTION_SUPPORTED_EXTENSIONS
 from sample_rag.knowledge_source import DocumentConstructionError
 
 WORDPROCESSINGML_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -251,3 +261,97 @@ def test_document_construction_error_is_independent_of_the_other_error_types():
     for other in (ManifestValidationError, ChunkConstructionError):
         assert not issubclass(DocumentConstructionError, other)
         assert not issubclass(other, DocumentConstructionError)
+
+
+# --- AH-7: corpus-root containment (ADR-P3.1.7.2-F2, Option A) -------------
+
+
+def test_ah7_absolute_source_outside_the_corpus_root_is_rejected(synthetic_corpus):
+    """An absolute `documents[].source` is refused, not silently honoured.
+
+    `SAMPLE_RAG_ROOT / Path(source)` discards the root entirely when `source`
+    is absolute, so before AH-7 this loaded the outside file and returned its
+    contents as `Document.text` (Decision Gate EV-3).
+    """
+    outside = synthetic_corpus.root.parent / "ah7_absolute_outside.txt"
+    outside.write_text("content outside the corpus root", encoding="utf-8")
+    synthetic_corpus.entries(("id-ah7-abs", str(outside)))
+
+    with pytest.raises(DocumentConstructionError) as excinfo:
+        synthetic_corpus.load()
+
+    assert "escapes the corpus root" in str(excinfo.value)
+    assert excinfo.value.__cause__ is None
+
+
+def test_ah7_relative_escape_outside_the_corpus_root_is_rejected(synthetic_corpus):
+    """A `..` relative escape is refused, even though the target file exists."""
+    outside = synthetic_corpus.root.parent / "ah7_relative_outside.txt"
+    outside.write_text("content outside the corpus root", encoding="utf-8")
+    synthetic_corpus.entries(("id-ah7-rel", f"../{outside.name}"))
+
+    with pytest.raises(DocumentConstructionError) as excinfo:
+        synthetic_corpus.load()
+
+    assert "escapes the corpus root" in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "escaping_source",
+    [
+        pytest.param("../outside.txt", id="parent-escape"),
+        pytest.param("documents/../../outside.txt", id="nested-escape"),
+        pytest.param("documents/../../../outside.txt", id="multi-level-escape"),
+    ],
+)
+def test_ah7_containment_is_decided_from_the_manifest_value_alone(
+    synthetic_corpus, escaping_source
+):
+    """Containment is refused on the entry's own value, whether or not a file exists.
+
+    The check reads only the corpus root and the entry being processed — the
+    property ADR-P3.1.7.2-F2 relied on to place it in Construction rather than
+    Data Quality Validation. It therefore cannot depend on filesystem state.
+    """
+    synthetic_corpus.entries(("id-ah7", escaping_source))
+
+    with pytest.raises(DocumentConstructionError) as excinfo:
+        synthetic_corpus.load()
+
+    assert "escapes the corpus root" in str(excinfo.value)
+
+
+def test_ah7_legitimate_nested_source_is_not_rejected(synthetic_corpus):
+    """Containment must not narrow the corpus: real nested sources still load.
+
+    The committed manifest's own source is nested (`documents/resume/…`), so a
+    containment check that rejected nesting would break the repository corpus.
+    """
+    synthetic_corpus.text_file("documents/resume/nested.txt", "legitimate nested content")
+    synthetic_corpus.entries(("id-nested", "documents/resume/nested.txt"))
+
+    (document,) = synthetic_corpus.load()
+
+    assert document.text == "legitimate nested content"
+
+
+# --- AH-9: the admissibility gate is defined once, in two places -----------
+
+
+def test_ah9_supported_extension_gates_agree_across_the_module_boundary():
+    """`SUPPORTED_EXTENSIONS` must remain identical in construction and the builder.
+
+    The constant is deliberately duplicated rather than shared:
+    `sample_rag/knowledge_source.py` may not import from `scripts/`, which
+    `docs/architecture.md` §6 defines as "not pipeline logic", and introducing a
+    shared module would create a new architectural concept without the evidence
+    bar `docs/adr/ADR-0001-chunk-persistent-representation.md` requires.
+
+    `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §9.1 rated exactly this duplication
+    pattern a **High** drift risk — "two implementations must be changed
+    together, with nothing enforcing it" — when it rejected identity strategy
+    S3. This specification is what enforces it. Divergence would mean the
+    builder catalogues corpus items construction refuses to load, or the
+    reverse, with no other detector in the repository.
+    """
+    assert CONSTRUCTION_SUPPORTED_EXTENSIONS == BUILDER_SUPPORTED_EXTENSIONS

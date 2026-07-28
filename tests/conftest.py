@@ -26,12 +26,13 @@ extraction mechanism, not a contractual property (`docs/DOCUMENT_CONTRACT.md`
 encoded the way the contract defines it: repeated construction yields equal
 values.
 
-Deferred architectural findings — permanent record
---------------------------------------------------
-F-1 (duplicate manifest IDs) and F-2 (construction-time corpus containment) are
-known deferred findings identified during Sprint P3.1.5 Construction
-Validation. They are intentionally excluded from this Executable Specification
-Suite because they do not represent approved repository behaviour.
+Architectural findings F-1 and F-2 — current status
+---------------------------------------------------
+Both were identified during Sprint P3.1.5 Construction Validation and
+independently reproduced at Sprint P3.1.7.1 (Evidence Verification), which
+confirmed each as CONFIRMED against repository evidence. Their dispositions now
+differ, and the canonical record is
+`docs/ENGINEERING_TRACEABILITY_REGISTER.md`.
 
     F-1 — Duplicate `knowledge_manifest.json` `documents[].id` values are
           accepted silently; `load()` returns two `Document`s sharing one id.
@@ -39,22 +40,21 @@ Suite because they do not represent approved repository behaviour.
           corpus", but uniqueness is not one of §8.7's three invariants and
           §8.5 routes collection-level and cross-artifact checks to the Data
           Quality Validation layer.
-          Deferred to Sprint P3.1.8 (Data Quality Validation).
+          STILL DEFERRED to Sprint P3.1.8 (Data Quality Validation). No
+          specification below asserts uniqueness, because it is not yet
+          approved repository behaviour.
 
-    F-2 — A manifest `documents[].source` is not constrained to the corpus
-          root: a relative escape (`../…`) or an absolute path resolves and
-          loads a file from outside `sample_rag/`. This is a gap between
-          `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §4.1's stated corpus boundary
-          and what `resolve_source_path` enforces, not a violation of any
-          frozen invariant.
-          Deferred to Sprint P3.1.7 (Independent Implementation Review).
+    F-2 — A manifest `documents[].source` escaping the corpus root (a `..`
+          relative escape, or an absolute path) resolved and loaded a file
+          from outside `sample_rag/`.
+          RESOLVED at Sprint P3.1.7.2 by ADR-P3.1.7.2-F2 (accepted Option A —
+          Construction). `resolve_source_path` now rejects an escaping source
+          as an Input failure, and the behaviour is specified in
+          tests/test_knowledge_source_failures.py. F-2 is therefore approved
+          repository behaviour and *is* covered by this suite.
 
-No intentionally failing specification is created for either finding, and
-neither is redefined as approved behaviour here. The repository holds no
-dedicated engineering backlog artifact, so both findings are cited by name
-against *Sprint P3.1.5 Construction Validation Evidence*, which records them in
-full. This module is the first permanent repository artifact to hold them; the
-three specification files reference this record rather than restating it.
+The suite excludes only F-1. No intentionally failing specification exists for
+it, and it is not redefined as approved behaviour here.
 """
 
 import json
