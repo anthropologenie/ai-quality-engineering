@@ -57,8 +57,8 @@ Explicitly verified at establishment, and a standing constraint on every future 
 | **Evidence** | `sample_rag/knowledge_source.py` `load()` — no uniqueness check across entries |
 | **Disposition** | **DEFERRED to Sprint P3.1.8 (Data Quality Validation)** — upheld at P3.1.7.1 and unchanged at P3.1.7.2 |
 | **Why deferred** | Uniqueness is a collection-level, cross-artifact property. `docs/DOCUMENT_CONTRACT.md` §8.5 routes such checks to Data Quality Validation; it is not among §8.7's three invariants |
-| **Coupled to** | **D-2** below — must be resolved together |
-| **Status** | Open |
+| **Coupled to** | **D-2** (§3.6) — **resolved** at Sprint P3.1.8.0B by Contract Erratum E-1 (`docs/DOCUMENT_CONTRACT.md` §8.9). The invariant F-1's check must enforce is now stated, so the check no longer risks inventing one |
+| **Status** | **Open.** D-2's resolution unblocks the check but does not perform it. F-1 closes when Sprint P3.1.8.1 ships the DQ-2 uniqueness specification |
 
 ### 3.2 F-2 — Corpus-root containment not enforced
 
@@ -110,12 +110,25 @@ Recorded because they have a disposition, not because they are scheduled.
 | ID | Observation | Disposition |
 |---|---|---|
 | **F-1** | Duplicate manifest identifiers (§3.1) | Sprint P3.1.8 |
-| **D-2** | `docs/DOCUMENT_CONTRACT.md` §8.3 states `id` "is unique across the corpus"; §8.7's invariants omit uniqueness. The implementation follows the weaker reading | Reconcile **with F-1** at Sprint P3.1.8, *before* implementing a uniqueness check, so the check enforces a stated invariant rather than inventing one |
 | **F-2-sym** | Containment reads the manifest value, so a corpus file that is a **symlink** pointing outside the root is not detected | Deliberate boundary of `ADR-P3.1.7.2-F2`. Candidate for Data Quality Validation if evidence ever emerges; none exists today |
 | **I-6** | `test_b6` hardcodes the corpus filename `Karthik_SR_Resume_v2_2.docx` | Re-verify at corpus expansion |
 | **I-7** | `test_a15`'s allowlist tracks CPython-synthesized dataclass members (`__firstlineno__`, `__static_attributes__` are 3.13+; suite runs on 3.12) | Re-verify at the next CPython upgrade |
 | **A-3** | `discover_manifest_entries` performs admissibility checks bounded only by a docstring against growing into a second `validate_manifest` | Re-inspect if that function grows |
 | **P3.1.7-ARCH-01** | JobOps-as-`Document` classification unresolved (Contract Outstanding Question 3) | Intentionally deferred; structurally excluded today by the manifest discovery gate |
+
+### 3.6 D-2 — Contract inconsistency on `Document.id` uniqueness
+
+| | |
+|---|---|
+| **Raised** | Sprint P3.1.7 (`docs/P3.1.7_Independent_Implementation_Review_ClaudeCode.md`, **MAJOR**) |
+| **Verified** | Sprint P3.1.7.1 — **Independently Verified**; routed to Sprint P3.1.8 together with F-1 |
+| **Previously carried in** | §3.5 (Open findings), until resolution moved it here. `docs/DOCUMENT_CONTRACT.md` §8.9 cites §3.5, the location current when Erratum E-1 was authored |
+| **Evidence** | `docs/DOCUMENT_CONTRACT.md` §8.3 states `id` "is unique across the corpus"; §8.7's invariant list, declared complete, omits uniqueness. `sample_rag/knowledge_source.py` `load()` follows the weaker reading |
+| **Analysed** | Sprint P3.1.8.0A (Governance Analysis) — five governance mechanisms evaluated against repository evidence; **Option A (Scoped Contract Erratum)** recommended with **Interpretation I-C** (corpus-scoped uniqueness inherited from the Knowledge Manifest, recorded adjacently) |
+| **Disposition** | **RESOLVED at Sprint P3.1.8.0B** by **Contract Erratum E-1**, approved by the repository owner |
+| **Implementation** | `docs/DOCUMENT_CONTRACT.md` §8.9 records the guarantee as binding, corpus-scoped, inherited from `docs/MILESTONE_1A.md` build item 1, and enforced by Data Quality Validation. §8.2–§8.8 verified byte-for-byte unchanged; `Contract Version` remains `1.0`; no ADR created |
+| **Coupled to** | **F-1** (§3.1) — the invariant a DQ-2 check must enforce is now stated, satisfying the precondition that the check enforce a stated invariant rather than invent one. F-1 itself remains **Open** |
+| **Status** | **Closed** |
 
 ---
 

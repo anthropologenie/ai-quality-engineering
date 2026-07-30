@@ -1,7 +1,7 @@
 # Document Contract
 
 **Repository:** `ai-quality-engineering`
-**Status:** Approved v1.0 (frozen at Sprint P2.5; Independent Review accepted — see `docs/DOCUMENT_CONTRACT_REVIEW.md`, Outcome A; review corrections F1 and F4–F8 applied at Sprint P2.5.1 — see Correction Record)
+**Status:** Approved v1.0 (frozen at Sprint P2.5; Independent Review accepted — see `docs/DOCUMENT_CONTRACT_REVIEW.md`, Outcome A; review corrections F1 and F4–F8 applied at Sprint P2.5.1 — see Correction Record; Contract Erratum E-1 applied at Sprint P3.1.8.0B resolving finding D-2 — see Section 8.9)
 **Contract Version:** 1.0
 **Related documents:** `docs/CHUNK_CONTRACT.md` (frozen v1.0 — records the backlog item this sprint resolves, §20), `docs/architecture.md` (§5 Component Architecture — `KnowledgeSource.load() -> List[Document]`), `docs/MILESTONE_1A.md` (Knowledge Manifest contract; build item 1), `docs/glossary.md` (canonical terminology — §3, §8), `docs/CHUNK_BUILDER_IMPLEMENTATION_PLAN.md` (§1.2 — the minimal `Document` shape Construction already assumed), `sample_rag/chunker.py` (the one existing consumer of a `Document`-shaped input), `sample_rag/knowledge_manifest.json` (current corpus state)
 
@@ -232,6 +232,24 @@ Consolidated statement of the proposed v1 Document Contract.
 
 2. **No existing check detects extracted-text drift.** `knowledge_manifest.json`'s `documents[].hash` is a SHA-256 digest of the **source file's bytes** (`scripts/build_manifest.py`'s `compute_sha256`), not of extracted text. A change to the extraction mechanism can therefore alter `Document.text` for byte-identical source content without any existing freshness or integrity check registering it. Invariant 3 is mechanism-relative by design — matching, and not weaker than, the equivalent scoping in `docs/CHUNK_CONTRACT.md` §10 — but that scoping means the repository currently has no detector for a mechanism change. Recorded here only; no detector is designed, scoped, or required by this contract. It is a Data Quality Validation concern (`docs/MILESTONE_1A.md` build item 2) if a need for one is ever evidenced.
 
+### 8.9 Recorded Scope and Enforcement of the §8.3 Identity Guarantee — Contract Erratum E-1
+
+*Added per finding **D-2** (`docs/ENGINEERING_TRACEABILITY_REGISTER.md` §3.5), raised at Sprint P3.1.7 (`docs/P3.1.7_Independent_Implementation_Review_ClaudeCode.md`, MAJOR) and independently verified at Sprint P3.1.7.1. This section records the scope, source, and enforcement owner of the identity guarantee stated in Section 8.3. It adds no field, changes no type, alters no invariant, and withdraws no deferral. **Sections 8.2 through 8.8 are byte-for-byte unchanged**, following the precedent set when Section 8.8 was added adjacent to, and without modifying, Section 8.7. `Contract Version` remains `1.0`.*
+
+**The finding.** Section 8.3's Identity guarantee states that `id` "is unique across the corpus." Section 8.7's invariant list — introduced as *"all must hold for every conforming Document"* and declared complete — does not encode uniqueness. The runtime implementation (`sample_rag/knowledge_source.py` `load()`) follows Section 8.7. The contract therefore admits two readings of the same requirement. This section resolves that, without editing either statement.
+
+**1 — The guarantee is binding.** Section 8.3's uniqueness guarantee is a requirement of this contract, not aspirational prose. A corpus in which two `Document` values returned by one `KnowledgeSource.load()` share an `id` does not conform to this contract.
+
+**2 — The guarantee is corpus-scoped.** Uniqueness is a property of the *set* of `Document` values, and of the `documents[]` array they are read from. It is undecidable from any single `Document` value in isolation. Section 8.7's invariants 1–3 are the conditions checkable against one `Document`; uniqueness is recorded here rather than added there, so that Section 8.7's frozen text is preserved. This is the same structural limit Section 8.8 item 1 already records for invariant 3, and the same scope the repository assigns to the analogous Chunk requirement, which `docs/CHUNK_VALIDATION_PLAN.md` §P3 classifies as a **Collection** invariant.
+
+**3 — The guarantee is inherited, not newly created.** `docs/MILESTONE_1A.md` build item 1 already freezes `documents[].id` as the *"**Unique** identifier for the document within the manifest."* Section 8.4 requires `Document.id` to equal that value and states that this contract *"does not introduce a second, competing identity scheme."* `Document.id` uniqueness therefore follows from the Knowledge Manifest's own frozen contract. This section creates no new guarantee; it records the one Section 8.3 was already pointing at.
+
+**4 — Enforcement owner: Data Quality Validation.** Uniqueness is a cross-artifact, collection-level property and is enforced by the Data Quality Validation pytest layer (`docs/MILESTONE_1A.md` build item 2), the venue Section 8.5 already names for semantic and cross-artifact concerns, and the venue `docs/adr/ADR-P3.1.7.2-F2-corpus-root-containment.md`'s accepted rationale names verbatim: *"Data Quality Validation remains responsible for cross-artifact repository properties such as duplicate identifiers, uniqueness, completeness, and consistency."* No structural `Document` validator is required, designed, or implied by this section.
+
+**5 — Construction is unchanged.** `KnowledgeSource.load()` requires no modification. A duplicate identifier is **detected** by Data Quality Validation, not **prevented** by construction — consistent with the prevention/detection split recorded in `ADR-P3.1.7.2-F2`, and with identity strategy S1 (`docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3), under which `Document.id` is read from the Manifest and never derived. Under S1, `Document.id` uniqueness across `load()` and `documents[].id` uniqueness across the Manifest are the same predicate.
+
+**6 — What this section does not do.** It does not add a fourth invariant to Section 8.7; does not add, remove, or retype a field; does not alter Section 8.4's identity rules; does not withdraw Section 8.5's referential-integrity deferral; does not reopen `ADR-P3.1.7.2-F2`; and does not authorize any implementation. Implementation of the corresponding check is Sprint P3.1.8.1's work, under `docs/DATA_QUALITY_VALIDATION_PLAN.md` §11.2 W2.
+
 ---
 
 ## Phase 9 — Repository Boundaries
@@ -332,6 +350,7 @@ Sprint P2.5.1 was a documentation-only pass applying that review's findings to t
 | **F7** (completeness) | Added the stronger evidence the review identified for Question 3: `scripts/build_manifest.py`'s `DOCUMENTS_ROOT`/`SUPPORTED_EXTENSIONS` discovery gate means a JobOps SQLite row cannot obtain a `documents[]` entry and therefore cannot satisfy Section 8.4 — a **structural** exclusion, not merely prose scoping. Disposition unchanged. | Phase 11 Q3 |
 | **F8** (completeness) | Recorded two previously unstated consequences of invariant 3: it is not checkable from a single artifact (requires a two-run comparison, as for Chunk invariant 8), and `documents[].hash` covers source bytes rather than extracted text, so no existing check detects extraction-mechanism drift. Added as a new Section 8.8 **adjacent to, and without modifying**, Section 8.7. | New Section 8.8 |
 | — | Document status updated to reflect acceptance (header). | Header |
+| **E-1** (governance) | Recorded the scope, inherited source, and enforcement owner of §8.3's identity guarantee, resolving finding D-2. Added as a new Section 8.9 **adjacent to, and without modifying**, Sections 8.2–8.8. `Contract Version` unchanged. | New Section 8.9; header |
 
 **F2 and F3 are not corrections to this document.** The review classified them as unrecorded consequences requiring an owner, and this sprint's governing brief assigns them to Document Construction Planning, where they are addressed as `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §9 (identity-derivation coupling) and §12 (dependency governance) respectively.
 
