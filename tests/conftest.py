@@ -40,9 +40,13 @@ differ, and the canonical record is
           corpus", but uniqueness is not one of §8.7's three invariants and
           §8.5 routes collection-level and cross-artifact checks to the Data
           Quality Validation layer.
-          STILL DEFERRED to Sprint P3.1.8 (Data Quality Validation). No
-          specification below asserts uniqueness, because it is not yet
-          approved repository behaviour.
+          RESOLVED at Sprint P3.1.8.0B by Contract Erratum E-1
+          (docs/DOCUMENT_CONTRACT.md §8.9), which records the uniqueness
+          guarantee as binding and corpus-scoped and names Data Quality
+          Validation as its enforcement owner. Uniqueness is therefore
+          approved repository behaviour, and is specified by the DQ-2
+          specifications in tests/test_data_quality.py. F-1 closed at
+          Sprint P3.1.8.4 — see the register §3.1.
 
     F-2 — A manifest `documents[].source` escaping the corpus root (a `..`
           relative escape, or an absolute path) resolved and loaded a file

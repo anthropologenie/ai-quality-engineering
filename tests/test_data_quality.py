@@ -218,17 +218,21 @@ protection, not live detection. They hold `load()` to strategy S1: were a future
 sprint to derive `Document.id` rather than read it (strategies S2/S3, which
 `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §9.1 records as the rejected alternatives),
 or to drop or duplicate entries while constructing, these specifications fail.
-That is the protection the mutation pass measures, and it is the only honest
-claim available — no synthetic corpus can manufacture a DQ-4 violation without
-fabricating a state the repository cannot produce, and fabricating one would
-specify a fiction rather than repository behaviour.
+That protection is measured rather than asserted:
+`docs/ENGINEERING_TRACEABILITY_REGISTER.md` §6 records mutants **M20** (a
+derived `Document.id`), **M21** (a duplicated `Document`), and **M22** (a
+truncated enumeration) as **KILLED** by the DQ-4 specifications below.
 
-Consequently the synthetic specification below does **not** attempt a negative
-case. It exercises the correspondence over a three-document corpus, which is the
-scale the committed corpus cannot supply — precisely what O-5 means by
-*"synthetic cases carry the protection"*. Plan §12's negative-case examples name
-a duplicate id, a stale hash, and an unmanifested file — DQ-1, DQ-2, DQ-3 — and
-pointedly do not name DQ-4.
+The synthetic specification below is consequently **not** a negative case. That
+deviation from plan §13's synthetic-negative criterion is an owner-approved
+governance deviation, and `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §3.7
+(**P3.1.8.2-D1**) — not this docstring — is its authoritative record: it holds
+the determination, its reasoning, its scope, and its approval. Retained here as
+implementation context only: no synthetic corpus can manufacture a DQ-4
+violation without fabricating a state `load()` cannot produce, so the
+specification exercises the correspondence over a three-document corpus
+instead — the scale the committed corpus cannot supply, and precisely what O-5
+means by *"synthetic cases carry the protection"*.
 
 **One-to-one is DQ-4's cardinality, not a restatement of DQ-2.** Plan §9.1
 records §8.5's one-to-one relationship as *"the cardinality DQ-4 asserts"*. A
@@ -626,11 +630,12 @@ def test_dq4_correspondence_holds_across_a_multi_document_corpus(synthetic_corpu
     synthetic cases. This is that case: three documents, three entries, checked
     for the same correspondence the real specifications assert.
 
-    Deliberately **not** a negative case. A `Document.id` without a Manifest
-    entry cannot be produced by `load()` under strategy S1 — see the module
-    docstring — so manufacturing one would require fabricating a state the
-    repository cannot reach. Plan §12's negative-case examples name a duplicate
-    id, a stale hash, and an unmanifested file; DQ-4 is not among them.
+    Deliberately **not** a negative case, under the owner-approved governance
+    deviation whose authoritative record is
+    `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §3.7 (**P3.1.8.2-D1**). A
+    `Document.id` without a Manifest entry cannot be produced by `load()` under
+    strategy S1, so manufacturing one would require fabricating a state the
+    repository cannot reach.
 
     What this specification does add over the real ones is scale: with three
     entries, a `load()` that dropped, duplicated, or reordered a `Document` would

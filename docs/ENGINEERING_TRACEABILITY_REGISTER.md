@@ -58,7 +58,10 @@ Explicitly verified at establishment, and a standing constraint on every future 
 | **Disposition** | **DEFERRED to Sprint P3.1.8 (Data Quality Validation)** — upheld at P3.1.7.1 and unchanged at P3.1.7.2 |
 | **Why deferred** | Uniqueness is a collection-level, cross-artifact property. `docs/DOCUMENT_CONTRACT.md` §8.5 routes such checks to Data Quality Validation; it is not among §8.7's three invariants |
 | **Coupled to** | **D-2** (§3.6) — **resolved** at Sprint P3.1.8.0B by Contract Erratum E-1 (`docs/DOCUMENT_CONTRACT.md` §8.9). The invariant F-1's check must enforce is now stated, so the check no longer risks inventing one |
-| **Status** | **Open.** D-2's resolution unblocks the check but does not perform it. F-1 closes when Sprint P3.1.8.1 ships the DQ-2 uniqueness specification |
+| **Implementation** | Contract Erratum E-1 stated the invariant; Sprint P3.1.8.1B shipped the DQ-2 uniqueness specifications at commit `e9405ad`. `sample_rag/knowledge_source.py` is unchanged — a duplicate identifier is **detected** by Data Quality Validation, not **prevented** by `load()` (§8.9 item 5) |
+| **Specifications** | `tests/test_data_quality.py` — 4 DQ-2 specifications: W2 predicates A and B, each with a synthetic duplicate-id case reproducing this finding's recorded shape |
+| **Mutation evidence** | §6 — mutants **M20**, **M21**, **M22** killed by the DQ-2 specifications. **M21** is killed by `test_dq2_loaded_document_ids_are_pairwise_distinct`, the predicate the specification records as vacuous on the one-document corpus: it is vacuous against a duplicate *Manifest entry*, not against a `load()` that duplicates a `Document` |
+| **Status** | **Closed** at Sprint P3.1.8.4, under the event-driven closure policy (§8). The trigger this entry documented — *"Sprint P3.1.8.1 ships the DQ-2 uniqueness specification"* — occurred at `e9405ad`. Sprint P3.1.8.1's own completion remains governed independently by `docs/DATA_QUALITY_VALIDATION_PLAN.md` §13 |
 
 ### 3.2 F-2 — Corpus-root containment not enforced
 
@@ -109,7 +112,6 @@ Recorded because they have a disposition, not because they are scheduled.
 
 | ID | Observation | Disposition |
 |---|---|---|
-| **F-1** | Duplicate manifest identifiers (§3.1) | Sprint P3.1.8 |
 | **F-2-sym** | Containment reads the manifest value, so a corpus file that is a **symlink** pointing outside the root is not detected | Deliberate boundary of `ADR-P3.1.7.2-F2`. Candidate for Data Quality Validation if evidence ever emerges; none exists today |
 | **I-6** | `test_b6` hardcodes the corpus filename `Karthik_SR_Resume_v2_2.docx` | Re-verify at corpus expansion |
 | **I-7** | `test_a15`'s allowlist tracks CPython-synthesized dataclass members (`__firstlineno__`, `__static_attributes__` are 3.13+; suite runs on 3.12) | Re-verify at the next CPython upgrade |
@@ -127,7 +129,21 @@ Recorded because they have a disposition, not because they are scheduled.
 | **Analysed** | Sprint P3.1.8.0A (Governance Analysis) — five governance mechanisms evaluated against repository evidence; **Option A (Scoped Contract Erratum)** recommended with **Interpretation I-C** (corpus-scoped uniqueness inherited from the Knowledge Manifest, recorded adjacently) |
 | **Disposition** | **RESOLVED at Sprint P3.1.8.0B** by **Contract Erratum E-1**, approved by the repository owner |
 | **Implementation** | `docs/DOCUMENT_CONTRACT.md` §8.9 records the guarantee as binding, corpus-scoped, inherited from `docs/MILESTONE_1A.md` build item 1, and enforced by Data Quality Validation. §8.2–§8.8 verified byte-for-byte unchanged; `Contract Version` remains `1.0`; no ADR created |
-| **Coupled to** | **F-1** (§3.1) — the invariant a DQ-2 check must enforce is now stated, satisfying the precondition that the check enforce a stated invariant rather than invent one. F-1 itself remains **Open** |
+| **Coupled to** | **F-1** (§3.1) — the invariant a DQ-2 check must enforce is now stated, satisfying the precondition that the check enforce a stated invariant rather than invent one. F-1 itself closed at Sprint P3.1.8.4 |
+| **Status** | **Closed** |
+
+### 3.7 P3.1.8.2-D1 — DQ-4 synthetic negative case not constructible under identity strategy S1
+
+| | |
+|---|---|
+| **Raised** | Sprint P3.1.8.2 (Data Quality Validation Layer Review) |
+| **Verified** | Sprint P3.1.8.3 (Governance & Evidence Verification) — `docs/DATA_QUALITY_VALIDATION_PLAN.md` §13's criterion *"Each check has a synthetic negative case **and** a real-corpus positive case"* is explicit and unqualified; DQ-4 is a check by §8.1 and §11.2 W5; W5 ships a synthetic **positive** case only. The criterion is therefore unmet as written |
+| **Evidence** | `sample_rag/knowledge_source.py` `load()` iterates `discover_manifest_entries()`, reads `document_id = entry["id"]` and passes it through unchanged under identity strategy S1 (`docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3; `docs/DOCUMENT_CONTRACT.md` §8.4, A5), and appends exactly one `Document` per entry. A `Document.id` with no corresponding `documents[]` entry is unreachable through repository execution at any corpus size |
+| **Architectural reasoning** | DQ-4's failure state cannot be exercised without fabricating a state the repository cannot produce, which would specify a fiction rather than repository behaviour. `docs/DATA_QUALITY_VALIDATION_PLAN.md` §12's negative-case examples name a duplicate id, a stale hash, and an unmanifested file — DQ-1, DQ-2, DQ-3 — and do not name DQ-4. This is distinct from §16 open item **O-5**, which records DQ-4 as vacuously true for the separate reason of corpus scale (one document). Both limits are real and neither substitutes for the other |
+| **Disposition** | **Owner-approved governance deviation, Sprint P3.1.8.4.** A literal DQ-4 synthetic negative case is determined **not constructible** under S1. The §13 synthetic-negative criterion is waived for DQ-4 alone. No artificial, synthetic, or otherwise non-representative DQ-4 negative specification is to be introduced |
+| **What protects DQ-4 instead** | Regression protection against a change of identity strategy, **measured rather than asserted**: §6 records mutants **M20** (`Document.id` derived rather than read), **M21** (each entry yields two `Document`s), and **M22** (enumeration truncated) as **KILLED** by the DQ-4 specifications |
+| **Scope** | DQ-4 only. DQ-1, DQ-2, and DQ-3 each retain a synthetic negative case, and §13's criterion is unmodified for them |
+| **Recorded in the implementation** | `tests/test_data_quality.py` cites this section as the decision's authoritative record rather than carrying it in a module docstring — the defect class §1 records this register as having been established to end |
 | **Status** | **Closed** |
 
 ---
@@ -173,6 +189,48 @@ Recorded so the figure is not re-cited without its qualification (finding G-4).
 
 **Post-remediation, Sprint P3.1.7.2:** every genuine mutant is killed. The only survivors are the two equivalent mutants above, whose survival is correct behaviour.
 
+**Mutation baseline — Data Quality Validation, Sprint P3.1.8.4**, 23 semantically meaningful mutations against commit `3a32253`, satisfying `docs/DATA_QUALITY_VALIDATION_PLAN.md` §12 (*"must run a mutation pass over any code its checks protect and record the result"*) and §13's Evidence criterion.
+
+**Scope**, fixed before execution and not broadened: `scripts/build_manifest.py` — `load_manifest`, `validate_manifest`, `compute_sha256`, `discover_documents`, `normalize_source_path`; `sample_rag/knowledge_source.py` — `resolve_source_path`, `load()`. Every mutation lies inside one of those seven function bodies. Mutants were applied to a throwaway copy of the repository, one at a time, with the source restored between runs; the working tree was never mutated.
+
+Each mutant was run twice — against the **DQV suite alone** (`tests/test_data_quality.py`) and against the **full suite** — so protection attributable to W1–W5 is distinguished from protection the repository already had:
+
+| | Count |
+|---|---|
+| Mutants generated | **23** |
+| Killed by the DQV suite alone | **11** — M01, M04, M06, M07, M09, M10, M13, M18, M20, M21, M22 |
+| Killed by the full suite | **14** — the 11 above, plus M17, M19, M23 |
+| Survived both | **9** |
+| — of which **equivalent mutants** | **5** |
+| — of which **genuine survivors outside DQV's scope** | **4** |
+| — of which **genuine survivors inside DQV's scope** | **0** |
+
+| Survivor | Function | Classification |
+|---|---|---|
+| M02 `path.suffix.lower()` → `path.suffix` | `discover_documents` | **Equivalent on the current corpus** — every corpus file and every synthetic fixture carries a lowercase extension. A genuine gap only if a file with an uppercase extension enters the corpus |
+| M03 hidden / `__pycache__` skip removed | `discover_documents` | **Equivalent on the current corpus** — `sample_rag/documents/**` contains no hidden or `__pycache__` path |
+| M05 `as_posix()` → `str(...)` | `normalize_source_path` | **Equivalent on POSIX** — the two agree when the OS separator is `/`; the suite runs on Linux. A genuine gap on Windows |
+| M08 read chunk size 8192 → 1 | `compute_sha256` | **Equivalent, unconditionally** — SHA-256 is a streaming digest; chunking changes performance, never the value |
+| M11 read encoding `utf-8` → `latin-1` | `load_manifest` | **Equivalent on the current artifact** — `knowledge_manifest.json` is pure ASCII, where the two decodings coincide. A genuine gap if a non-ASCII byte enters the Manifest |
+| M12 JSON parse failure no longer wrapped | `load_manifest` | **Genuine survivor, outside DQV's scope.** Manifest load/parse failure is a `ManifestValidationError` concern, listed at plan §8.2 under *"Explicitly **not** DQV failure classes"* and owned by Structural Artifact Validation |
+| M14 `manifest_version` equality check removed | `validate_manifest` | **Genuine survivor, outside DQV's scope** — same §8.2 assignment |
+| M15 per-entry field type check removed | `validate_manifest` | **Genuine survivor, outside DQV's scope** — same §8.2 assignment |
+| M16 missing-`documents` guard removed | `validate_manifest` | **Genuine survivor, outside DQV's scope** — same §8.2 assignment |
+
+**No genuine survivor lies inside a DQV-owned behaviour.** The four genuine survivors are all manifest *structural* failures, which plan §8.2 assigns to Structural Artifact Validation and §11.2 records against W1 as failure classes *"—"*. They are a measured confirmation that W1 is a gate call and not a structural-failure specification, not a DQV blind spot.
+
+**Boundary confirmation, in the other direction.** Three mutants were killed by the full suite but survived the DQV suite, each correctly:
+
+| Mutant | Survived DQV because | Killed by |
+|---|---|---|
+| M17 corpus-root containment removed | Containment is Construction's, per `ADR-P3.1.7.2-F2`; plan §5.5 and §11.3 bar DQV from specifying it | AH-7 |
+| M19 extension gate removed | Construction's single-entry admissibility gate (§6.1 row 2) | Construction failure surface |
+| M23 manifest order reversed | Ordering is Construction Behaviour; §11.3 bars DQV from re-specifying it. W5 asserts cardinality, not order | B9 / B10 |
+
+**Protection attributable to each work package**, by killed mutant: **W1** — M13 (the gate must return the same object, not a copy). **W3 / DQ-1** — M07, M09, M10, M18. **W4 / DQ-3** — M01, M04, M06. **W2 / DQ-2** — M18, M20, M21, M22. **W5 / DQ-4** — M18, M20, M21, M22.
+
+**One measured correction to a recorded limitation.** `tests/test_data_quality.py` records W2 as vacuously true on the one-document corpus. M21 (`load()` appends two `Document`s per entry) is killed by `test_dq2_loaded_document_ids_are_pairwise_distinct`. The predicate is therefore vacuous against a duplicate *Manifest entry* — the F-1 shape — but not against a `load()` that duplicates a `Document`. The recorded limitation is narrower than stated, in the repository's favour.
+
 **Line coverage:** `sample_rag/document.py` 100%, `sample_rag/knowledge_source.py` 100%.
 
 **Standing caution:** a surviving mutant is evidence of a blind spot; a killed mutant is not proof of adequacy. Line coverage is not evidence of behavioural protection — at Sprint P3.1.7.1 the module measured 99% while a mutation emptying its entire output went undetected.
@@ -199,13 +257,14 @@ Recorded so the figure is not re-cited without its qualification (finding G-4).
 | **W4 / DQ-3** completeness — Case A | DQV Plan §11.2, §8.3; `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3 | 2 | `tests/test_data_quality.py` |
 | **W5 / DQ-4** referential integrity | DQV Plan §11.2; `docs/DOCUMENT_CONTRACT.md` §8.5 (A8) | 3 | `tests/test_data_quality.py` |
 
-**Not specified, deliberately:** symlink containment (§3.5, F-2-sym); `Document` persistence and structural validation (unresolved by the contract).
+**Not specified, deliberately:** symlink containment (§3.5, F-2-sym); `Document` persistence and structural validation (unresolved by the contract); a DQ-4 synthetic negative case (§3.7, **P3.1.8.2-D1** — owner-approved governance deviation).
 
 ---
 
 ## 8. Maintenance
 
 - Add a row only **after** a disposition is established.
+- **Finding closure is event-driven** (policy adopted at Sprint P3.1.8.4). A finding closes when the implementation trigger its own entry documents occurs — not when the sprint carrying that work is judged complete. Sprint completion is governed independently, by that sprint's own acceptance criteria. Applied first to F-1 (§3.1).
 - Every row cites repository evidence — a file, a commit, a measurement, or an ADR.
 - A finding is never removed. It moves to Closed, with the change that closed it.
 - If a row would describe work to be scheduled, it belongs in `docs/roadmap.md` instead (§1.2).
