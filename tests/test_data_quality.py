@@ -3,7 +3,8 @@
 Sprint P3.1.8.1A implemented **Phase W1 — Manifest structural gate** from the
 approved `docs/DATA_QUALITY_VALIDATION_PLAN.md` §11.2. Sprint P3.1.8.1B added
 **Phase W2 — Identifier uniqueness (DQ-2)**, closing finding **F-1**. Sprint
-P3.1.8.1C adds **Phase W3 — Freshness / integrity (DQ-1)**.
+P3.1.8.1C added **Phase W3 — Freshness / integrity (DQ-1)**. Sprint P3.1.8.1D
+adds **Phase W4 — Completeness, Case A (DQ-3)**.
 
 W1 is the repository's first executable Manifest specification. Until now the
 committed `sample_rag/knowledge_manifest.json` was validated only when
@@ -133,15 +134,75 @@ two computed values"* rather than assert a literal hash, because a digest is a
 fact about one corpus snapshot; the synthetic case therefore computes its
 expected hash with the same function under test rather than hardcoding one.
 
+W4 — completeness in one direction only, and why
+-------------------------------------------------
+W4 enumerates `sample_rag/documents/**` filtered by `SUPPORTED_EXTENSIONS`,
+`sorted(...)`, and asserts every such file has a `documents[]` entry, comparing
+on `normalize_source_path`'s normalized form (plan §11.2 W4). This is DQ-3:
+*"A corpus file exists beneath `sample_rag/documents/**` with an approved
+extension but has no `documents[]` entry — the Case A silent-narrowing blind
+spot"* (plan §8.1).
+
+**The narrowing direction ONLY.** Plan §8.3 is explicit that the opposite
+direction — a Manifest entry whose file is absent — must **not** be asserted
+here:
+
+    "Under Construction's accepted asymmetry (`docs/DOCUMENT_CONSTRUCTION_PLAN.md`
+    §20.3), the opposite direction — a Manifest entry whose file is absent —
+    already raises at Construction time. DQV must therefore assert only the
+    narrowing direction (file present, entry absent); asserting the other
+    direction would duplicate a Construction responsibility and violate §6's
+    single-owner rule."
+
+That direction is Case B, and it is already specified — `resolve_source_path`
+raises, and `tests/test_knowledge_source_failures.py`'s
+`test_case_b_manifest_entry_without_a_corpus_file_raises` covers it. Adding it
+here would be literal duplication, not defence in depth. Nothing below asserts
+it.
+
+Case A is the asymmetric half Construction deliberately left open:
+`docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3 records that under strategy S1 the
+Manifest — not the filesystem — is the corpus enumeration, so *"a file present
+but unmanifested is silently excluded (detecting it needs the corpus/Manifest
+diff deferred to Data Quality Validation)"*. W4 is that deferred detector. It
+reports the divergence; it does not change Construction's behaviour, which
+remains correct and unmodified.
+
+Corpus scale — W4 is not vacuous
+---------------------------------
+Plan §16 open item **O-5** names **DQ-2 and DQ-4** as the checks made vacuously
+true by the one-document corpus. **DQ-3 is deliberately not among them**, and
+the enumeration bears that out: `sample_rag/documents/**` yields one supported
+file today, so the real-corpus specification below quantifies over a non-empty
+set and every element of it is genuinely compared against the Manifest. It
+would fail the moment a supported file were added to the corpus without the
+Manifest being rebuilt — which is precisely the Case A blind spot.
+
+What the committed corpus *cannot* show is the failure itself: the Manifest is
+currently complete, so detection can only be exercised synthetically. That is
+the sole reason a synthetic specification exists here, and it is a different
+reason from W2's, where the real-corpus case carries no force at all.
+
+Per Register §3.5's finding **I-6**, no specification below names a corpus
+filename; the enumeration is computed, never hardcoded.
+
 Scope boundary
 --------------
-W4 (completeness) and W5 (referential integrity) are separate implementation
-sprints and are absent from this file by design.
+W5 (referential integrity) is a separate implementation sprint and is absent
+from this file by design.
 """
 
 import json
 
-from scripts.build_manifest import compute_sha256, load_manifest, validate_manifest
+from scripts.build_manifest import (
+    DOCUMENTS_ROOT,
+    SAMPLE_RAG_ROOT,
+    compute_sha256,
+    discover_documents,
+    load_manifest,
+    normalize_source_path,
+    validate_manifest,
+)
 
 from sample_rag.knowledge_source import resolve_source_path
 
@@ -363,3 +424,83 @@ def test_dq1_source_file_changed_after_cataloguing_is_detected(synthetic_corpus)
     computed = compute_sha256(resolve_source_path(entry["source"]))
 
     assert computed != entry["hash"]
+
+
+# --- W4 / DQ-3: completeness, Case A ----------------------------------------
+
+
+def test_dq3_every_committed_corpus_file_has_a_manifest_entry(real_manifest_entries):
+    """W4 — every supported file under `sample_rag/documents/**` is catalogued.
+
+    The Case A detector `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3 deferred to
+    this layer: under strategy S1 the Manifest is the corpus enumeration, so a
+    supported file present on disk but absent from `documents[]` is silently
+    excluded by `load()` and nothing currently registers it.
+
+    Enumeration reuses `discover_documents` — which applies the
+    `SUPPORTED_EXTENSIONS` filter and skips hidden and `__pycache__` paths — and
+    `normalize_source_path`, so the comparison is against the same normalized
+    form `documents[].source` was written in. Neither is reimplemented here, and
+    no filename is hardcoded (Register §3.5, I-6).
+
+    Narrowing direction only. A Manifest entry whose file is absent is Case B,
+    which raises at Construction and is specified in
+    tests/test_knowledge_source_failures.py; asserting it here would duplicate a
+    Construction responsibility (plan §8.3, §6).
+
+    The guard is not decoration: were the enumeration ever empty, the assertion
+    below would pass vacuously.
+    """
+    enumerated = sorted(
+        normalize_source_path(path, SAMPLE_RAG_ROOT)
+        for path in discover_documents(DOCUMENTS_ROOT)
+    )
+    manifested = {entry["source"] for entry in real_manifest_entries}
+
+    assert enumerated, "the committed corpus must contain at least one supported document"
+
+    unmanifested = [source for source in enumerated if source not in manifested]
+
+    assert unmanifested == [], (
+        f"corpus files present but absent from the Manifest: {unmanifested}"
+    )
+
+
+def test_dq3_corpus_file_absent_from_the_manifest_is_detected(synthetic_corpus):
+    """W4, synthetic — a supported corpus file with no `documents[]` entry is reported.
+
+    Case A's failure mode, which the committed corpus cannot exhibit because its
+    Manifest is complete. Two supported files are placed in the corpus and only
+    one is catalogued; the enumeration must report the other.
+
+    A third file carries an extension outside `SUPPORTED_EXTENSIONS`. W4
+    enumerates *"filtered by `SUPPORTED_EXTENSIONS`"* (plan §11.2 W4), so it must
+    **not** be reported: Construction's `resolve_source_path` rejects that
+    extension outright, meaning the file is not a corpus item at all and flagging
+    it would be a DQ-3 false positive. Asserting the exact list, rather than
+    merely that it is non-empty, is what holds both halves — the file that must
+    be reported and the file that must not.
+
+    `discover_documents` and `normalize_source_path` take their roots as
+    arguments, so this specification passes the synthetic root directly — no
+    module constant is monkeypatched for W4, and the functions under test are
+    the committed ones.
+
+    The unmanifested file is reported by its normalized source, not merely
+    counted, so a failure names the offending file (plan §8.4).
+    """
+    synthetic_corpus.text_file("documents/catalogued.txt", "catalogued")
+    synthetic_corpus.text_file("documents/unmanifested.txt", "present but never catalogued")
+    synthetic_corpus.binary_file("documents/notes.pdf", b"outside SUPPORTED_EXTENSIONS")
+    synthetic_corpus.entries(("a", "documents/catalogued.txt"))
+
+    entries = json.loads(synthetic_corpus.manifest_path.read_text(encoding="utf-8"))["documents"]
+    enumerated = sorted(
+        normalize_source_path(path, synthetic_corpus.root)
+        for path in discover_documents(synthetic_corpus.root / "documents")
+    )
+    manifested = {entry["source"] for entry in entries}
+
+    unmanifested = [source for source in enumerated if source not in manifested]
+
+    assert unmanifested == ["documents/unmanifested.txt"]

@@ -181,7 +181,7 @@ Recorded so the figure is not re-cited without its qualification (finding G-4).
 
 ## 7. Claim-to-specification mapping
 
-104 specifications: 17 pre-existing (`test_chunker.py`), 78 Knowledge Layer, and 9 Data Quality Validation.
+106 specifications: 17 pre-existing (`test_chunker.py`), 78 Knowledge Layer, and 11 Data Quality Validation.
 
 | Claim family | Source | Specifications | File |
 |---|---|---|---|
@@ -196,6 +196,7 @@ Recorded so the figure is not re-cited without its qualification (finding G-4).
 | **W1** Manifest structural gate | DQV Plan §11.2; `docs/MILESTONE_1A.md` build item 1 | 3 | `tests/test_data_quality.py` |
 | **W2 / DQ-2** identifier uniqueness (F-1) | DQV Plan §11.2; `docs/DOCUMENT_CONTRACT.md` §8.9 (Erratum E-1) | 4 | `tests/test_data_quality.py` |
 | **W3 / DQ-1** freshness / integrity | DQV Plan §11.2; `docs/MILESTONE_1A.md` build item 1, Architectural AC 3 | 2 | `tests/test_data_quality.py` |
+| **W4 / DQ-3** completeness — Case A | DQV Plan §11.2, §8.3; `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3 | 2 | `tests/test_data_quality.py` |
 
 **Not specified, deliberately:** symlink containment (§3.5, F-2-sym); `Document` persistence and structural validation (unresolved by the contract).
 
