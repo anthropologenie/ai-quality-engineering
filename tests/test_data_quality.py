@@ -4,7 +4,8 @@ Sprint P3.1.8.1A implemented **Phase W1 — Manifest structural gate** from the
 approved `docs/DATA_QUALITY_VALIDATION_PLAN.md` §11.2. Sprint P3.1.8.1B added
 **Phase W2 — Identifier uniqueness (DQ-2)**, closing finding **F-1**. Sprint
 P3.1.8.1C added **Phase W3 — Freshness / integrity (DQ-1)**. Sprint P3.1.8.1D
-adds **Phase W4 — Completeness, Case A (DQ-3)**.
+added **Phase W4 — Completeness, Case A (DQ-3)**. Sprint P3.1.8.1E adds
+**Phase W5 — Referential integrity (DQ-4)**.
 
 W1 is the repository's first executable Manifest specification. Until now the
 committed `sample_rag/knowledge_manifest.json` was validated only when
@@ -186,10 +187,63 @@ reason from W2's, where the real-corpus case carries no force at all.
 Per Register §3.5's finding **I-6**, no specification below names a corpus
 filename; the enumeration is computed, never hardcoded.
 
+W5 — referential integrity, and the guarantee that makes it tautological today
+------------------------------------------------------------------------------
+W5 asserts every `Document.id` returned by `load()` has a corresponding
+`documents[]` entry, and that the correspondence is one-to-one (plan §11.2 W5;
+`docs/DOCUMENT_CONTRACT.md` §8.5: *"Every `Document` returned by
+`KnowledgeSource.load()` corresponds to exactly one `knowledge_manifest.json`
+`documents[]` entry"*). This is DQ-4, the check §8.5 deferred to this layer as
+*"a semantic/cross-artifact validation concern, not a structural one"*, and it
+closes A8's deferral for the `Document` side.
+
+**Why DQ-4's failure state cannot arise from the committed implementation.**
+`sample_rag/knowledge_source.py` `load()` iterates `discover_manifest_entries()`
+and, per identity strategy S1, reads `document_id = entry["id"]` and passes it
+through unchanged — *"`Document.id` is read from the entry and passed through
+unchanged (A5)"* — appending exactly one `Document` per entry. A `Document.id`
+with no corresponding entry is therefore not merely improbable: it is
+unreachable through normal repository execution, at **any** corpus size. This is
+a structural guarantee of S1, and it is distinct from plan §16 open item
+**O-5**, which records DQ-4 as vacuous for a different reason — the corpus holds
+one document.
+
+Both limits are real and neither is glossed:
+
+    O-5 (scale)      one document, so the correspondence is trivially small
+    S1 (structure)   the failure state cannot be produced by `load()` at all
+
+**What the specifications below are therefore worth.** They are regression
+protection, not live detection. They hold `load()` to strategy S1: were a future
+sprint to derive `Document.id` rather than read it (strategies S2/S3, which
+`docs/DOCUMENT_CONSTRUCTION_PLAN.md` §9.1 records as the rejected alternatives),
+or to drop or duplicate entries while constructing, these specifications fail.
+That is the protection the mutation pass measures, and it is the only honest
+claim available — no synthetic corpus can manufacture a DQ-4 violation without
+fabricating a state the repository cannot produce, and fabricating one would
+specify a fiction rather than repository behaviour.
+
+Consequently the synthetic specification below does **not** attempt a negative
+case. It exercises the correspondence over a three-document corpus, which is the
+scale the committed corpus cannot supply — precisely what O-5 means by
+*"synthetic cases carry the protection"*. Plan §12's negative-case examples name
+a duplicate id, a stale hash, and an unmanifested file — DQ-1, DQ-2, DQ-3 — and
+pointedly do not name DQ-4.
+
+**One-to-one is DQ-4's cardinality, not a restatement of DQ-2.** Plan §9.1
+records §8.5's one-to-one relationship as *"the cardinality DQ-4 asserts"*. A
+duplicate `documents[].id` would break that cardinality *and* violate DQ-2, so
+both checks would fail together — which is correct, and is why the plan
+specifies them as separate claims under separate phases. W5 asserts cardinality;
+it does not assert uniqueness, and ownership of F-1 stays with W2.
+
 Scope boundary
 --------------
-W5 (referential integrity) is a separate implementation sprint and is absent
-from this file by design.
+W1–W5 complete the DQ-1 … DQ-4 checks planned for Sprint P3.1.8.1. DQ-5, DQ-6,
+and DQ-7 remain **blocked** on artifacts that do not exist at HEAD —
+`sample_rag/chunks.json`, the Index Layer, and an `EmbeddingProvider`
+implementation (plan §8.1, §11.2 W6, §16 open item O-6) — and are absent from
+this file for that reason, not by oversight.
 """
 
 import json
@@ -504,3 +558,101 @@ def test_dq3_corpus_file_absent_from_the_manifest_is_detected(synthetic_corpus):
     unmanifested = [source for source in enumerated if source not in manifested]
 
     assert unmanifested == ["documents/unmanifested.txt"]
+
+
+# --- W5 / DQ-4: referential integrity ---------------------------------------
+
+
+def test_dq4_every_loaded_document_id_has_a_manifest_entry(real_documents, real_manifest_entries):
+    """W5 — every `Document.id` from `load()` corresponds to a `documents[]` entry.
+
+    DQ-4 as plan §8.1 states it: *"A `Document.id` returned by `load()` has no
+    corresponding `documents[]` entry."* `docs/DOCUMENT_CONTRACT.md` §8.5
+    deferred exactly this check to this layer; A8 recorded the same deferral.
+
+    The two sides are read independently — `load()` for the `Document` side, and
+    the `real_manifest_entries` fixture, which parses the artifact with `json`
+    directly, for the Manifest side — so the comparison is against the committed
+    artifact rather than against the code path that produced the values.
+
+    Tautological on the committed implementation: S1 reads `Document.id` from the
+    entry, so this cannot fail today at any corpus size. It is regression
+    protection against an identity strategy that derived ids instead. See the
+    module docstring.
+    """
+    assert real_documents, "the committed corpus must yield at least one Document"
+
+    manifested_ids = {entry["id"] for entry in real_manifest_entries}
+    unreferenced = [document.id for document in real_documents if document.id not in manifested_ids]
+
+    assert unreferenced == [], (
+        f"Document ids with no corresponding Manifest entry: {unreferenced}"
+    )
+
+
+def test_dq4_document_to_manifest_entry_correspondence_is_one_to_one(
+    real_documents, real_manifest_entries
+):
+    """W5 — the `Document` ↔ Manifest entry correspondence is one-to-one.
+
+    The cardinality `docs/DOCUMENT_CONTRACT.md` §8.5 freezes — *"Every `Document`
+    returned by `KnowledgeSource.load()` corresponds to exactly one
+    `knowledge_manifest.json` `documents[]` entry"* — and which plan §9.1 names
+    as *"the cardinality DQ-4 asserts"*.
+
+    Both directions are checked, because one alone does not establish a
+    bijection: each `Document` must match exactly one entry, and the two
+    collections must be the same size, so no entry is left uncorresponded.
+
+    This is not DQ-2 restated. A duplicate `documents[].id` would break this
+    cardinality and independently violate DQ-2; both would fail, correctly.
+    Uniqueness remains W2's claim and F-1 remains W2's finding.
+    """
+    for document in real_documents:
+        matching = [entry for entry in real_manifest_entries if entry["id"] == document.id]
+
+        assert len(matching) == 1, (
+            f"Document id {document.id!r} matched {len(matching)} Manifest entries, expected 1"
+        )
+
+    assert len(real_documents) == len(real_manifest_entries)
+
+
+def test_dq4_correspondence_holds_across_a_multi_document_corpus(synthetic_corpus):
+    """W5, synthetic — the correspondence holds over a corpus larger than one document.
+
+    The committed corpus holds one document, which plan §16 open item **O-5**
+    records as making DQ-4 vacuously true; O-5 states the protection comes from
+    synthetic cases. This is that case: three documents, three entries, checked
+    for the same correspondence the real specifications assert.
+
+    Deliberately **not** a negative case. A `Document.id` without a Manifest
+    entry cannot be produced by `load()` under strategy S1 — see the module
+    docstring — so manufacturing one would require fabricating a state the
+    repository cannot reach. Plan §12's negative-case examples name a duplicate
+    id, a stale hash, and an unmanifested file; DQ-4 is not among them.
+
+    What this specification does add over the real ones is scale: with three
+    entries, a `load()` that dropped, duplicated, or reordered a `Document` would
+    break the correspondence here while a one-document corpus could not reveal
+    it.
+    """
+    synthetic_corpus.text_file("documents/a.txt", "alpha")
+    synthetic_corpus.text_file("documents/b.txt", "beta")
+    synthetic_corpus.text_file("documents/c.txt", "gamma")
+    synthetic_corpus.entries(
+        ("id-a", "documents/a.txt"),
+        ("id-b", "documents/b.txt"),
+        ("id-c", "documents/c.txt"),
+    )
+
+    documents = synthetic_corpus.load()
+    entries = json.loads(synthetic_corpus.manifest_path.read_text(encoding="utf-8"))["documents"]
+    manifested_ids = {entry["id"] for entry in entries}
+
+    assert [document.id for document in documents if document.id not in manifested_ids] == []
+
+    for document in documents:
+        assert len([entry for entry in entries if entry["id"] == document.id]) == 1
+
+    assert len(documents) == len(entries)
