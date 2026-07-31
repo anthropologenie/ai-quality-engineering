@@ -1,16 +1,17 @@
 """Specification Family 4 — Data Quality Validation.
 
 Sprint P3.1.8.1A implemented **Phase W1 — Manifest structural gate** from the
-approved `docs/DATA_QUALITY_VALIDATION_PLAN.md` §11.2. Sprint P3.1.8.1B adds
-**Phase W2 — Identifier uniqueness (DQ-2)**, closing finding **F-1**.
+approved `docs/DATA_QUALITY_VALIDATION_PLAN.md` §11.2. Sprint P3.1.8.1B added
+**Phase W2 — Identifier uniqueness (DQ-2)**, closing finding **F-1**. Sprint
+P3.1.8.1C adds **Phase W3 — Freshness / integrity (DQ-1)**.
 
 W1 is the repository's first executable Manifest specification. Until now the
 committed `sample_rag/knowledge_manifest.json` was validated only when
 `scripts/build_manifest.py` was run by hand; `docs/MILESTONE_1A.md` build item
 1 promised *"one pytest suite"* over the Manifest and the plan's §0 verified
-that suite absent at HEAD. This file closes that gap for **structure**. The
-freshness/hash half of build item 1 is DQ-1 (phase W3) and is deliberately not
-implemented here.
+that suite absent at HEAD. W1 closed that gap for **structure**; **W3 closes
+its other half** — the *"hash comparison against the manifest"* build item 1
+names literally, owed since Sprint P1.2.0 and never built.
 
 Reuse, not reimplementation (plan §11.1)
 ----------------------------------------
@@ -92,15 +93,57 @@ shape Sprint P3.1.7.1 used to reproduce F-1 — and confirm the predicate report
 it. Both the real and the synthetic cases run the same predicate function, so
 the synthetic cases genuinely exercise what the real ones assert.
 
+W3 — what a hash comparison does and does not detect
+-----------------------------------------------------
+W3 asserts, for every Manifest entry, that `compute_sha256` of the file at
+`documents[].source` equals the catalogued `documents[].hash`. This is DQ-1:
+*"A catalogued `documents[].hash` no longer matches the SHA-256 of the file at
+`documents[].source`"* (plan §8.1).
+
+**The bound, stated explicitly because it is an implementation requirement and
+not a footnote** (plan §11.2 W3, §9.1; `docs/DOCUMENT_CONTRACT.md` §8.8 item 2):
+
+    `documents[].hash` is a SHA-256 digest of the SOURCE FILE'S BYTES, not of
+    extracted text. W3 therefore detects SOURCE-BYTE DRIFT ONLY.
+
+    W3 does NOT detect extraction-mechanism drift. If the `.docx` extraction
+    mechanism changes so that `Document.text` changes while the underlying
+    source file remains byte-identical, every specification below still passes.
+    Nothing here is evidence about `Document.text`.
+
+§8.8 item 2 records that consequence and is explicit that *"no detector is
+designed, scoped, or required by this contract"* for mechanism drift. No
+specification below invents one; the gap is documented, not closed. Reading
+these specifications as a guarantee about `Document.text` is precisely the
+over-reading plan §9.1 warns of.
+
+Corpus scale — W3 differs from W2 here
+---------------------------------------
+W2's uniqueness predicate is vacuous on a one-document corpus. **W3's is not.**
+A single entry carrying a real catalogued digest and a real file on disk is a
+complete DQ-1 comparison, so the real-corpus specification below has full
+protective force today — it would fail the moment the corpus file changed
+without the Manifest being rebuilt. The synthetic specification is not
+compensating for a vacuous real case here, as it is for W2; it exists because
+plan §12 requires the negative direction to be exercised, and the committed
+corpus is (correctly) fresh and so can never demonstrate detection.
+
+No specification below freezes a digest. Plan §12 requires DQ-1 to *"compare
+two computed values"* rather than assert a literal hash, because a digest is a
+fact about one corpus snapshot; the synthetic case therefore computes its
+expected hash with the same function under test rather than hardcoding one.
+
 Scope boundary
 --------------
-W3 (freshness / hash), W4 (completeness), and W5 (referential integrity) are
-separate implementation sprints and are absent from this file by design.
+W4 (completeness) and W5 (referential integrity) are separate implementation
+sprints and are absent from this file by design.
 """
 
 import json
 
-from scripts.build_manifest import load_manifest, validate_manifest
+from scripts.build_manifest import compute_sha256, load_manifest, validate_manifest
+
+from sample_rag.knowledge_source import resolve_source_path
 
 
 def duplicate_ids(ids):
@@ -252,3 +295,71 @@ def test_dq2_duplicate_loaded_document_ids_are_detected(synthetic_corpus):
 
     assert len(documents) == 2
     assert duplicate_ids(ids) == ["dup"]
+
+
+# --- W3 / DQ-1: freshness / integrity ---------------------------------------
+
+
+def test_dq1_every_committed_entry_hash_matches_its_source_file(real_manifest_entries):
+    """W3 — every `documents[].hash` equals the SHA-256 of the file it catalogues.
+
+    The check `docs/MILESTONE_1A.md` build item 1 promised — *"one pytest suite
+    running hash comparison against the manifest"* — and Architectural AC 3's
+    requirement that the Manifest be *"the sole source of truth that
+    freshness/hash validation checks against"*.
+
+    Two computed values are compared: the digest `compute_sha256` produces now,
+    against the digest the Manifest catalogued when it was built. No literal
+    digest appears here (plan §12). The source is resolved with Construction's
+    own `resolve_source_path`, so the bytes hashed are the bytes
+    `KnowledgeSource.load()` would read for this entry, not a path this
+    specification re-derived.
+
+    Source bytes only: a passing run says the catalogued files are unchanged on
+    disk. It says nothing about `Document.text` — see the module docstring and
+    `docs/DOCUMENT_CONTRACT.md` §8.8 item 2.
+
+    Fail-fast within the test, naming the offending entry, per plan §8.4.
+    """
+    assert real_manifest_entries, "the committed Manifest must catalogue at least one document"
+
+    for entry in real_manifest_entries:
+        computed = compute_sha256(resolve_source_path(entry["source"]))
+
+        assert computed == entry["hash"], (
+            f"{entry['source']}: catalogued hash {entry['hash']} != computed {computed}"
+        )
+
+
+def test_dq1_source_file_changed_after_cataloguing_is_detected(synthetic_corpus):
+    """W3, synthetic — a corpus file edited after cataloguing is reported as stale.
+
+    DQ-1's actual failure mode, reproduced rather than simulated: the Manifest
+    catalogues the file's true digest, the file is then edited, and the
+    catalogued digest no longer describes it. The committed corpus is correctly
+    fresh and so can never exercise this direction, which is why plan §12
+    requires a synthetic negative case.
+
+    The expected hash is computed by the same function under test rather than
+    hardcoded, per plan §12 — a literal digest would freeze a fact about one
+    snapshot. The manifest is written with all four contracted entry fields so
+    the only property under test is freshness, not structure.
+    """
+    source = "documents/a.txt"
+    path = synthetic_corpus.text_file(source, "content as catalogued")
+    catalogued = compute_sha256(path)
+    synthetic_corpus.manifest(
+        {
+            "manifest_version": "1.0",
+            "documents": [
+                {"id": "a", "source": source, "hash": catalogued, "indexed": False}
+            ],
+        }
+    )
+
+    synthetic_corpus.text_file(source, "content after an uncatalogued edit")
+
+    entry = json.loads(synthetic_corpus.manifest_path.read_text(encoding="utf-8"))["documents"][0]
+    computed = compute_sha256(resolve_source_path(entry["source"]))
+
+    assert computed != entry["hash"]
