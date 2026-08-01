@@ -1,0 +1,263 @@
+{
+  "schema_version": "1.0",
+  "qa_pairs": [
+    {
+      "id": "qa_resume_f001_lexical_01",
+      "source": "resume",
+      "fact_id": "resume_f001",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "How many years of experience does Karthik have?",
+      "question_category": "lexical",
+      "failure_category": "Exact Fact",
+      "expected_answer": "Around 7.5 years of backend-focused engineering experience.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f004_lexical_01",
+      "source": "resume",
+      "fact_id": "resume_f004",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "By what percentage did Karthik's Python test automation framework reduce ETL test execution time?",
+      "question_category": "lexical",
+      "failure_category": "Exact Fact",
+      "expected_answer": "By 40%.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f005_lexical_01",
+      "source": "resume",
+      "fact_id": "resume_f005",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "How many engineers did Karthik lead on the dealer service analytics platform?",
+      "question_category": "lexical",
+      "failure_category": "Exact Fact",
+      "expected_answer": "A cross-functional team of 5.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f016_lexical_01",
+      "source": "resume",
+      "fact_id": "resume_f016",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "How many columns and how many tables did Karthik profile in the GA4 telemetry pipeline?",
+      "question_category": "lexical",
+      "failure_category": "Exact Fact",
+      "expected_answer": "172 columns spanning 14 gold-layer tables.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f008_lexical_01",
+      "source": "resume",
+      "fact_id": "resume_f008",
+      "supporting_fact_ids": [],
+      "fact_relation": "bounds",
+      "question": "Which Kubernetes clusters has Karthik managed?",
+      "question_category": "lexical",
+      "failure_category": "No Answer",
+      "expected_answer": "The resume does not state any Kubernetes experience. The DevOps and platform engineering skills it lists are GitHub REST API, GitHub Enterprise, Backend API Testing, Backend Systems Testing, Git, Jenkins, CI/CD Pipeline, Docker, JIRA, and HP ALM.",
+      "answerable": false
+    },
+    {
+      "id": "qa_resume_f002_semantic_01",
+      "source": "resume",
+      "fact_id": "resume_f002",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "What experience does Karthik have leading engineering teams?",
+      "question_category": "semantic",
+      "failure_category": "Paraphrase",
+      "expected_answer": "He has led cross-functional QA teams of 5 or more, owning test strategy, stakeholder communication, and delivery across Oracle, Teradata, Redshift, Databricks, and Snowflake environments.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f001_semantic_01",
+      "source": "resume",
+      "fact_id": "resume_f001",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "What background does Karthik have in data engineering?",
+      "question_category": "semantic",
+      "failure_category": "Paraphrase",
+      "expected_answer": "Around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f006_semantic_01",
+      "source": "resume",
+      "fact_id": "resume_f006",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "Has Karthik worked on autonomous or agentic AI systems?",
+      "question_category": "semantic",
+      "failure_category": "Paraphrase",
+      "expected_answer": "Yes. He engineered and validated a five-agent Autonomous Root Cause Analysis (RCA) pipeline targeting a 10-15 minute alert-to-RCA turnaround, versus 2 hours to days of manual investigation.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f024_semantic_01",
+      "source": "resume",
+      "fact_id": "resume_f024",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "Does Karthik have experience making data pipelines reproducible?",
+      "question_category": "semantic",
+      "failure_category": "Paraphrase",
+      "expected_answer": "Yes. On the JobOps Platform he designed deterministic data validation and provenance workflows using schema versioning, content-hash verification, and import tracking to ensure reproducible datasets.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f017_semantic_01",
+      "source": "resume",
+      "fact_id": "resume_f017",
+      "supporting_fact_ids": [],
+      "fact_relation": "bounds",
+      "question": "What salary did Karthik earn at Happiest Minds Technologies?",
+      "question_category": "semantic",
+      "failure_category": "No Answer",
+      "expected_answer": "The resume does not state compensation for any role. It states that he was QA Lead / Test Module Lead at Happiest Minds Technologies, Bengaluru, from Sep 2023 to Apr 2025.",
+      "answerable": false
+    },
+    {
+      "id": "qa_resume_f001_summarization_01",
+      "source": "resume",
+      "fact_id": "resume_f001",
+      "supporting_fact_ids": [
+        "resume_f002",
+        "resume_f004"
+      ],
+      "fact_relation": "supports",
+      "question": "Summarize Karthik's professional background.",
+      "question_category": "summarization",
+      "failure_category": "Paraphrase",
+      "expected_answer": "A QA Lead with around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance, who has led cross-functional QA teams of 5 or more across Oracle, Teradata, Redshift, Databricks, and Snowflake environments, and whose Python-based test automation framework reduced ETL test execution time by 40% at a 98% pass rate across 100+ scenarios.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f009_summarization_01",
+      "source": "resume",
+      "fact_id": "resume_f009",
+      "supporting_fact_ids": [
+        "resume_f010",
+        "resume_f011",
+        "resume_f016"
+      ],
+      "fact_relation": "supports",
+      "question": "Describe what Karthik does in his current role.",
+      "question_category": "summarization",
+      "failure_category": "Paraphrase",
+      "expected_answer": "As Senior Engineer (Agentic AI & Data Platform Engineering) at Ascendion on HP's AAVA / OMEN Gaming Hub Analytics Program since Jan 2026, he contributed to a five-agent Autonomous Root Cause Analysis (RCA) pipeline, developed a 12-step deterministic Autonomous Root Cause Analysis (RCA) reasoning agent with confidence scoring and anomaly classification, and profiled data quality across 172 columns in 14 gold-layer GA4 tables.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f007_summarization_01",
+      "source": "resume",
+      "fact_id": "resume_f007",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "What are Karthik's AI engineering skills?",
+      "question_category": "summarization",
+      "failure_category": "Exact Fact",
+      "expected_answer": "AI Quality Engineering, LLM Validation, Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), Pydantic v2, Prompt Engineering, and Root Cause Analysis (RCA) Automation.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f003_summarization_01",
+      "source": "resume",
+      "fact_id": "resume_f003",
+      "supporting_fact_ids": [
+        "resume_f005",
+        "resume_f021",
+        "resume_f022"
+      ],
+      "fact_relation": "supports",
+      "question": "Which large-scale enterprise data migration programs has Karthik worked on?",
+      "question_category": "summarization",
+      "failure_category": "Exact Fact",
+      "expected_answer": "Maruti Suzuki, Betts Group, and Red Earth.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f019_reasoning_01",
+      "source": "resume",
+      "fact_id": "resume_f019",
+      "supporting_fact_ids": [
+        "resume_f022"
+      ],
+      "fact_relation": "supports",
+      "question": "Across Karthik's ETL data warehouse projects, what measurable improvements in data accuracy were reported?",
+      "question_category": "reasoning",
+      "failure_category": "Multi-hop",
+      "expected_answer": "Two. On Maruti Suzuki he improved data accuracy by 25% through data profiling and root cause analysis, and on Red Earth he improved data accuracy and reliability by 30% through systematic root cause analysis while resolving 100+ data quality issues.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f016_reasoning_01",
+      "source": "resume",
+      "fact_id": "resume_f016",
+      "supporting_fact_ids": [
+        "resume_f012"
+      ],
+      "fact_relation": "supports",
+      "question": "What evidence shows Karthik has worked on both data quality assessment and AI agent reliability?",
+      "question_category": "reasoning",
+      "failure_category": "Multi-hop",
+      "expected_answer": "For data quality assessment, he profiled and measured data quality across 172 columns spanning 14 gold-layer GA4 tables, producing field-level reliability evidence. For AI agent reliability, he established production agent specifications and optimized LLM configuration parameters to eliminate hallucinated retries and duplicate-write collisions.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f001_reasoning_01",
+      "source": "resume",
+      "fact_id": "resume_f001",
+      "supporting_fact_ids": [
+        "resume_f009",
+        "resume_f024"
+      ],
+      "fact_relation": "supports",
+      "question": "Which work best demonstrates Karthik's move from ETL testing into AI Quality Engineering?",
+      "question_category": "reasoning",
+      "failure_category": "Multi-hop",
+      "expected_answer": "His background is around 7.5 years of ETL testing and data validation. His current role at Ascendion applies that discipline to agentic AI platform engineering, and on the JobOps Platform he designed deterministic validation and provenance workflows explicitly to establish a trusted data foundation for downstream AI quality evaluation workflows.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f012_reasoning_01",
+      "source": "resume",
+      "fact_id": "resume_f012",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "How has Karthik addressed reliability problems in LLM-driven systems?",
+      "question_category": "reasoning",
+      "failure_category": "Paraphrase",
+      "expected_answer": "He established production agent specifications (Role, Goal, Behaviour, Expected Output, Guardrails) and optimized LLM configuration parameters (temperature, top-p, execution limits) to eliminate hallucinated retries and duplicate-write collisions.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f004_reasoning_01",
+      "source": "resume",
+      "fact_id": "resume_f004",
+      "supporting_fact_ids": [],
+      "fact_relation": "refutes",
+      "question": "Karthik's automation framework cut ETL test execution time by 70% — how did he achieve that?",
+      "question_category": "reasoning",
+      "failure_category": "False Premise",
+      "expected_answer": "The premise is incorrect. The resume states a 40% reduction in ETL test automation execution time, achieved through a Python-based framework using Pytest, Pandas, and SQLAlchemy, sustaining a 98% pass rate across 100+ test scenarios.",
+      "answerable": false
+    },
+    {
+      "id": "qa_resume_f005_reasoning_01",
+      "source": "resume",
+      "fact_id": "resume_f005",
+      "supporting_fact_ids": [],
+      "fact_relation": "refutes",
+      "question": "Since Karthik managed a team of 15 engineers on the dealer analytics platform, how did he handle that scale?",
+      "question_category": "reasoning",
+      "failure_category": "False Premise",
+      "expected_answer": "The premise is incorrect. The resume states he managed a cross-functional team of 5 while leading QA delivery for a data analytics platform serving 2,000+ dealer service centers.",
+      "answerable": false
+    }
+  ]
+}
