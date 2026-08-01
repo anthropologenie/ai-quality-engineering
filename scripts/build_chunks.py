@@ -18,13 +18,23 @@ collection Mapping. Read-only: validation never touches the filesystem and
 accepts any already-loaded, mapping-like collection. Referential integrity
 against knowledge_manifest.json and any check requiring Document text are
 explicitly deferred (docs/CHUNK_VALIDATION_PLAN.md §P5, §P1.4).
+
+Sprint P3.2.2: adds `main()` — the execution wiring that runs the already-built
+components end to end against the committed corpus, closing the "Build
+orchestration" forward dependency recorded at docs/CHUNK_VALIDATION_PLAN.md §P8.
+It introduces no chunking, serialization, or validation logic of its own: it
+composes `KnowledgeSource.load()` (Sprint P3.1.4), `Chunker.chunk()` (Sprint
+P2.2.1), and this module's existing serialize/write/load/validate functions, in
+the same thin-orchestrator role `scripts/build_manifest.py` `main()` already
+plays for the Knowledge Manifest.
 """
 
 import json
 from collections.abc import Mapping
 from pathlib import Path
 
-from sample_rag.chunker import Chunk
+from sample_rag.chunker import Chunk, Chunker
+from sample_rag.knowledge_source import KnowledgeSource
 
 SAMPLE_RAG_ROOT = Path(__file__).resolve().parent.parent / "sample_rag"
 SCHEMA_VERSION = "1.0"
@@ -253,3 +263,44 @@ def validate_chunks(collection: Mapping) -> Mapping:
     _validate_collection_invariants(chunks)
 
     return collection
+
+
+def main() -> None:
+    """Materialize the repository's Chunk collection from the validated corpus.
+
+    Thin orchestrator only, mirroring `scripts/build_manifest.py` `main()`: every
+    step below is an existing component invoked unchanged, and no chunking,
+    identifier, ordering, or validation rule is decided here.
+
+        KnowledgeSource.load()  -> Documents, in Knowledge Manifest order
+        Chunker.chunk(document) -> Chunks, in reading order per document
+        assemble_chunk_collection / write_chunks -> sample_rag/chunks.json
+        validate_chunks(load_chunks())           -> structural gate
+
+    Corpus enumeration stays the Manifest's (Construction Plan §9.1, strategy
+    S1): documents are consumed in the order `load()` emits them and are never
+    re-sorted here, so corpus ordering has exactly one authority. Per-document
+    chunk lists are concatenated in that same order, which is what makes the
+    persisted `chunks[]` array stable across runs.
+
+    Validation reads the artifact back from disk rather than validating the
+    in-memory collection, so the structural gate covers the round trip actually
+    consumed downstream — `validate_chunks(load_chunks())` chained exactly as
+    docs/CHUNK_VALIDATION_PLAN.md §P7.1 prescribes. A failure propagates as
+    ChunkConstructionError, ChunkSerializationError, or ChunkValidationError
+    from the component that detected it; this function adds no error handling of
+    its own, since it has no failure mode the components do not already own.
+    """
+    documents = KnowledgeSource().load()
+
+    chunker = Chunker()
+    chunks: list[Chunk] = []
+    for document in documents:
+        chunks.extend(chunker.chunk(document))
+
+    write_chunks(assemble_chunk_collection(chunks))
+    validate_chunks(load_chunks())
+
+
+if __name__ == "__main__":
+    main()
