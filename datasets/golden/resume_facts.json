@@ -225,6 +225,15 @@
       "section": "EDUCATION",
       "fact": "He holds a Bachelor of Engineering in Electronics & Communication with a CGPA of 8.83/10 from M.S. Ramaiah Institute of Technology, Bengaluru, 2014 to 2018.",
       "source_text": "Bachelor of Engineering in Electronics & Communication | CGPA: 8.83/10\n\nM.S. Ramaiah Institute of Technology, Bengaluru | 2014 – 2018"
+    },
+    {
+      "id": "resume_f026",
+      "source": "resume",
+      "document_id": "3f3797c1134c",
+      "document_source": "documents/resume/Karthik_SR_Resume_v2_2.docx",
+      "section": "PROFESSIONAL SUMMARY",
+      "fact": "The Fortune 500 data migration programs he worked on include Maruti Suzuki, Betts Group, and Red Earth.",
+      "source_text": "for Fortune 500 data migration programs including Maruti Suzuki, Betts Group, and Red Earth."
     }
   ]
 }

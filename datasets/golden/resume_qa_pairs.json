@@ -258,6 +258,30 @@
       "failure_category": "False Premise",
       "expected_answer": "The premise is incorrect. The resume states he managed a cross-functional team of 5 while leading QA delivery for a data analytics platform serving 2,000+ dealer service centers.",
       "answerable": false
+    },
+    {
+      "id": "qa_resume_f026_reasoning_01",
+      "source": "resume",
+      "fact_id": "resume_f026",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "According to Karthik's resume, are his data migration programs described as Fortune 500 engagements?",
+      "question_category": "reasoning",
+      "failure_category": "Stale Version",
+      "expected_answer": "This wording appears in an earlier catalogued version of the resume (v2.2): 'Fortune 500 data migration programs including Maruti Suzuki, Betts Group, and Red Earth.' It has since been superseded — the current canonical resume (v2.3) uses 'large-scale enterprise data migration programs' instead, since none of these companies are Fortune 500. A system retrieving from a stale corpus snapshot would surface this outdated characterization as if it were current.",
+      "answerable": true
+    },
+    {
+      "id": "qa_resume_f026_reasoning_02",
+      "source": "resume",
+      "fact_id": "resume_f026",
+      "supporting_fact_ids": [],
+      "fact_relation": "supports",
+      "question": "Do Karthik's resume versions agree on how his data migration programs are characterized?",
+      "question_category": "reasoning",
+      "failure_category": "Contradiction",
+      "expected_answer": "No. This entry's source (Resume v2.2) describes the programs as 'Fortune 500 data migration programs.' The current canonical version (v2.3) instead describes them as 'large-scale enterprise data migration programs,' since none of the named companies are Fortune 500. The two catalogued versions conflict on this characterization; v2.3's wording is the corrected one.",
+      "answerable": true
     }
   ]
 }
