@@ -279,6 +279,139 @@ def test_question_without_symptom_yields_no_diagnosis():
 
 
 # ---------------------------------------------------------------------------
+# Document identity (Sprint P3.3.5)
+# ---------------------------------------------------------------------------
+
+
+def test_disjoint_documents_select_the_wrong_document_rule():
+    """Zero recall with no document overlap is `ALTM-RETRIEVE-1`.
+
+    "Right topic, wrong specific document retrieved" — a §5 row that could not
+    fire before document identity existed, because nothing distinguished it from
+    "Missing answer despite evidence existing in the corpus".
+    """
+    assert (
+        select_rule(0.0, 0.0, expected_documents=["doc_1"], observed_documents=["doc_2"])
+        == "ALTM-RETRIEVE-1"
+    )
+
+
+def test_reached_expected_document_selects_the_missing_evidence_rule():
+    """Zero recall while retrieving *from* the expected document is `ALTM-RETRIEVE-2`.
+
+    The right document was reached; its expected chunks were not returned. That
+    is the missing-evidence row, not the wrong-document row.
+    """
+    assert (
+        select_rule(0.0, 0.0, expected_documents=["doc_1"], observed_documents=["doc_1", "doc_2"])
+        == "ALTM-RETRIEVE-2"
+    )
+
+
+def test_rule_selection_is_unchanged_without_document_identity():
+    """Absent identity reproduces the pre-P3.3.5 selection exactly.
+
+    The split is additional resolution, not a changed rule: a record predating
+    the enrichment diagnoses as it always did.
+    """
+    assert select_rule(0.0, 0.0) == "ALTM-RETRIEVE-2"
+    assert select_rule(0.0, 0.0, expected_documents=[], observed_documents=[]) == "ALTM-RETRIEVE-2"
+
+
+def test_document_identity_excludes_the_upstream_stages():
+    """A non-empty expected document set yields Complete Evidence at any recall.
+
+    `expected_document_ids` resolves through chunk ids Sprint P3.3.2 validated as
+    present in the committed Chunk Corpus, so the expected document is indexed
+    and its chunks exist — which is what the Knowledge and Index checks test.
+    Both upstream stages are excluded on evidence, so nothing above Retrieve
+    remains unresolved.
+    """
+    assert assess_confidence("ALTM-RETRIEVE-2", 0.0, ["doc_1"]) == "Complete Evidence"
+    assert assess_confidence("ALTM-RETRIEVE-1", 0.0, ["doc_1"]) == "Complete Evidence"
+    assert assess_confidence("ALTM-RETRIEVE-3", 0.5, ["doc_1"]) == "Complete Evidence"
+
+
+def test_confidence_is_unchanged_without_document_identity():
+    """The pre-P3.3.5 assessments survive intact for records lacking identity."""
+    assert assess_confidence("ALTM-RETRIEVE-2", 0.0, []) == "Insufficient Evidence"
+    assert assess_confidence("ALTM-RETRIEVE-3", 0.5, []) == "Partial Evidence"
+    assert assess_confidence("ALTM-RETRIEVE-4", 1.0, []) == "Complete Evidence"
+
+
+def test_no_knowledge_rule_becomes_selectable():
+    """Document identity activates a Retrieve row, not a Knowledge row.
+
+    `ALTM-KNOWLEDGE-1` needs which *version* is current — the Knowledge Manifest
+    encodes that in filenames and the dependency rule bars reading it.
+    `ALTM-KNOWLEDGE-2`'s documented detection is that re-indexing was triggered,
+    and a non-empty expected document set shows it was, contradicting the row's
+    premise rather than leaving it open.
+    """
+    selections = {
+        select_rule(recall, precision, expected, observed)
+        for recall, precision in ((0.0, 0.0), (0.5, 0.2), (1.0, 0.2), (1.0, 1.0))
+        for expected in (["doc_1"], [])
+        for observed in (["doc_1"], ["doc_2"], ["doc_1", "doc_2"], [])
+    }
+
+    assert not {rule for rule in selections if rule and rule.startswith("ALTM-KNOWLEDGE")}
+
+
+def test_diagnosis_carries_the_supporting_document_evidence():
+    """The document sets travel with the diagnosis, so the rule split and the
+    upstream exclusion are re-derivable from the diagnosis alone."""
+    evaluation = record("meta_a", ["x"], ["y"])
+    evaluation["expected_document_ids"] = ["doc_1"]
+    evaluation["observed_document_ids"] = ["doc_2"]
+
+    diagnosis = diagnose_question(
+        evaluation, {"id": "meta_a", "chunk_recall_at_k": 0.0, "chunk_precision_at_k": 0.0}
+    )
+
+    assert diagnosis["rule_id"] == "ALTM-RETRIEVE-1"
+    assert diagnosis["altm_stage"] == "Retrieve"
+    assert diagnosis["diagnosis_confidence"] == "Complete Evidence"
+    assert diagnosis["expected_document_ids"] == ["doc_1"]
+    assert diagnosis["observed_document_ids"] == ["doc_2"]
+
+
+def test_independent_validator_agrees_on_the_document_split():
+    """Both derivations reach the same rule and confidence from document identity."""
+    records = []
+    for entry_id, expected, observed, expected_docs, observed_docs in (
+        ("meta_a", ["x"], ["y"], ["doc_1"], ["doc_2"]),
+        ("meta_b", ["x"], ["y"], ["doc_1"], ["doc_1", "doc_2"]),
+        ("meta_c", ["x", "y"], ["x", "z"], ["doc_1"], ["doc_1", "doc_2"]),
+    ):
+        evaluation = record(entry_id, expected, observed)
+        evaluation["expected_document_ids"] = expected_docs
+        evaluation["observed_document_ids"] = observed_docs
+        records.append(evaluation)
+
+    metrics = compute(records)
+    engine = {
+        d["id"]: (d["rule_id"], d["altm_stage"], d["diagnosis_confidence"])
+        for d in diagnose(records, metrics)
+    }
+
+    assert engine == rederive(records, metrics)
+    assert engine["meta_a"][0] == "ALTM-RETRIEVE-1"
+    assert engine["meta_b"][0] == "ALTM-RETRIEVE-2"
+
+
+def test_independent_validator_detects_incoherent_document_identity():
+    """Matched chunks with disjoint document sets cannot describe one retrieval."""
+    evaluation = record("meta_a", ["x"], ["x", "y"])
+    evaluation["expected_document_ids"] = ["doc_1"]
+    evaluation["observed_document_ids"] = ["doc_2"]
+    records = [evaluation]
+
+    rows = {row["check"]: row for row in compare(diagnose(records, compute(records)), records, compute(records))}
+    assert rows["document identity integrity"]["status"] == "FAIL"
+
+
+# ---------------------------------------------------------------------------
 # Input contract and dependency rule
 # ---------------------------------------------------------------------------
 
@@ -501,6 +634,11 @@ def test_committed_corpus_validation_report_is_all_pass(diagnoses, records, metr
         "metric/record agreement",
         "unreachable stages absent",
         "one diagnosis per question",
+        # Sprint P3.3.5. The one existing P3.3.4 specification this sprint
+        # changes, and it changes by one appended row: the enrichment added a
+        # validation check, so the reported check list grew. No assertion about
+        # pre-existing behaviour was weakened or removed.
+        "document identity integrity",
     ]
     assert all(row["status"] == "PASS" for row in rows), rows
 

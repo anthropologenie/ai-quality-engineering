@@ -58,7 +58,9 @@ def _ratio(numerator: int, denominator: int) -> float:
     return round(numerator / denominator, PRECISION) if denominator else 0.0
 
 
-def _matching_rules(recall: float, precision: float) -> list:
+def _matching_rules(
+    recall: float, precision: float, expected_documents: list, observed_documents: list
+) -> list:
     """Every §5 row whose symptom this evidence exhibits, in document order.
 
     Enumerated rather than short-circuited. The engine selects by falling through
@@ -66,15 +68,30 @@ def _matching_rules(recall: float, precision: float) -> list:
     element verifies both that the same row is chosen and that `docs/altm.md`
     §5's row order is what chooses it.
 
-    Only rules attributing to a reachable stage are considered — the Knowledge
-    rows require a freshness check against the source, which no permitted input
-    can perform, and the Assemble/Infer/Post-Process/Evaluate/Final-Answer rows
-    name components this repository does not implement.
+    The Knowledge rows are still not considered, and Sprint P3.3.5's document
+    identity is why that is now demonstrable rather than assumed:
+    ALTM-KNOWLEDGE-1 needs which *version* is current, which no permitted input
+    carries; ALTM-KNOWLEDGE-2's documented detection is that re-indexing was
+    triggered, and a non-empty `expected_document_ids` shows it was. The
+    Assemble/Infer/Post-Process/Evaluate/Final-Answer rows name components this
+    repository does not implement.
+
+    Derived independently of the engine's ordered chain: `document_mismatch` is
+    computed here from the two document lists rather than read from any
+    engine-produced value.
     """
+    document_identity = bool(expected_documents) and observed_documents is not None
+    document_mismatch = document_identity and not (
+        set(expected_documents) & set(observed_documents)
+    )
+
     exhibits = {
+        # "Right topic, wrong specific document retrieved" — reachable only once
+        # document identity exists (Sprint P3.3.5).
+        "ALTM-RETRIEVE-1": recall == 0.0 and document_mismatch,
         # "Missing answer despite evidence existing in the corpus". The premise
         # holds by Sprint P3.3.2's validated referential integrity.
-        "ALTM-RETRIEVE-2": recall == 0.0,
+        "ALTM-RETRIEVE-2": recall == 0.0 and not document_mismatch,
         "ALTM-RETRIEVE-3": 0.0 < recall < 1.0,
         "ALTM-RETRIEVE-4": recall == 1.0 and precision < 1.0,
     }
@@ -86,7 +103,7 @@ def _matching_rules(recall: float, precision: float) -> list:
     ]
 
 
-def _confidence(recall: float) -> str:
+def _confidence(recall: float, expected_documents: list) -> str:
     """Evidence completeness, derived from what the observation itself excludes.
 
     Restated from `docs/altm.md` §7 (rule out upstream before attributing
@@ -101,7 +118,16 @@ def _confidence(recall: float) -> str:
     * Zero recall excludes nothing upstream, and ALTM-KNOWLEDGE-2 ("Stale answer
       despite a recent source update") remains equally consistent with the
       observation while being unverifiable from the permitted inputs.
+
+    Sprint P3.3.5 supersedes all three whenever document identity is present: a
+    non-empty `expected_document_ids` shows the expected document is in the
+    corpus and indexed, which is what the Knowledge check tests, and Sprint
+    P3.3.2's validated referential integrity shows its chunks exist, which is
+    what the Index check tests. Both upstream stages are then excluded on
+    evidence regardless of recall, leaving the Retrieve attribution complete.
     """
+    if expected_documents:
+        return COMPLETE
     if recall == 0.0:
         return INSUFFICIENT
     if recall < 1.0:
@@ -137,7 +163,10 @@ def rederive(records: list, metrics: dict) -> dict:
         recall = _ratio(len(matched), len(expected))
         precision = _ratio(len(matched), len(observed))
 
-        matching = _matching_rules(recall, precision)
+        expected_documents = record.get("expected_document_ids", [])
+        observed_documents = record.get("observed_document_ids", [])
+
+        matching = _matching_rules(recall, precision, expected_documents, observed_documents)
         if not matching:
             continue
 
@@ -152,7 +181,7 @@ def rederive(records: list, metrics: dict) -> dict:
                 f"Rule {rule_id!r} does not resolve to exactly one reachable stage."
             )
 
-        derived[record["id"]] = (rule_id, reachable[0], _confidence(recall))
+        derived[record["id"]] = (rule_id, reachable[0], _confidence(recall, expected_documents))
 
     return derived
 
@@ -191,8 +220,59 @@ def compare(diagnoses: list, records: list, metrics: dict) -> list:
     rows.append(_check_metric_agreement(records, metrics))
     rows.append(_check_unreachable_stages_absent(diagnoses))
     rows.append(_check_one_diagnosis_per_question(diagnoses, records))
+    rows.append(_check_document_identity(records))
 
     return rows
+
+
+def _check_document_identity(records: list) -> dict:
+    """Verify Sprint P3.3.5's document identity is present, ordered, and coherent.
+
+    Three properties, each guarding a way the enrichment could be wrong rather
+    than absent:
+
+    * **Sorted** — the same ordering obligation every id list in an evaluation
+      record carries; an unsorted list would make the record's serialization
+      depend on set iteration.
+    * **Expected non-empty** — every evaluated question expects at least one
+      chunk (Sprint P3.3.2's enforced domain), so every question must resolve to
+      at least one expected document. An empty list would silently return the
+      whole diagnosis layer to its pre-P3.3.5 behaviour, since absent identity is
+      exactly what the fallback path keys on.
+    * **Overlap implies document overlap** — a question with matched chunks must
+      have intersecting document sets, because a matched chunk belongs to a
+      document on both sides. This is the check that would catch two independently
+      derived lists that do not describe the same retrieval.
+
+    Records predating the enrichment are skipped rather than failed: they are
+    diagnosable under the pre-P3.3.5 path, and a specification's synthetic record
+    is not a defect in the corpus.
+    """
+    problems = []
+
+    for record in records:
+        if "expected_document_ids" not in record or "observed_document_ids" not in record:
+            continue
+
+        expected = record["expected_document_ids"]
+        observed = record["observed_document_ids"]
+
+        if expected != sorted(expected) or observed != sorted(observed):
+            problems.append(f"{record['id']}: document ids are not in stable order")
+
+        if record["expected_chunk_ids"] and not expected:
+            problems.append(f"{record['id']}: expects chunks but resolves to no document")
+
+        if record["matched_chunk_ids"] and not set(expected) & set(observed):
+            problems.append(
+                f"{record['id']}: has matched chunks but disjoint document sets"
+            )
+
+    return {
+        "check": "document identity integrity",
+        "status": "FAIL" if problems else "PASS",
+        "detail": "; ".join(problems),
+    }
 
 
 def _compare_field(engine: dict, derived: dict, position: int, name: str) -> dict:

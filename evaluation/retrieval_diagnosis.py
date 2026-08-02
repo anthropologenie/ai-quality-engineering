@@ -67,7 +67,12 @@ class RetrievalDiagnosisError(Exception):
     """
 
 
-def select_rule(recall: float, precision: float) -> str:
+def select_rule(
+    recall: float,
+    precision: float,
+    expected_documents: list = None,
+    observed_documents: list = None,
+) -> str:
     """Select the one `docs/altm.md` §5 rule whose symptom the evidence exhibits.
 
     Three reachable symptoms, evaluated in §5's own top-to-bottom row order —
@@ -93,8 +98,49 @@ def select_rule(recall: float, precision: float) -> str:
 
     Returns `None` when neither recall nor precision is deficient: retrieval
     exhibited no symptom, and §5 has no row for the absence of one.
+
+    Document identity (Sprint P3.3.5)
+    ---------------------------------
+    When the record carries document identity, a zero-recall question splits in
+    two, because §5 documents both cases separately and the new fields finally
+    distinguish them:
+
+        observed ∩ expected = ∅   ALTM-RETRIEVE-1  "Right topic, wrong specific
+                                                    document retrieved"
+        otherwise                 ALTM-RETRIEVE-2  the expected document *was*
+                                                   reached; its chunks were not
+
+    ALTM-RETRIEVE-1 precedes ALTM-RETRIEVE-2 in §5, so the split obeys the same
+    document order every other selection here does. Without document identity
+    the behaviour is exactly what it was before this sprint — the split is
+    additional resolution, not a changed rule.
+
+    Why no Knowledge rule is selected here, even now
+    ------------------------------------------------
+    Both §5 Knowledge rows remain unfireable, and the new fields are what make
+    that demonstrable rather than merely unknown:
+
+    * **ALTM-KNOWLEDGE-1**, "Answer cites the wrong document version" — the new
+      fields establish *which* document was retrieved, never which version is
+      current. Deciding that a retrieved document is the *wrong version* of
+      another requires the Knowledge Manifest (only its filenames encode
+      `v2_2`/`v2_3`), which the dependency rule bars this engine from reading,
+      and a canonical-document designation, which Sprint P3.3.5 places out of
+      scope. "Which document" is now determinable; "wrong version" is not.
+    * **ALTM-KNOWLEDGE-2**, "Stale answer despite a recent source update" — its
+      documented detection is *"Verify re-indexing was triggered on the source
+      change."* `expected_document_ids` is non-empty and resolves through chunk
+      ids that Sprint P3.3.2 validated as present in the committed Chunk Corpus,
+      so the expected document demonstrably **is** indexed and retrievable. The
+      row's premise is contradicted by the evidence, not merely unverifiable.
+
+    The stage attribution therefore stays Retrieve. That is a finding produced by
+    the new evidence, not a limitation of it.
     """
     if recall == 0.0:
+        if expected_documents and observed_documents is not None:
+            if not set(expected_documents) & set(observed_documents):
+                return "ALTM-RETRIEVE-1"
         return "ALTM-RETRIEVE-2"
     if recall < 1.0:
         return "ALTM-RETRIEVE-3"
@@ -103,7 +149,9 @@ def select_rule(recall: float, precision: float) -> str:
     return None
 
 
-def assess_confidence(rule_id: str, recall: float) -> str:
+def assess_confidence(
+    rule_id: str, recall: float, expected_documents: list = None
+) -> str:
     """Assess how completely repository evidence supports the selected diagnosis.
 
     `docs/altm.md` §7 requires an upstream stage to be ruled out before a
@@ -136,7 +184,35 @@ def assess_confidence(rule_id: str, recall: float) -> str:
 
     This is evidence completeness, not likelihood. No value here expresses how
     probable a diagnosis is.
+
+    Document identity (Sprint P3.3.5)
+    ---------------------------------
+    The Partial and Insufficient assessments above both exist for one reason,
+    stated in their own text: the upstream stages could not be excluded because
+    the records carried no document identity. When they do carry it, both
+    exclusions become available for **every** question, whatever its recall:
+
+    * **Knowledge is excluded** — `expected_document_ids` is non-empty, and it
+      resolves through chunk ids Sprint P3.3.2 validated as present in the
+      committed Chunk Corpus. The expected document is therefore in the corpus
+      and indexed, which is precisely what `docs/altm.md` §4's Knowledge check
+      ("a document was edited but the pipeline still reads the old version")
+      tests for.
+    * **Index is excluded** — the expected chunks exist in the corpus by the
+      same validated referential integrity, so no chunk is missing or
+      unembedded.
+
+    With both upstream stages excluded on evidence, `docs/altm.md` §7's
+    requirement is satisfied and the Retrieve attribution has nothing above it
+    left unresolved: Complete Evidence.
+
+    This is the sprint's substantive result and it is uniform by consequence,
+    not by construction — the same rule applied to a corpus that did *not*
+    contain the expected document would exclude nothing and return here.
     """
+    if expected_documents:
+        return COMPLETE_EVIDENCE
+
     if rule_id == "ALTM-RETRIEVE-2":
         return INSUFFICIENT_EVIDENCE
     if recall < 1.0:
@@ -162,7 +238,13 @@ def diagnose_question(evaluation: dict, metric_row: dict) -> dict:
     recall = metric_row["chunk_recall_at_k"]
     precision = metric_row["chunk_precision_at_k"]
 
-    rule_id = select_rule(recall, precision)
+    # Sprint P3.3.5, read with `.get` so a record predating the enrichment still
+    # diagnoses — under exactly its pre-P3.3.5 behaviour, since absent identity
+    # is what every rule below already falls back to.
+    expected_documents = evaluation.get("expected_document_ids", [])
+    observed_documents = evaluation.get("observed_document_ids", [])
+
+    rule_id = select_rule(recall, precision, expected_documents, observed_documents)
     if rule_id is None:
         return None
 
@@ -176,7 +258,7 @@ def diagnose_question(evaluation: dict, metric_row: dict) -> dict:
         "documented_investigation": rule["investigation"],
         "responsible_component": rule["component"],
         "altm_stage": reachable_stage(rule_id),
-        "diagnosis_confidence": assess_confidence(rule_id, recall),
+        "diagnosis_confidence": assess_confidence(rule_id, recall, expected_documents),
         # Supporting evaluation evidence (Sprint P3.3.2).
         "classification": evaluation["classification"],
         "expected_count": evaluation["expected_count"],
@@ -190,6 +272,11 @@ def diagnose_question(evaluation: dict, metric_row: dict) -> dict:
         # available, and the two are deliberately not conflated.
         "chunk_recall_at_k": recall,
         "chunk_precision_at_k": precision,
+        # Supporting document evidence (Sprint P3.3.5). Carried so a reader can
+        # re-derive the rule split and the upstream exclusion from the diagnosis
+        # itself, without consulting the evaluation record it came from.
+        "expected_document_ids": list(expected_documents),
+        "observed_document_ids": list(observed_documents),
     }
 
 

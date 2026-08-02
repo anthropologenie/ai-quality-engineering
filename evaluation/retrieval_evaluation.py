@@ -109,7 +109,44 @@ def classify(expected: set, observed: set) -> str:
     return NO_MATCH
 
 
-def evaluate_entry(entry_id: str, expected_chunk_ids: list, observed_chunk_ids: list) -> dict:
+def resolve_documents(chunk_ids: list, chunk_documents: Mapping) -> list:
+    """Resolve chunk ids to the sorted set of documents backing them.
+
+    Sprint P3.3.5. The mapping is supplied by the caller — this module still
+    performs no filesystem I/O, so the enrichment does not cost
+    `retrieval_evaluation.py` the read-only property the module docstring
+    claims. `scripts/evaluate_retrieval.py` already builds this mapping for the
+    aggregate summary; it is passed in rather than rebuilt.
+
+    An unresolvable chunk id raises rather than being dropped. Silently omitting
+    it would understate the document set — the one field a Knowledge-stage
+    diagnosis depends on — and would do so invisibly. Chunk existence is already
+    validated by `check_referential_integrity`; this is the same invariant
+    enforced at the point the document identity is derived.
+
+    A `None` mapping means document identity was not supplied and yields an
+    empty list, which is how a caller that has no corpus mapping (a synthetic
+    record in a specification) gets a well-formed record rather than an error.
+    """
+    if chunk_documents is None:
+        return []
+
+    unresolved = sorted(set(chunk_ids) - set(chunk_documents))
+    if unresolved:
+        raise RetrievalEvaluationError(
+            f"Chunk ids {unresolved} have no document in the supplied chunk/document "
+            f"mapping; document identity cannot be derived."
+        )
+
+    return sorted({chunk_documents[chunk_id] for chunk_id in chunk_ids})
+
+
+def evaluate_entry(
+    entry_id: str,
+    expected_chunk_ids: list,
+    observed_chunk_ids: list,
+    chunk_documents: Mapping = None,
+) -> dict:
     """Evaluate one Evidence Trace entry against one RetrievalResult.
 
     Every chunk-id collection on the returned record is a sorted list, never a
@@ -127,6 +164,15 @@ def evaluate_entry(entry_id: str, expected_chunk_ids: list, observed_chunk_ids: 
     which the four categories stop being mutually exclusive (see `classify`),
     and the Evidence Trace Dataset never produces one. Observed retrieval may be
     empty — that is No Match, and a legitimate evaluation.
+
+    `expected_document_ids` and `observed_document_ids` (Sprint P3.3.5) are
+    additive: they are derived from the chunk id lists already present and
+    change no existing field's name, type, or derivation. They exist because
+    three committed reports — P3.3.3 on Document Recall, P3.3.4 on
+    Knowledge-stage diagnosis, and P3.3.1/P3.3.2 on document dominance —
+    independently recorded chunk-only identity as the missing signal. They are
+    empty when no mapping is supplied, never absent: a consumer can read them
+    unconditionally.
     """
     expected = set(expected_chunk_ids)
     observed = set(observed_chunk_ids)
@@ -153,10 +199,14 @@ def evaluate_entry(entry_id: str, expected_chunk_ids: list, observed_chunk_ids: 
         "expected_count": len(expected),
         "observed_count": len(observed),
         "matched_count": len(expected & observed),
+        # Sprint P3.3.5, additive. Sorted by document id, the same ordering
+        # convention every other id list in this record follows.
+        "expected_document_ids": resolve_documents(expected_chunk_ids, chunk_documents),
+        "observed_document_ids": resolve_documents(observed_chunk_ids, chunk_documents),
     }
 
 
-def evaluate(expectations: list, observations: Mapping) -> list:
+def evaluate(expectations: list, observations: Mapping, chunk_documents: Mapping = None) -> list:
     """Evaluate every Evidence Trace entry against exactly one RetrievalResult.
 
     `expectations` is `(entry_id, expected_chunk_ids)` in Evidence Trace order —
@@ -192,7 +242,7 @@ def evaluate(expectations: list, observations: Mapping) -> list:
         )
 
     return [
-        evaluate_entry(entry_id, expected_chunk_ids, observations[entry_id])
+        evaluate_entry(entry_id, expected_chunk_ids, observations[entry_id], chunk_documents)
         for entry_id, expected_chunk_ids in expectations
     ]
 
@@ -320,6 +370,11 @@ def check_stable_ordering(evaluations: list, expectations: list) -> None:
         "matched_chunk_ids",
         "missing_chunk_ids",
         "unexpected_chunk_ids",
+        # Sprint P3.3.5. Same ordering obligation as every other id list, so the
+        # new fields are covered by the same check rather than by a new one —
+        # which would change this suite's reported check names.
+        "expected_document_ids",
+        "observed_document_ids",
     )
     for evaluation in evaluations:
         for field in id_fields:

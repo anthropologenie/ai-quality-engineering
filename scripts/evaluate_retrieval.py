@@ -146,7 +146,7 @@ def main() -> None:
     expectations = load_expectations()
     observations = observe(chunks)
 
-    evaluations = evaluate(expectations, observations)
+    evaluations = evaluate(expectations, observations, chunk_documents)
     summary = summarize(evaluations, chunk_documents)
     validation = run_validation_suite(
         evaluations, expectations, observations, chunk_documents, summary

@@ -87,9 +87,15 @@ def observations(corpus):
 
 
 @pytest.fixture(scope="module")
-def evaluations(expectations, observations):
-    """The evaluation of the committed corpus."""
-    return evaluate(expectations, observations)
+def evaluations(expectations, observations, chunk_documents):
+    """The evaluation of the committed corpus.
+
+    Sprint P3.3.5: the chunk/document mapping is supplied, matching what
+    `scripts/evaluate_retrieval.py` produces. The fixture changed, no assertion
+    did — every specification below reads the same fields it read before, and
+    the enrichment is additive.
+    """
+    return evaluate(expectations, observations, chunk_documents)
 
 
 # ---------------------------------------------------------------------------
@@ -242,6 +248,105 @@ def test_evaluation_record_partitions_the_two_sets():
     assert evaluation["expected_count"] == 2
     assert evaluation["observed_count"] == 2
     assert evaluation["matched_count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Document identity (Sprint P3.3.5)
+# ---------------------------------------------------------------------------
+
+
+def test_document_identity_is_derived_from_the_supplied_mapping():
+    """Both new fields resolve chunk ids through the caller's mapping.
+
+    The mapping is supplied rather than read: `evaluation/retrieval_evaluation.py`
+    performs no filesystem I/O, and the enrichment does not cost it that property.
+    """
+    mapping = {"a": "doc_1", "b": "doc_1", "c": "doc_2"}
+    evaluation = evaluate_entry("meta_a", ["a"], ["a", "c"], mapping)
+
+    assert evaluation["expected_document_ids"] == ["doc_1"]
+    assert evaluation["observed_document_ids"] == ["doc_1", "doc_2"]
+
+
+def test_document_identity_is_de_duplicated_and_sorted():
+    """Documents, not document references — sorted by id, each appearing once.
+
+    Three chunks from two documents yield two document ids, in sorted order,
+    matching the ordering convention every other id list in the record follows.
+    """
+    mapping = {"a": "doc_2", "b": "doc_1", "c": "doc_2"}
+    evaluation = evaluate_entry("meta_a", ["a", "b", "c"], ["c"], mapping)
+
+    assert evaluation["expected_document_ids"] == ["doc_1", "doc_2"]
+    assert evaluation["observed_document_ids"] == ["doc_2"]
+
+
+def test_document_identity_is_empty_when_no_mapping_is_supplied():
+    """The fields are always present, never absent, so a consumer reads them
+    unconditionally — and an absent mapping yields the pre-P3.3.5 behaviour."""
+    evaluation = evaluate_entry("meta_a", ["a"], ["b"])
+
+    assert evaluation["expected_document_ids"] == []
+    assert evaluation["observed_document_ids"] == []
+
+
+def test_empty_observed_retrieval_resolves_to_no_documents():
+    """Zero retrieved chunks is zero retrieved documents — not an error."""
+    evaluation = evaluate_entry("meta_a", ["a"], [], {"a": "doc_1"})
+
+    assert evaluation["expected_document_ids"] == ["doc_1"]
+    assert evaluation["observed_document_ids"] == []
+
+
+def test_unresolvable_chunk_id_is_refused():
+    """A chunk absent from the mapping raises rather than being dropped.
+
+    Silently omitting it would understate the document set — the field a
+    Knowledge-stage diagnosis depends on — and would do so invisibly.
+    """
+    with pytest.raises(RetrievalEvaluationError, match="no document in the supplied"):
+        evaluate_entry("meta_a", ["a"], ["ghost"], {"a": "doc_1"})
+
+
+def test_enrichment_leaves_every_pre_existing_field_unchanged():
+    """Additive only: the enriched record differs from the unenriched one by
+    exactly the two new keys, and by nothing else."""
+    mapping = {"a": "doc_1", "b": "doc_2"}
+    plain = evaluate_entry("meta_a", ["a"], ["a", "b"])
+    enriched = evaluate_entry("meta_a", ["a"], ["a", "b"], mapping)
+
+    assert set(enriched) - set(plain) == set()
+    for field in plain:
+        if field not in ("expected_document_ids", "observed_document_ids"):
+            assert enriched[field] == plain[field], field
+
+
+def test_evaluate_threads_the_mapping_through_every_entry():
+    """The collection-level entry point carries document identity too."""
+    mapping = {"c1": "doc_1", "c2": "doc_2"}
+    evaluations = evaluate([("meta_a", ["c1"])], {"meta_a": ["c2"]}, mapping)
+
+    assert evaluations[0]["expected_document_ids"] == ["doc_1"]
+    assert evaluations[0]["observed_document_ids"] == ["doc_2"]
+
+
+def test_committed_corpus_document_identity_is_coherent(evaluations, chunk_documents):
+    """On the committed corpus every question resolves to real catalogued documents.
+
+    A matched chunk belongs to a document on both sides, so any question with
+    overlap must have intersecting document sets.
+    """
+    catalogued = set(chunk_documents.values())
+
+    for evaluation in evaluations:
+        assert set(evaluation["expected_document_ids"]) <= catalogued
+        assert set(evaluation["observed_document_ids"]) <= catalogued
+        assert evaluation["expected_document_ids"], evaluation["id"]
+
+        if evaluation["matched_chunk_ids"]:
+            assert set(evaluation["expected_document_ids"]) & set(
+                evaluation["observed_document_ids"]
+            )
 
 
 # ---------------------------------------------------------------------------

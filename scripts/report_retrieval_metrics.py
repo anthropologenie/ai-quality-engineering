@@ -25,7 +25,12 @@ obtaining its input. It hands the engine records and nothing else.
 from evaluation.retrieval_metrics import compute
 from evaluation.retrieval_metrics_validator import compare
 from evaluation.retrieval_evaluation import evaluate
-from scripts.evaluate_retrieval import authority_digests, load_expectations, observe
+from scripts.evaluate_retrieval import (
+    authority_digests,
+    index_chunk_documents,
+    load_expectations,
+    observe,
+)
 from scripts.run_retrieval import load_corpus
 
 # Report field order. Fixed here rather than derived from the report's keys so
@@ -69,7 +74,7 @@ def evaluation_records() -> list:
     layer about what was evaluated.
     """
     chunks = load_corpus()
-    return evaluate(load_expectations(), observe(chunks))
+    return evaluate(load_expectations(), observe(chunks), index_chunk_documents(chunks))
 
 
 def report(metrics: dict, validation: list) -> None:
