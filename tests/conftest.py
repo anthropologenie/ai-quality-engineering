@@ -59,6 +59,24 @@ differ, and the canonical record is
 
 The suite excludes only F-1. No intentionally failing specification exists for
 it, and it is not redefined as approved behaviour here.
+
+Sprint P3.4.1 — committed dataset authorities
+----------------------------------------------
+Dataset Authority Validation (`tests/test_golden_dataset.py`,
+`tests/test_qa_pairs.py`, `tests/test_evidence_trace_dataset.py`,
+`tests/test_cross_dataset_integrity.py`) needs the same committed artifact in
+several files at once, so its readers are defined here **once** rather than
+once per file: `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §5 rates duplicated
+validation logic a **High** drift risk, and four independently written loaders
+of the same authority could disagree about what the repository contains.
+
+Every one of those fixtures reads a *committed* artifact through the
+repository's own existing reader — `scripts/build_evidence_trace.py`'s
+`load_json` / `load_evidence_trace`, and `scripts/build_chunks.py`'s
+`validate_chunks(load_chunks())` chained gate. None regenerates a dataset, runs
+a builder, or writes anything, per the Sprint P3.4.1 Repository Dependency
+Rule. The `real_` prefix follows `real_manifest_entries` and `real_documents`
+above and means the same thing: repository state exactly as stored.
 """
 
 import json
@@ -66,6 +84,14 @@ import zipfile
 from pathlib import Path
 
 import pytest
+
+from scripts.build_chunks import load_chunks, validate_chunks
+from scripts.build_evidence_trace import (
+    FACTS_PATH,
+    QA_PAIRS_PATH,
+    load_evidence_trace,
+    load_json,
+)
 
 from sample_rag import knowledge_source
 from sample_rag.knowledge_source import KnowledgeSource
@@ -197,3 +223,104 @@ def real_manifest_entries():
 def real_documents():
     """`KnowledgeSource().load()` over the committed repository corpus."""
     return KnowledgeSource().load()
+
+
+# --- Sprint P3.4.1: the committed dataset authorities -----------------------
+
+
+@pytest.fixture
+def real_documents_by_id(real_documents):
+    """The committed corpus keyed by `Document.id`, the repository's document identity.
+
+    `docs/DOCUMENT_CONTRACT.md` §8.4 makes `id` the join key that
+    `knowledge_manifest.json` `documents[].id`, `chunk.document_id` and the
+    Golden Dataset's `document_id` already share, so every dataset specification
+    that needs a document's text addresses it the same way.
+    """
+    return {document.id: document for document in real_documents}
+
+
+@pytest.fixture
+def real_facts_collection():
+    """The committed Golden Dataset container, read but not validated.
+
+    Read with `scripts/build_evidence_trace.py`'s `load_json` — the reader the
+    Evidence Trace builder itself uses for this artifact — so specifications
+    observe the dataset through the repository's own code path. `load_json`
+    performs no structural validation and no repair; the container's shape is
+    what `tests/test_golden_dataset.py` specifies, not something a fixture may
+    presuppose.
+    """
+    return load_json(FACTS_PATH)
+
+
+@pytest.fixture
+def real_facts(real_facts_collection):
+    """The committed Golden Dataset's `facts[]`, in stored order."""
+    return real_facts_collection["facts"]
+
+
+@pytest.fixture
+def real_facts_by_id(real_facts):
+    """The committed facts keyed by `id`.
+
+    Keyed exactly as `scripts/build_evidence_trace.py` `main()` keys them, so
+    cross-dataset resolution here uses the same index the builder resolves
+    through. Uniqueness of those keys is not assumed by this fixture — it is
+    specified independently by `tests/test_golden_dataset.py`.
+    """
+    return {fact["id"]: fact for fact in real_facts}
+
+
+@pytest.fixture
+def real_qa_pairs_collection():
+    """The committed QA Dataset container, read but not validated."""
+    return load_json(QA_PAIRS_PATH)
+
+
+@pytest.fixture
+def real_qa_pairs(real_qa_pairs_collection):
+    """The committed QA Dataset's `qa_pairs[]`, in stored order.
+
+    Stored order is load-bearing: `scripts/build_evidence_trace.py` `main()`
+    preserves it and never re-sorts, so it is the order the Evidence Trace
+    Dataset inherits.
+    """
+    return real_qa_pairs_collection["qa_pairs"]
+
+
+@pytest.fixture
+def real_evidence_trace_collection():
+    """The committed Evidence Trace Dataset container, read but not validated.
+
+    Deliberately *not* passed through `validate_evidence_trace` here. That gate
+    is the subject of `tests/test_evidence_trace_dataset.py`'s specifications; a
+    fixture that ran it would make those specifications assert a property their
+    own fixture had already guaranteed.
+    """
+    return load_evidence_trace()
+
+
+@pytest.fixture
+def real_evidence_trace(real_evidence_trace_collection):
+    """The committed Evidence Trace Dataset's `evidence_trace[]`, in stored order."""
+    return real_evidence_trace_collection["evidence_trace"]
+
+
+@pytest.fixture
+def real_chunks():
+    """The committed Chunk Corpus, loaded through its own validation gate.
+
+    `validate_chunks(load_chunks())` is the chained call
+    `docs/CHUNK_VALIDATION_PLAN.md` §P7.1 prescribes and `scripts/run_retrieval.py`
+    already uses. The Chunk Corpus is **out of scope** for Sprint P3.4.1 and no
+    specification in the dataset suites validates it; it is read here only as
+    the universe against which Evidence Trace chunk references must resolve.
+    """
+    return validate_chunks(load_chunks())["chunks"]
+
+
+@pytest.fixture
+def real_chunks_by_id(real_chunks):
+    """The committed Chunk Corpus keyed by chunk `id`."""
+    return {chunk["id"]: chunk for chunk in real_chunks}
