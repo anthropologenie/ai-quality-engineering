@@ -5,11 +5,13 @@ Sprint P3.3.2: the repository's first comparison of *observed* retrieval
 (the Evidence Trace Dataset, Sprint P3.2.4). It answers one question per
 evidence entry — which expected chunks were retrieved — and nothing beyond it.
 
-Evaluation only. No metric is computed here: Context Precision, Context Recall,
-Chunk Recall, Document Recall, Exact Match Rate, Top-k Success and every
-ranking statistic belong to Sprint P3.3.3, and interpretation of any of them to
-Sprint P3.3.4. The summaries below are descriptive counts of what was observed,
-which is what a metrics layer consumes — not a substitute for one.
+Evaluation only. No metric is computed here: Chunk Precision@K, Chunk Recall@K,
+Exact Match Rate, Hit Rate and every ranking statistic belong to Sprint P3.3.3,
+and interpretation of any of them to Sprint P3.3.4. Context Precision and
+Context Recall are Ragas metrics reserved for Milestone 2
+(docs/AI_Quality_Metrics_Reference.md §Layer 3) and belong to neither. The
+summaries below are descriptive counts of what was observed, which is what a
+metrics layer consumes — not a substitute for one.
 
 Read-only, and structurally so, following the precedent `sample_rag/retriever.py`
 set: this module performs no filesystem and no network I/O at all, so no
@@ -215,7 +217,7 @@ def summarize(evaluations: list, chunk_documents: Mapping) -> dict:
 
     Descriptive counts only (Sprint P3.3.2 Work Package 4). The classification
     totals below are frequencies, not rates: no total is divided by the question
-    count, because Exact Match Rate, Chunk Recall and Document Recall are named
+    count, because Exact Match Rate, Chunk Recall@K and Hit Rate are named
     Sprint P3.3.3 deliverables and computing them here would move that sprint's
     output into this one under a different name.
 
