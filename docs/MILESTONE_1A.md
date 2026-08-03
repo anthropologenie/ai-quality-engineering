@@ -3,7 +3,9 @@
 **Project:** AI Quality Evaluation Suite (`ai-quality-engineering`)
 **Roadmap reference:** `AI_QA_Learning_Roadmap_Scope.md` §1.6, §1.6.1
 **Architecture reference:** `Session2_RAG_Architecture_Closure.md`, `AI_Systems_Diagnostic_Framework_v1.md`
-**Status:** Locked. Implementation may begin. No further architectural debate expected without a deliberate scope decision.
+**Status:** Locked. Implementation executed and validated; governance synchronized to the verified repository state at Sprint P3.7.2. No further architectural debate expected without a deliberate scope decision.
+
+> **Milestone Synchronization Record (Sprint P3.7.2)** — build-item status, sprint references, acceptance-criteria status, Definition of Done status and milestone readiness are recorded at the end of this document. **No scope statement, contract, schema, acceptance criterion or Definition of Done item in this document was reworded, added or removed by that sprint.** The only in-place changes are checkbox marks against criteria verified complete.
 
 ---
 
@@ -193,16 +195,16 @@ All of the above are Milestone 2+ concerns, already deferred in `Session2_RAG_Ar
 
 - [ ] Chunking correctly applies structure-aware splitting on the resume and at least one job description, with recursive-character fallback demonstrably unused in the default path
 - [ ] SQL-filter retrieval returns correct results against real JobOps data, including at least one exclusion-criteria case (e.g. Selenium-only)
-- [ ] CLI runs the full stub pipeline end-to-end locally with no external network or model calls
-- [ ] Full pytest suite passes
+- [x] CLI runs the full stub pipeline end-to-end locally with no external network or model calls
+- [x] Full pytest suite passes
 
 ### Architectural
 
 - [ ] `EmbeddingProvider` interface and retriever interface are defined and swappable — a stub implementation can be replaced without changing calling code
-- [ ] `RetrievalResult` is a defined dataclass (not a bare list) returned by every retrieval path, with deterministic, meaningful placeholder values in every field
-- [ ] `knowledge_manifest.json` exists and is the sole source of truth that freshness/hash validation checks against
-- [ ] Runtime Pipeline and Evaluation Assets exist as clearly separated modules/directories, not interleaved
-- [ ] Zero imports of any embedding, vector-store, or LLM-evaluation library anywhere in the codebase
+- [x] `RetrievalResult` is a defined dataclass (not a bare list) returned by every retrieval path, with deterministic, meaningful placeholder values in every field
+- [x] `knowledge_manifest.json` exists and is the sole source of truth that freshness/hash validation checks against
+- [x] Runtime Pipeline and Evaluation Assets exist as clearly separated modules/directories, not interleaved
+- [x] Zero imports of any embedding, vector-store, or LLM-evaluation library anywhere in the codebase
 
 ---
 
@@ -247,4 +249,69 @@ Any newly discovered optimization, library, feature request, orchestration capab
 
 ---
 
-*This document is locked. Revise only when Milestone 1A implementation surfaces a contract gap not anticipated here, or when Milestone 2 formally begins and this document is superseded.*
+## Milestone Synchronization Record — Sprint P3.7.2
+
+Added by **Sprint P3.7.2 — Repository Governance Synchronization**, against the repository at commit `d9a6db4` with a clean working tree. Every row below traces to a committed repository authority. **This record synchronizes governance to the implementation; it defines no scope, adds no completion requirement, and changes no statement above it.**
+
+Full derivation, cross-reference audit and Deferred Repository Items Register: `docs/P3.7.2_Repository_Governance_Synchronization_Report.md`.
+
+### Build Item Matrix
+
+| # | Build item | Implementing sprint(s) | Committed artifact | Executable evidence | Status |
+|---|---|---|---|---|---|
+| **1** | Knowledge Manifest | P1.2.0 (contract), P1.2.1–P1.2.2 (`92a35e9`, `19f8f48`), P1.3 (`25b6770`) | `sample_rag/knowledge_manifest.json`, `scripts/build_manifest.py` | W1 structural gate (3), W3 / DQ-1 freshness (2) | **Complete.** Digest `a1fa0857b723`. `documents[].indexed` is `false` for both entries — semantics open, see Deferred Register |
+| **2** | Data Quality Validation | P3.1.8.1A–E (`78b5daf` … `3a32253`), P3.1.8.4 (`ea629b2`) | `tests/test_data_quality.py` | 14 specifications, DQ-1 … DQ-4; 23-mutant baseline | **Partially complete.** DQ-5, DQ-6, DQ-7 recorded **blocked** by `docs/DATA_QUALITY_VALIDATION_PLAN.md` §8.1, §11.2 W6, §16 O-6. Index Coverage Validation — this item's own clause — **is** DQ-7 |
+| **3** | Indexing | Chunking: `e556a98`, `11299b7`. Placeholder vectors: **no sprint** | `sample_rag/chunker.py`, `sample_rag/chunks.json` (172 chunks) | `tests/test_chunker.py` — 17 | **Partially complete.** Structure-aware chunking with recursive-character fallback shipped; digest `323723b4fe82`. **No `Indexer`, no `EmbeddingProvider`, no placeholder vectors exist in the repository** |
+| **4** | Retrieval | P3.3.1 — runtime committed under `dfe1b5b` (see Register §5) | `sample_rag/retriever.py`, `scripts/run_retrieval.py` | `RetrievalResult` exercised by 117 evaluation, 48 generation and 27 CLI specifications | **Complete for the corpus as committed.** Route `LEXICAL`. The SQL-filter stage is **not exercised** — the corpus carries no JobOps structured data; `diagnostics["sql_filter_applied"]` is `False` and unapplied filters are reported in `diagnostics["filters_ignored"]` rather than dropped |
+| **5** | Generation | P3.5.1 (`dfbc86b`), P3.5.2 (`17d077b`) | `docs/GENERATION_CONTRACT.md` v1.0.0 **frozen**, `sample_rag/generator.py` | `tests/test_generator.py` — 48, mapping G-1 … G-14; 25 mutants, 25 killed | **Complete** |
+| **6** | CLI | P3.6.0 (`b50e45f`) | `scripts/cli.py` | `tests/test_cli.py` — 27, six of them AST-structural; 25 mutants, 25 killed | **Complete.** As built the chain is Knowledge → Chunk Corpus → Retriever → Generator → CLI. There is **no Assembler**: `docs/GENERATION_CONTRACT.md` §21 excludes the Assemble stage from Milestone 1A and §22 / G-2 approves `Generator.generate(query, retrieval)`. A contract-approved deviation from build item 6's diagram, not a silent one |
+| **7** | Golden Dataset | `39ed0e4`, `64a3e16` | `datasets/golden/resume_facts.json` (26 facts), `resume_qa_pairs.json` (22 pairs) | P3.4.1 — 16 + 14 | **Complete.** Digests `d5035f4013fc`, `c8c8f120f423` |
+| **8** | Evidence Trace Dataset | `1a260af` | `datasets/golden/resume_evidence_trace.json` (22 entries) | P3.4.1 — 25, plus 16 cross-dataset integrity | **Complete.** Digest `f45c2c2f5f41` |
+| **9** | Pytest Validation | P3.4.1 (`4705db4`) | `tests/` — 14 files | **372** specifications at `d9a6db4` | **Complete.** `docs/P3.4.1_Dataset_Authority_Validation_Report.md` records this sprint as completing build item 9 |
+| **10** | Manual Review | P3.7.0 (`8e73173`), P3.7.1 (`d9a6db4`) | `docs/P3.7.0_Manual_Review_Evidence.md`, `docs/P3.7.1_Manual_Review_Report.md` | 16 manual verifications; 24 verification items, **24 PASS / 0 FAIL** | **Complete** |
+
+**Seven of ten build items complete. Three partially complete** — items 2, 3 and 4, each with the gap and its owning authority named above. No build item is unstarted.
+
+### Acceptance Criteria status
+
+Checkbox marks above are set only where a committed authority establishes completion. Criteria left unchecked are recorded here with the evidence establishing that they are unmet — none was reworded, and none was removed.
+
+| Criterion | Status | Evidence |
+|---|---|---|
+| **F-1** Structure-aware chunking on the resume **and at least one job description**, fallback demonstrably unused in the default path | **Partially met — unchecked** | Resume half met: 172 chunks, `tests/test_chunker.py`. Job-description half **not met** — the corpus catalogues two resume documents and no job description (`sample_rag/knowledge_manifest.json`) |
+| **F-2** SQL-filter retrieval against real JobOps data, including an exclusion-criteria case | **Not met — unchecked** | The SQL-filter stage is not exercised; the corpus contains no JobOps structured data (`sample_rag/retriever.py` module docstring) |
+| **F-3** CLI runs the full stub pipeline end-to-end locally with no external network or model call | **Met — checked** | `docs/P3.7.1_…` §3 V-23, V-24; `docs/P3.6.0_…` §3 |
+| **F-4** Full pytest suite passes | **Met — checked** | 372 passed, `docs/P3.7.0_…` lines 1–5; V-04, V-05 |
+| **A-1** `EmbeddingProvider` **and** retriever interfaces defined and swappable | **Partially met — unchecked** | Retriever half met — `RetrievalResult` returned on every path, stub swappable behind the frozen signature. `EmbeddingProvider` **is not defined anywhere in the repository** |
+| **A-2** `RetrievalResult` is a dataclass with deterministic, meaningful placeholder values in every field | **Met — checked** | `sample_rag/retriever.py`; every field populated on both the match and no-match paths, none ever `None` |
+| **A-3** `knowledge_manifest.json` is the sole source of truth for freshness/hash validation | **Met — checked** | W3 / DQ-1, `tests/test_data_quality.py` |
+| **A-4** Runtime Pipeline and Evaluation Assets separated, not interleaved | **Met — checked** | `docs/architecture.md` §6; enforced structurally by the CLI and validator import specifications |
+| **A-5** Zero imports of any embedding, vector-store or LLM-evaluation library | **Met — checked** | AST allowlist specifications in `tests/test_cli.py`, `tests/test_retrieval_metrics.py`, `tests/test_retrieval_diagnosis.py`, `tests/test_generator.py` |
+
+### Definition of Done status
+
+| Item | Status | Evidence |
+|---|---|---|
+| All build items 1–6 and 7–10 complete | **Not met** | Items 2, 3 and 4 partially complete (matrix above) |
+| All Functional and Architectural acceptance criteria checked | **Not met** | F-1, F-2 and A-1 unchecked (table above) |
+| Interfaces committed with docstrings explaining the Milestone 2 swap-in plan for each seam | **Met for every interface that exists** | `sample_rag/retriever.py`, `sample_rag/generator.py`, `sample_rag/knowledge_source.py`, `sample_rag/chunker.py`. Not assessable for `EmbeddingProvider` / `VectorStore`, which do not exist |
+| All public contracts unchanged throughout implementation unless a documented contract gap is approved | **Met** | One approved gap pair — `docs/GENERATION_CONTRACT.md` §22, G-1 and G-2, Repository Owner, Sprint P3.5.1-G. One approved erratum — `docs/DOCUMENT_CONTRACT.md` §8.9, E-1. Both recorded in `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §2 and §3.6 |
+| `docs/architecture.md` committed as the canonical reference | **Met** | Committed; its §5 `Generator` row amendment remains a Repository Owner action per `docs/GENERATION_CONTRACT.md` §22 |
+| Manual review pass on the Golden Dataset completed and logged | **Met** | `docs/P3.7.0_Manual_Review_Evidence.md`, assessed by `docs/P3.7.1_Manual_Review_Report.md` |
+| Non-Goals list reviewed and confirmed untouched | **Met** | Audited at Sprint P3.7.2 against the repository: **no embedding library, vector store, LLM SDK, BM25, RRF or evaluation-tool module is imported anywhere** — the criterion A-5 states. No Out of Scope item has crept in. Recorded alongside it: `requirements.txt` *declares* `deepeval`, `promptfoo`, `ragas`, `pandas` and `python-dotenv`, and `evaluation/deepeval/`, `evaluation/promptfoo/` and `evaluation/ragas/` are empty scaffold directories. A declaration is not an import, so A-5 holds as written; the declarations are carried as a deferred item |
+
+### North Star Question
+
+> Can we deterministically trace every answer back to verified knowledge, without relying on any probabilistic AI component?
+
+**Answered yes, by demonstration.** Three separate processes given identical input produced indistinguishable output; all 45 statements emitted across the manual review carry a chunk id, a document id and document-frame offsets; no model call, network call or external dependency occurred in the session. `docs/P3.7.1_…` §4 Finding 3, §6.4 — the demonstrated form this document's Success Criteria require.
+
+**The North Star Question and the Definition of Done are answered separately, and only the first is answered yes.** Determinism and traceability are demonstrated; three Definition of Done items are not met. Both statements are true at `d9a6db4`, and neither substitutes for the other.
+
+### Milestone readiness
+
+Governance documentation is synchronized to the verified repository state. Milestone status is **unchanged by Sprint P3.7.2** — that sprint closed no milestone, froze no baseline, and resolved no deferred item. Closure sequencing (Canonical Document Marking → Milestone 1A Closure & Frozen Baseline) is a Repository Owner decision, informed by the Deferred Repository Items Register in `docs/P3.7.2_Repository_Governance_Synchronization_Report.md` §5.
+
+---
+
+*This document is locked. Revise only when Milestone 1A implementation surfaces a contract gap not anticipated here, or when Milestone 2 formally begins and this document is superseded. The Milestone Synchronization Record above is appended governance state, not a revision of the locked scope.*

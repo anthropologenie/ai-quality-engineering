@@ -3,6 +3,7 @@
 **Repository:** `ai-quality-engineering`
 **Status:** Active — established at Sprint P3.1.7.2 (Assurance Remediation)
 **Scope at establishment:** Knowledge Layer (Milestone 1A). Later layers are added as their decisions are dispositioned.
+**Last synchronized:** Sprint P3.7.2 (Repository Governance Synchronization) — Retrieval, Evaluation, Dataset, Generation and CLI layers added, per `docs/P3.7.2_Repository_Governance_Synchronization_Report.md`
 
 ---
 
@@ -41,6 +42,15 @@ Explicitly verified at establishment, and a standing constraint on every future 
 |---|---|---|---|---|
 | [`ADR-0001`](adr/ADR-0001-chunk-persistent-representation.md) | Does Chunk need a separate persistent-representation contract? | No — resolve the container shape inside Serialization Planning | P2.3.0 | Accepted |
 | [`ADR-P3.1.7.2-F2`](adr/ADR-P3.1.7.2-F2-corpus-root-containment.md) | Where is corpus-root containment enforced — Construction or Data Quality Validation? | **Option A — Construction** | P3.1.7.2 | **Accepted** (repository owner) |
+
+**Dispositions recorded outside the ADR series.** Two Generation gaps were dispositioned by the Repository Owner in the contract itself rather than by a separate ADR file, and are recorded here so the register remains the single index of accepted decisions. Neither creates an ADR; both cite the frozen authority that carries them.
+
+| Reference | Question | Decision | Sprint | Status |
+|---|---|---|---|---|
+| `docs/GENERATION_CONTRACT.md` §22, **G-1** | The Generation artifact name | `GenerationResult` approved as the Generation artifact | P3.5.1-G | **Approved** (Repository Owner) |
+| `docs/GENERATION_CONTRACT.md` §22, **G-2** | The Milestone 1A runtime interface | `Generator.generate(query, retrieval: RetrievalResult)` approved, in place of `generate(prompt)` | P3.5.1-G | **Approved** (Repository Owner) |
+
+**Consequence recorded, not actioned.** §22 assigns the corresponding `docs/architecture.md` §5 `Generator` row amendment to the Repository Owner, in the manner `docs/MILESTONE_1A.md` build item 4 amended the `Retriever` row. It is unperformed at Sprint P3.7.2 and is carried in `docs/P3.7.2_Repository_Governance_Synchronization_Report.md` §5 as a deferred item, not as a finding.
 
 **Standing governance rule**, established at Sprint P3.1.7.1 and carried forward: architectural disposition is not the implementing agent's decision. An implementing agent presents options and a recommendation; a recommendation is not a decision.
 
@@ -156,6 +166,8 @@ Recorded because they have a disposition, not because they are scheduled.
 | `docs/P3.1.7_Independent_Implementation_Review_Codex.md` | APPROVED WITH OBSERVATIONS | Accepted except its unqualified specification-adequacy claim (§3.4, NEW-1). `P3.1.7-IMPL-01` superseded by `ADR-P3.1.7.2-F2` |
 | `docs/P3.1.7_Independent_Implementation_Review_ClaudeCode.md` | CHANGES REQUESTED | Accepted, with its mutation-survivor count corrected (§3.4, NEW-2). All three required items closed at P3.1.7.2 |
 | `docs/P3.1.7.1_Decision_Gate_Report_Evidence_Verification.md` | Decision Gate | Authority for every change made at Sprint P3.1.7.2 |
+| `docs/P3.7.0_Manual_Review_Evidence.md` (P3.7.0) | Evidence record — not a verdict | The committed verbatim terminal transcript of the Repository Owner's manual review of commit `b50e45f`. Completes `docs/MILESTONE_1A.md` build item 10. Assessed, not re-run, by P3.7.1 |
+| `docs/P3.7.1_Manual_Review_Report.md` (P3.7.1) | **Milestone 1A READY FOR Repository Governance Synchronization** | Accepted. 24 of 24 verification items PASS, 0 FAIL. Findings 1 and 2 dispositioned as confirmations of previously-diagnosed, contract-conforming accepted limitations, each linked to the authority that already records it. **No backlog item created** (§7 of that report) |
 
 **Recorded divergence.** The two P3.1.7 reviews reached opposite verdicts. Sprint P3.1.7.1 traced the divergence to a single methodological difference — **one review measured specification adequacy; the other asserted it**. Retained as a standing lesson: an adequacy claim about a specification suite requires measurement.
 
@@ -169,6 +181,10 @@ Recorded because they have a disposition, not because they are scheduled.
 | No Sprint P3.1.5 commit exists; its evidence report was first committed under `5b903db`, the Sprint P3.1.6 commit, while the report's own §12 states "Repository Impact: None" | `git log --diff-filter=A` | Recorded (G-2). Documented in the report's Restoration Record |
 | Construction depends on the Manifest artifact at runtime — an accepted consequence of identity strategy S1 | Construction Plan §9.1 | Accepted |
 | The terminal-capture path that damaged the P3.1.5 report is still active: `docs/P3.1.7.1_Decision_Gate_Report_Evidence_Verification.md` carries 2 truncated box-drawing characters in decorative borders | Verified at Sprint P3.1.7.2 | Inert — no finding, evidence, or disposition affected. Relevant when capturing future reports |
+| **No Sprint P3.3.1 commit and no Sprint P3.3.1 report exist.** The Retrieval Runtime it produced — `sample_rag/retriever.py` and `scripts/run_retrieval.py` — was first committed under `dfe1b5b`, the Sprint P3.3.2 commit. `docs/P3.3.2_Retrieval_Evaluation_Report.md` §1 records the two files as untracked at that sprint's start, *"left uncommitted because P3.3.1 also barred Git operations"* | `git log --diff-filter=A -- sample_rag/retriever.py`; P3.3.2 §1 | Recorded at Sprint P3.7.2. **Same defect class as G-2** (P3.1.5 evidence committed under the P3.1.6 commit). The runtime's own module docstring names Sprint P3.3.1, and P3.3.2 §§1, 5.4 cite its observations, so provenance is recoverable from committed artifacts — but from no single report |
+| `docs/P3.3.5_Evaluation_Record_Enrichment_Report.md`'s file-impact table states 9 specifications added to `tests/test_retrieval_evaluation.py` and 8 to `tests/test_retrieval_diagnosis.py`. The measured deltas across `439e2a7`…`1b568f3` are **+8** and **+9** respectively | `diff` of `def test_` names between the two commits; totals at HEAD are 35 and 47 | Recorded at Sprint P3.7.2, **historical report unchanged**. The two counts are transposed; their sum (17) and every verdict in that report are unaffected |
+| `documents[].indexed` is `false` for both catalogued documents, while `sample_rag/chunks.json` carries 172 chunks derived from them and `docs/P3.3.5_…` §4 reasons that the expected document *"demonstrably **is** indexed"* | `sample_rag/knowledge_manifest.json`; `docs/MILESTONE_1A.md` build item 1 schema; `docs/P3.3.5_…` §4, §5 | Recorded at Sprint P3.7.2. The field's semantics under a chunk-only Index stage are unresolved; regeneration of the Manifest is barred by that sprint's scope. Carried as a deferred item in `docs/P3.7.2_Repository_Governance_Synchronization_Report.md` §5 |
+| The **Index Layer** named by `docs/MILESTONE_1A.md` build item 3 — deterministic placeholder vectors behind an `EmbeddingProvider` interface — does not exist. No `Indexer`, `EmbeddingProvider` or `VectorStore` is defined anywhere in the repository; the only occurrence of the name is a docstring in `tests/test_data_quality.py` recording the blocker | `grep -rn "EmbeddingProvider" --include=*.py`; `docs/DATA_QUALITY_VALIDATION_PLAN.md` §8.1 (DQ-7), §11.2 W6, §16 O-6 | **Previously recorded**, by the DQV plan, as the blocker for DQ-7 and for build item 2's Index Coverage Validation clause. Re-verified unchanged at Sprint P3.7.2 and carried in that sprint's Deferred Repository Items Register |
 
 ---
 
@@ -233,13 +249,31 @@ Each mutant was run twice — against the **DQV suite alone** (`tests/test_data_
 
 **Line coverage:** `sample_rag/document.py` 100%, `sample_rag/knowledge_source.py` 100%.
 
+### 6.1 Later mutation rounds — added at Sprint P3.7.2
+
+Recorded from the sprint reports that produced them. Each figure is that sprint's own; none is re-derived here, and none is a repository-wide adequacy claim.
+
+| Sprint | Scope | Mutants | Killed | Survived | Recorded in |
+|---|---|---|---|---|---|
+| **P3.4.1** — Dataset authority validation | Golden Dataset, QA pairs, Evidence Trace, cross-dataset integrity, mutated in memory | 34 | **34** | 0 | `docs/P3.4.1_Dataset_Authority_Validation_Report.md` §Mutation evidence |
+| **P3.5.2** — Generation runtime | `sample_rag/generator.py`, via mutant results and mutant `Generator` subclasses in memory | 25 | **25** | 0 | `docs/P3.5.2_Generation_Implementation_Report.md` §Mutation evidence |
+| **P3.6.0** — CLI integration | `scripts/cli.py`, structural mutants against the module source and behavioural mutants executed as real processes | 25 | **25** | 0 | `docs/P3.6.0_CLI_Integration_Report.md` §Mutation evidence |
+
+**No repository file was modified during any of the three rounds** — each report records the isolation mechanism it used.
+
+**Two consecutive rounds found a defect in a specification rather than in an implementation**, and both were fixed and re-verified before the sprint closed: P3.5.2's §12 varying-value scan missed the `created_at` key (killed independently by the exact-key `diagnostics` check, so coverage never had a hole); P3.6.0's authority-import check was written to skip docstrings and was thereby skipping the imports it existed to inspect, and its orchestration check accepted any assignment binding a call. Recorded because it qualifies the figures above in the direction the standing caution already warns about — **the validation layer is itself under test, and twice it was the thing that failed.**
+
+**No mutation round was performed for Sprints P3.3.2, P3.3.3, P3.3.4 or P3.3.5.** Those sprints used **two-path independence** instead — an engine and a validator that share no import, each computing the same quantity by a different route (`docs/P3.3.3_…` §Validation, `docs/P3.3.4_…` §Independence), with the independence itself enforced by AST specifications. That is a different instrument, not a weaker application of the same one, and it is not interchangeable with a mutation figure.
+
 **Standing caution:** a surviving mutant is evidence of a blind spot; a killed mutant is not proof of adequacy. Line coverage is not evidence of behavioural protection — at Sprint P3.1.7.1 the module measured 99% while a mutation emptying its entire output went undetected.
 
 ---
 
 ## 7. Claim-to-specification mapping
 
-109 specifications: 17 pre-existing (`test_chunker.py`), 78 Knowledge Layer, and 14 Data Quality Validation.
+**372 specifications at commit `d9a6db4`**, collected read-only at Sprint P3.7.2 and matching the count `docs/P3.7.0_Manual_Review_Evidence.md` lines 1–5 record as passing. The register carried **109** when it was written at Sprint P3.1.7.2 — 17 pre-existing (`test_chunker.py`), 78 Knowledge Layer, 14 Data Quality Validation — and §7.1 records the 263 added since, by owning sprint.
+
+The table below is unchanged from establishment and continues to map the original 109.
 
 | Claim family | Source | Specifications | File |
 |---|---|---|---|
@@ -259,6 +293,26 @@ Each mutant was run twice — against the **DQV suite alone** (`tests/test_data_
 
 **Not specified, deliberately:** symlink containment (§3.5, F-2-sym); `Document` persistence and structural validation (unresolved by the contract); a DQ-4 synthetic negative case (§3.7, **P3.1.8.2-D1** — owner-approved governance deviation).
 
+### 7.1 Specifications added after establishment — recorded at Sprint P3.7.2
+
+263 specifications across six families, each attributed to the sprint that shipped it. Counts are the collected count at `d9a6db4`; where a sprint report states a different figure, both are shown and the divergence is recorded in §5.
+
+| Claim family | Owning sprint(s) | Specifications | File |
+|---|---|---|---|
+| **Retrieval evaluation** — classification algebra, pairing, validation checks, committed corpus | P3.3.2 (27), **+8** at P3.3.5 for document identity | **35** | `tests/test_retrieval_evaluation.py` |
+| **Retrieval metrics** — metric algebra, input contract, two-path independence, committed corpus | P3.3.3; unchanged at P3.3.5 | **35** | `tests/test_retrieval_metrics.py` |
+| **Retrieval diagnosis** — rule transcription against `docs/altm.md`, rule selection, confidence, dependency rule, independence, committed corpus | P3.3.4 (38), **+9** at P3.3.5 | **47** | `tests/test_retrieval_diagnosis.py` |
+| **Golden Dataset** — GD-1 … GD-13 | P3.4.1 | **16** | `tests/test_golden_dataset.py` |
+| **QA pairs** — QA-1 … QA-10 | P3.4.1 | **14** | `tests/test_qa_pairs.py` |
+| **Evidence Trace Dataset** — ET-1 … ET-6 | P3.4.1 | **25** | `tests/test_evidence_trace_dataset.py` |
+| **Cross-dataset integrity** — X-1 … X-16 | P3.4.1 | **16** | `tests/test_cross_dataset_integrity.py` |
+| **Generation** — `docs/GENERATION_CONTRACT.md` §16, guarantees G-1 … G-14, every guarantee mapped | P3.5.2 | **48** | `tests/test_generator.py` |
+| **CLI integration** — contract behaviour, byte-identity, exit codes, and six AST specifications constraining what the module may contain and import | P3.6.0 | **27** | `tests/test_cli.py` |
+
+**Reconciliation:** 109 (§7) + 263 (§7.1) = **372**, the collected total at `d9a6db4`. Sprint P3.4.1's four dataset families complete `docs/MILESTONE_1A.md` build item 9.
+
+**Two claim families in §7.1 are enforced structurally rather than behaviourally** and are recorded as such so the distinction is not lost: the CLI's *"contains no business logic"* property and the metrics/diagnosis validators' import independence are AST-parsed allowlist specifications. A behavioural test cannot observe a branch being added; these can.
+
 ---
 
 ## 8. Maintenance
@@ -268,3 +322,4 @@ Each mutant was run twice — against the **DQV suite alone** (`tests/test_data_
 - Every row cites repository evidence — a file, a commit, a measurement, or an ADR.
 - A finding is never removed. It moves to Closed, with the change that closed it.
 - If a row would describe work to be scheduled, it belongs in `docs/roadmap.md` instead (§1.2).
+- **Governance synchronization does not create dispositions.** Sprint P3.7.2 added §2's non-ADR disposition table, two §4 review rows, four §5 observations, §6.1 and §7.1 — every one of them a record of something a committed authority had already established. Where P3.7.2 found deferred work, it recorded it in its own Deferred Repository Items Register, **not here**: a deferred item awaiting a Repository Owner sequencing decision is scheduled work, which §1.2 bars from this register.
