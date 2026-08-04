@@ -361,9 +361,16 @@ Present ALTM in interviews and documentation as *"a mental model I use to reason
 
 | Milestone | ALTM Coverage |
 |---|---|
-| **Milestone 1A** | Knowledge and Index stages fully exercised via the deterministic pipeline and Layer 1 (pytest). Retrieve, Assemble, and Infer exist structurally (interfaces, stubs) but are not yet evaluated with real metrics. |
+| **Milestone 1A** | Knowledge stage fully exercised via the deterministic pipeline and Layer 1 (pytest). **Index stage exercised only in part** — see the qualification below. Retrieve, Assemble, and Infer exist structurally (interfaces, stubs) but are not yet evaluated with real metrics. |
+| **Milestone 1B** | Index stage exercised in full — an `Indexer` and deterministic placeholder vectors behind `EmbeddingProvider` give the stage a component, and DQ-7 gives it index-coverage validation under Layer 1. Retrieve gains a job-description and JobOps corpus, so the SQL route is exercised. Still no real metric at any stage: Layers 2–4 remain inactive. |
 | **Milestone 2** | Retrieve and Infer stages become measurable for real — Ragas activates Layer 2, DeepEval activates Layer 3, against real embeddings, real vector search, and real generation. |
 | **Milestone 3** | Evaluate stage becomes measurable across versions — Promptfoo activates Layer 4 regression comparison. |
+
+> **Milestone 1A Index-stage qualification, and the Milestone 1B row — added at Sprint P3.7.4** under authorization **A7** of `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md`.
+>
+> This table previously recorded the Index stage as *"fully exercised"* at Milestone 1A. The repository contains structure-aware chunking (172 chunks, `sample_rag/chunker.py`) but **no `Indexer`, no `EmbeddingProvider` and no placeholder vectors** — re-verified at commit `180dcdc`. Chunking discharges part of the Index stage's responsibility; index coverage (DQ-7) is unimplemented and recorded blocked by `docs/DATA_QUALITY_VALIDATION_PLAN.md` §16 O-6. The row is qualified to say so.
+>
+> **Nothing else in this document changes.** The eight-stage lifecycle (§3), the Failure Localization Matrix (§5) and the six design principles (§10) are unchanged, and this synchronization does not meet §13's revision trigger — no lifecycle stage was added, removed or redefined. Milestone 1B extends which stages are *measurable*, not which stages *exist*, exactly as this section already states.
 
 Future milestones extend which stages are *measurable*, not which stages *exist*. The eight-stage lifecycle in Section 3 does not change as tooling is added — a new milestone integrating a real embedding model, for example, makes the Index and Retrieve stages testable with real data; it does not introduce a new stage.
 

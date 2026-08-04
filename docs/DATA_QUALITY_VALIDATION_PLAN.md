@@ -716,7 +716,18 @@ Recorded, not resolved. Each states its impact and what would close it.
 | **O-3** | **No `DataQualityValidationError`.** §8.4 recommends assertions over a new exception type, by analogy to `ADR-0001`'s evidence bar | Low. Reversible; affects only the checks' internal style | P3.1.8.1 recording the choice explicitly, as `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §15 required for `DocumentConstructionError`'s name |
 | **O-4** | **`tests/` → `scripts/` import for reuse** (§11.1) is not explicitly sanctioned by any repository artifact; it follows from `docs/architecture.md` §6's directory responsibilities | Low, but it determines whether DQV reuses `compute_sha256`/`normalize_source_path` or duplicates them — and Register §5 rates duplication a **High** drift risk | P3.1.8.1 recording the choice with rationale. **Inference, labelled as such** |
 | **O-5** | **Corpus scale.** With one document, DQ-2 and DQ-4 are vacuously true on the real corpus | Bounded and disclosed. Protection comes from synthetic cases; §12 requires the limitation to be stated in the specifications | Corpus expansion — which is also the trigger for Contract Outstanding Question 1 and for re-verifying I-6 |
-| **O-6** | **DQ-5, DQ-6, DQ-7 are unimplementable** — `chunks.json`, the Index Layer, and `EmbeddingProvider` do not exist | None. Explicitly out of scope, with owner and blocker recorded | The Chunk and Index layers. Ownership is settled now so it is not rediscovered later |
+| **O-6** | **DQ-5, DQ-6, DQ-7 are unimplementable** — `chunks.json`, the Index Layer, and `EmbeddingProvider` do not exist | None. Explicitly out of scope, with owner and blocker recorded | The Chunk and Index layers. Ownership is settled now so it is not rediscovered later. **Owning milestone: Milestone 1B** — recorded at Sprint P3.7.4 |
+
+> **O-5 and O-6 — owning milestone recorded, Sprint P3.7.4.** Added under authorization **A7** of `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md`. **Ownership is unchanged (DQV), and the recorded blockers are unchanged.** This adds the milestone in which each item is scheduled, and nothing else.
+>
+> | Item | Owning milestone | Register id | Status of the recorded blocker |
+> |---|---|---|---|
+> | **O-5** — DQ-2 and DQ-4 vacuously true at corpus scale 1 | Milestone 1B | **1B-13** | Unchanged. Trigger is corpus expansion, which is register **1B-05** / **1B-06** |
+> | **O-6 / DQ-5** — chunk validity as a corpus property | Milestone 1B | **1B-08** | **Cleared.** `chunks.json` did not exist when W6 was scoped; it exists at commit `180dcdc`, digest `323723b4fe82`. The check remains unimplemented |
+> | **O-6 / DQ-6** — chunk referential integrity, incl. Chunk invariant 3's full form | Milestone 1B | **1B-09** | **Cleared**, same artifact. The check remains unimplemented |
+> | **O-6 / DQ-7** — index coverage | Milestone 1B | **1B-10** | **Not cleared.** The Index Layer and `EmbeddingProvider` still do not exist; both are register **1B-01** / **1B-03**, in the same milestone |
+>
+> Canonical authority for all four: `docs/DEFERRED_ITEMS_REGISTER.md`. §8.1, §11.2 W6 and §13 of this plan are unchanged.
 
 **Gate verdict: PASS with one blocking governance item (O-1).** The architecture is complete and the boundaries are unambiguous. Sprint P3.1.8.1 must not begin the DQ-2 uniqueness check until the D-2 erratum is approved; the remaining work is unblocked. **Implementation may begin only after repository owner approval** of this plan and of the §10 governance recommendation.
 

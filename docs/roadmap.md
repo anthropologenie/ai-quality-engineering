@@ -11,9 +11,13 @@
 
 ## 0. Current Repository Status
 
-- **Milestone 0 (Repository Scaffold): Complete.** Directory structure exists — `docs/`, `datasets/{rag,synthetic}`, `evaluation/{deepeval,promptfoo,ragas}`, `sample_rag/`, `tests/`, `reports/{baseline,regressions}`, `scripts/`, `notebooks/`. No pipeline code has been written yet, by design — docs and data structure come first.
+> **Status synchronized at Sprint P3.7.4**, under authorization **A4** of `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md`. Two statements in this section were accurate when written and became false as the repository advanced — *"Milestone 0.5 … In progress"* and *"No pipeline code has been written yet, by design"* — as recorded by `docs/P3.7.2_Repository_Governance_Synchronization_Report.md` §4.2. Both are corrected below. The order in which milestones were executed, and the reasoning that produced them, are unchanged.
+
+- **Milestone 0 (Repository Scaffold): Complete.** Directory structure exists — `docs/`, `datasets/{rag,synthetic}`, `evaluation/{deepeval,promptfoo,ragas}`, `sample_rag/`, `tests/`, `reports/{baseline,regressions}`, `scripts/`, `notebooks/`. Docs and data structure came first, by design; pipeline code followed under Milestone 1A.
 - **Session 1 (LLM Core Six Baseline) and Session 2 (RAG Architecture Closure): Finalized.** Architecture is locked; no further architectural debate is scheduled. See Section 8 for a summary of decisions made in each session.
-- **Milestone 0.5 (Documentation Synchronization): In progress.** This document is part of that synchronization — bringing architectural decisions that existed only in working notes into the repository itself, so the repository is self-contained and does not depend on external chat history to be understood.
+- **Milestone 0.5 (Documentation Synchronization): Complete.** This document is part of that synchronization — bringing architectural decisions that existed only in working notes into the repository itself, so the repository is self-contained and does not depend on external chat history to be understood. Its six documents are committed.
+- **Milestone 1A (Deterministic Knowledge Pipeline): Implementation and validation complete; awaiting closure.** The full pipeline exists and runs end to end from a terminal; 372 executable specifications pass; manual review is complete and accepted. The North Star Question is answered **yes, by demonstration**. Three Definition of Done items remain unmet, and the capabilities that would meet them are constitutionally reassigned to Milestone 1B. Canonical record: `docs/MILESTONE_1A.md` — *Milestone Synchronization Record (P3.7.2)* and *Repository Owner Scope Ruling (P3.7.3)*.
+- **Milestone 1B (Retrieval Infrastructure Foundation): Established, not started.** Constituted by `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` Decision 2. Its capability set is the canonical register at `docs/DEFERRED_ITEMS_REGISTER.md`.
 
 ---
 
@@ -39,10 +43,15 @@ These documents together form the repository documentation set:
 | **Milestone 0** | Repository scaffold |
 | **Milestone 0.5** | Documentation synchronization (`docs/roadmap.md`, `docs/architecture.md`, `docs/altm.md`, `docs/glossary.md`, `docs/interview-notes.md`, `docs/learning-log.md`) |
 | **Milestone 1A** | Golden Dataset → Data Quality Validation → Deterministic Retrieval Pipeline → CLI |
+| **Milestone 1B** | Retrieval Infrastructure Foundation — Index Layer, `EmbeddingProvider` / `VectorStore` interfaces, corpus expansion (job descriptions, JobOps), DQ-5 / DQ-6 / DQ-7 |
 | **Milestone 2** | Embeddings, Vector Retrieval, Retrieval Evaluation (Ragas), Generation Evaluation (DeepEval) |
 | **Milestone 3** | Regression (Promptfoo), Production Readiness |
 
-There is no Milestone 1B. Retrieval evaluation and generation evaluation are both Milestone 2 activities, gated behind a working deterministic pipeline from Milestone 1A — they are not a separate numbered milestone.
+**Milestone 1B — amendment recorded, Sprint P3.7.4, 2026-08-04.** This section previously stated *"There is no Milestone 1B."* Milestone 1B is established by `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` Decision 2 §2.2, and this table is amended under its authorization **A3**. **The reasoning behind the original statement is retained in full and still governs:** retrieval evaluation and generation evaluation are both Milestone 2 activities, gated behind a working deterministic pipeline from Milestone 1A — they are not a separate numbered milestone.
+
+Milestone 1B contains **no evaluation activity whatsoever.** It contains only the deterministic retrieval infrastructure that Milestone 2's gate is itself composed of — the Index Layer, the `EmbeddingProvider` and `VectorStore` interfaces, corpus expansion, and the three blocked Data Quality checks. Ragas and DeepEval remain Milestone 2 exactly as this section has always required, and no capability moved out of Milestone 2 or Milestone 3.
+
+Milestone 1B also **restores** Section 3's Locked Implementation Order rather than departing from it. That order is *Chunking → Indexing → Retrieval*; the repository executed Retrieval (Sprint P3.3.1) while Indexing was never built. Milestone 1B builds the missing stage. Section 3 is unchanged.
 
 ```
 Milestone 0
@@ -61,6 +70,16 @@ Data Quality Validation
         │
         ▼
 Deterministic Retrieval Pipeline
+        │
+        ▼
+Milestone 1B
+Index Layer
+        │
+        ▼
+EmbeddingProvider / VectorStore Interfaces
+        │
+        ▼
+Corpus Expansion (Job Descriptions, JobOps)
         │
         ▼
 Milestone 2

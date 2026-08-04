@@ -314,4 +314,68 @@ Governance documentation is synchronized to the verified repository state. Miles
 
 ---
 
+## Repository Owner Scope Ruling — Sprint P3.7.3
+
+Appended by **Sprint P3.7.4 — Repository Authority Synchronization**, implementing authorization **A1** of `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` (commit `180dcdc`). Like the Milestone Synchronization Record above, this is **appended governance state, not a revision of the locked scope.**
+
+**Nothing above this section was modified.** The Definition of Done, every Acceptance Criterion and its checkbox state, every In Scope build item, the Out of Scope list, the Architectural Invariant, the Success Criteria, the Architecture Freeze and the Milestone Synchronization Record are all preserved verbatim.
+
+### The ruling
+
+`docs/P3.7.3_…` Decision 5 rules that:
+
+1. **Milestone 1A establishes the repository's deterministic engineering baseline.** Its objective — the North Star Question — is met and demonstrated.
+2. **Retrieval Infrastructure capabilities are constitutionally reassigned to Milestone 1B** — the Retrieval Infrastructure Foundation, established by `docs/P3.7.3_…` Decision 2 §2.2 and recognized in `docs/roadmap.md` §1.
+3. **AI capabilities remain assigned to Milestone 2**, unchanged.
+4. **Production regression capabilities remain assigned to Milestone 3**, unchanged.
+5. The Milestone 1A **Definition of Done, Acceptance Criteria, In Scope, Out of Scope and Success Criteria remain textually unchanged.**
+
+**This is engineering sequencing, not scope reduction.** No capability was removed from the repository. Eight capabilities that previously had no owning milestone — three of them with no owning sprint at all — now have one. The full reasoning, including why the two alternative constructions (implementing the items inside Milestone 1A, or rewording the Definition of Done) were rejected, is at `docs/P3.7.3_…` Decision 5 §5.2.
+
+### Capabilities reassigned to Milestone 1B
+
+Each row names the clause or criterion in this document that the capability belongs to, and the capability identifier under which it is now tracked in `docs/DEFERRED_ITEMS_REGISTER.md`.
+
+| This document's clause or criterion | Capability reassigned | Register id | Constitutional authority |
+|---|---|---|---|
+| **Build item 2** — *Index Coverage Validation* clause | DQ-7, index-coverage validation | **1B-10** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-10 |
+| **Build item 3** — Index Layer clause | `Indexer` component (stub) | **1B-03** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-03/04 |
+| **Build item 3** — Index Layer clause | Deterministic placeholder vectors | **1B-04** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-03/04 |
+| **Build item 3**, **criterion A-1** | `EmbeddingProvider` interface | **1B-01** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-01/02 |
+| **Build item 3** (via `docs/architecture.md` §5, §7) | `VectorStore` interface | **1B-02** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-01/02 |
+| **Criterion F-1**, job-description half | Job Description corpus | **1B-05** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-05/06/07/12 |
+| **Criterion F-2** | JobOps structured data ingest | **1B-06** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-05/06/07/12 |
+| **Criterion F-2** | SQL filtering exercised, incl. an exclusion-criteria case | **1B-07** | `docs/P3.7.3_…` §3.1, §4.1 R-1B-05/06/07/12 |
+
+Eight further capabilities are **affirmed** at Milestone 1B without having been Milestone 1A obligations — DQ-5, DQ-6, `documents[].indexed` semantics, `job_*`/`jobops_*` dataset population, O-5, I-6, P3.1.7-ARCH-01 and F-2-sym (register **1B-08, 1B-09, 1B-11, 1B-12, 1B-13, 1B-14, 1B-15, 1B-16**). They are recorded here only so the Milestone 1B set is legible from this document; none was ever required by the text above.
+
+### Effect on the Definition of Done
+
+**No Definition of Done item was reworded, added or removed.** The status of the two affected items is recorded below and nowhere else; the items themselves stand as written.
+
+| Definition of Done item | Status | Recorded reason |
+|---|---|---|
+| *All Runtime Pipeline build items (1–6) and Evaluation Asset build items (7–10) complete* | **Annotated — not satisfied** | Build items 2 and 3 remain partially complete. The clauses that complete them — Index Coverage Validation, and the Index Layer with its `EmbeddingProvider` seam — are reassigned to Milestone 1B by this ruling |
+| *All Functional and Architectural acceptance criteria checked* | **Annotated — not satisfied** | F-1, F-2 and A-1 remain unchecked, exactly as the Milestone Synchronization Record above records them. The capabilities that would check them are reassigned to Milestone 1B by this ruling |
+| The remaining five items | **Met** | Unchanged from the Milestone Synchronization Record above |
+
+**Milestone 1A closes with its Definition of Done annotated, not satisfied.** `docs/P3.7.3_…` Decision 5 §5.3 states the reason plainly: *"A closure that claimed satisfaction would be the first false statement in this repository's governance record."*
+
+### The North Star Question is unaffected
+
+> Can we deterministically trace every answer back to verified knowledge, without relying on any probabilistic AI component?
+
+**Still answered yes, by demonstration.** This ruling reassigns capabilities; it touches no part of the demonstration recorded in the Milestone Synchronization Record above. `docs/P3.7.3_…` Decision 2 §2.1: the North Star Question and the Definition of Done are answered separately, and this ruling changes neither answer.
+
+### Authority
+
+| | |
+|---|---|
+| **Constitutional authority** | `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` — Decision 3 §3.1, Decision 4 §4.1, Decision 5, authorization **A1** |
+| **Governance finding that produced it** | `docs/P3.7.2_Repository_Governance_Synchronization_Report.md` §5.1, §6.7 |
+| **Canonical deferred-capability authority** | `docs/DEFERRED_ITEMS_REGISTER.md` |
+| **Synchronization sprint** | `docs/P3.7.4_Repository_Authority_Synchronization_Report.md` |
+
+---
+
 *This document is locked. Revise only when Milestone 1A implementation surfaces a contract gap not anticipated here, or when Milestone 2 formally begins and this document is superseded. The Milestone Synchronization Record above is appended governance state, not a revision of the locked scope.*

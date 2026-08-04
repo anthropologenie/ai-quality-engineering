@@ -102,14 +102,24 @@ This is a summary for architectural context. Stage-by-stage failure diagnosis, a
 |---|---|---|---|---|---|
 | **Knowledge Source** | Expose validated resume, job description, and JobOps data to the pipeline | `KnowledgeSource.load() -> List[Document]` | JobOps SQLite (read-only), resume file | 1A | Add cover letters, portfolio docs (future, out of scope now) |
 | **Chunker** | Split documents into retrievable units along structural boundaries | `Chunker.chunk(doc: Document) -> List[Chunk]` | Knowledge Source | 1A — structure-aware primary strategy, recursive-character fallback | Chunk-size/overlap benchmarking |
-| **Indexer** | Build a lookup structure over chunks | `Indexer.index(chunks: List[Chunk]) -> Index` | Chunker | 1A — deterministic placeholder vectors | Real embedding integration |
-| **EmbeddingProvider** | Convert text into vector representations | `EmbeddingProvider.embed(text: str) -> Vector` | — | 1A — interface + stub only | BGE-small-en-v1.5 (Milestone 2 default) |
-| **VectorStore** | Persist and query vector representations | `VectorStore.upsert(...)`, `VectorStore.query(...)` | EmbeddingProvider | 1A — interface only, no implementation | FAISS (Milestone 2 default) |
-| **Retriever** | Return ranked evidence for a query | `Retriever.retrieve(query, filters) -> List[Chunk]` | Indexer, VectorStore | 1A — SQL-filter stage implemented for real; semantic stage stubbed | Real BM25 + Vector + RRF fusion |
+| **Indexer** | Build a lookup structure over chunks | `Indexer.index(chunks: List[Chunk]) -> Index` | Chunker | **1B** — deterministic placeholder vectors | Real embedding integration |
+| **EmbeddingProvider** | Convert text into vector representations | `EmbeddingProvider.embed(text: str) -> Vector` | — | **1B** — interface + stub only | BGE-small-en-v1.5 (Milestone 2 default) |
+| **VectorStore** | Persist and query vector representations | `VectorStore.upsert(...)`, `VectorStore.query(...)` | EmbeddingProvider | **1B** — interface only, no implementation | FAISS (Milestone 2 default) |
+| **Retriever** | Return ranked evidence for a query | `Retriever.retrieve(query, filters) -> RetrievalResult` | Indexer, VectorStore | 1A — SQL-filter stage implemented, exercised at 1B; semantic stage stubbed | Real BM25 + Vector + RRF fusion |
 | **Context Builder** | Assemble retrieved chunks into a prompt within budget | `ContextBuilder.assemble(chunks, query) -> Prompt` | Retriever | 1A | Context-overflow handling under real token budgets |
-| **Generator** | Produce an answer from an assembled prompt | `Generator.generate(prompt: Prompt) -> Answer` | Context Builder | 1A — deterministic stub generator | DeepSeek API integration |
+| **Generator** | Produce an answer from an assembled prompt | `Generator.generate(query, retrieval: RetrievalResult) -> GenerationResult` | Retriever | 1A — deterministic stub generator | DeepSeek API integration |
 | **Evaluation Engine** | Score outputs against the Golden Dataset across all four layers | Layer-specific: pytest / Ragas / DeepEval / Promptfoo | Golden Dataset, Generator, Retriever | 1A — Layer 1 (pytest) only | Layers 2–4 activated in Milestone 2–3 |
 | **CLI** | Provide a reproducible local entry point tying the pipeline together | Command-line invocation | All of the above | 1A | — |
+
+> **Component synchronization — Sprint P3.7.4.** Four rows above were amended under `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md`.
+>
+> - **`Generator`** — interface and dependency corrected to the signature approved by `docs/GENERATION_CONTRACT.md` §22 (G-1, G-2) at Sprint P3.5.1-G and implemented at P3.5.2. This discharges the Repository Owner action §22 assigned and §20.3 barred implementing sprints from performing. Authorization **A5**. The row's *Future Evolution* column is unchanged and is revisited when DeepSeek integration lands (register **M2-14**).
+> - **`Retriever`** — interface corrected to `-> RetrievalResult`, frozen by `docs/MILESTONE_1A.md` build item 4 (*"not a bare `List[Chunk]`"*). Authorization **A5**. The SQL-filter stage is implemented but not exercised over the committed corpus; exercising it is register **1B-07**.
+> - **`Indexer`, `EmbeddingProvider`, `VectorStore`** — *Current Milestone* moved from `1A` to `1B` per the constitutional reassignment. Responsibilities, interfaces and *Future Evolution* are unchanged. Authorization **A7**; register **1B-01, 1B-02, 1B-03, 1B-04**.
+>
+> **`docs/architecture.md` §7's Protocol sketch is deliberately unchanged**, and consequently still shows the superseded `Generator.generate(prompt)` and `Retriever.retrieve(...) -> list["Chunk"]` shapes. Authorization A5 explicitly bars amending it: it illustrates interface *shape* and is amended only when the interface set changes. The binding signatures are the contracts and this table. Recorded as a known divergence in `docs/P3.7.4_Repository_Authority_Synchronization_Report.md`, not as an oversight.
+>
+> **The `Context Builder` row is deliberately unchanged**, and still reads *Current Milestone 1A* although `docs/GENERATION_CONTRACT.md` §21 excludes the Assemble stage from Milestone 1A and register **M2-12** allocates it to Milestone 2. No P3.7.3 authorization covers this row, and inferring one would broaden constitutional intent. Recorded as a residual divergence, deferred.
 
 **Knowledge Manifest.** The Knowledge Source owns the Knowledge Manifest. `knowledge_manifest.json` is an artifact produced from the corpus, containing metadata that describes the corpus — it is not a separate pipeline component or interface. Corpus integrity and freshness validation consume this artifact directly. The canonical schema is defined in `docs/MILESTONE_1A.md`.
 
@@ -236,11 +246,17 @@ sequenceDiagram
 **Milestone 1A**
 - Data Quality Validation (pytest) — resume, chunk, and metadata validation before any retrieval logic runs
 - Structure-aware chunking, deterministic
-- Indexer with placeholder vectors behind the `EmbeddingProvider` interface
 - Retriever: SQL-filter stage real; semantic stage stubbed behind the `Retriever` interface
 - Deterministic stub `Generator` — no external LLM call
 - CLI tying the above into a reproducible local run
 - No vector database, no real embeddings, no LLM
+
+**Milestone 1B**
+- `Indexer` with deterministic placeholder vectors behind the `EmbeddingProvider` interface — *moved here from Milestone 1A by `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` Decision 5*
+- `EmbeddingProvider` and `VectorStore` defined as interfaces, with no implementation behind either
+- Corpus expansion — at least one job description, and JobOps structured data, so the SQL-filter stage is exercised for real
+- DQ-5, DQ-6, DQ-7 — the three Data Quality checks blocked at Sprint P3.1.8.1
+- Still no vector database, no real embeddings, no LLM, and no evaluation tool: `docs/MILESTONE_1A.md` criterion A-5 remains binding throughout
 
 **Milestone 2**
 - Real `EmbeddingProvider` implementation (BGE-small-en-v1.5 default)
@@ -255,24 +271,29 @@ sequenceDiagram
 - Promptfoo regression harness activated (Layer 4)
 - Production-readiness hardening (documented benchmark reports, GitHub Actions on push — stretch goal per `docs/roadmap.md`)
 
-No milestone beyond these three is currently defined. Any new milestone requires a deliberate scope decision recorded in `docs/roadmap.md` before this document is updated to reflect it.
+No milestone beyond these four is currently defined. Any new milestone requires a deliberate scope decision recorded in `docs/roadmap.md` before this document is updated to reflect it — the procedure Milestone 1B itself followed: `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` Decision 2 §2.2, recorded in `docs/roadmap.md` §1, then reflected here.
 
 ### Milestone Capability Matrix
 
 The table below summarizes the same milestone evolution described above, capability by capability:
 
-| Capability | Milestone 1A | Milestone 2 | Milestone 3 |
-|------------|--------------|-------------|-------------|
-| Golden Dataset | ✅ | ✅ | ✅ |
-| Data Validation | ✅ | ✅ | ✅ |
-| Chunking | ✅ | ✅ | ✅ |
-| Embeddings | Stub | Real | Real |
-| Vector Store | Interface | FAISS | FAISS |
-| Retrieval | Deterministic | Hybrid | Hybrid |
-| Generation | Stub | DeepSeek | DeepSeek |
-| Retrieval Evaluation | — | Ragas | Ragas |
-| Generation Evaluation | — | DeepEval | DeepEval |
-| Regression | — | — | Promptfoo |
+| Capability | Milestone 1A | Milestone 1B | Milestone 2 | Milestone 3 |
+|------------|--------------|--------------|-------------|-------------|
+| Golden Dataset | ✅ | ✅ | ✅ | ✅ |
+| Data Validation | ✅ | ✅ | ✅ | ✅ |
+| Chunking | ✅ | ✅ | ✅ | ✅ |
+| Index Coverage | — | ✅ | ✅ | ✅ |
+| Embeddings | Stub | Stub | Real | Real |
+| Vector Store | Interface | Interface | FAISS | FAISS |
+| Retrieval | Deterministic | Deterministic | Hybrid | Hybrid |
+| Generation | Stub | Stub | DeepSeek | DeepSeek |
+| Retrieval Evaluation | — | — | Ragas | Ragas |
+| Generation Evaluation | — | — | DeepEval | DeepEval |
+| Regression | — | — | — | Promptfoo |
+
+> **Matrix synchronization — Sprint P3.7.4, authorization A7.** The **Milestone 1B** column and the **Index Coverage** row are added; **the Milestone 1A, 2 and 3 columns are preserved unchanged**, as A7 requires.
+>
+> One consequence is disclosed rather than silently corrected: the Milestone 1A cells for **Embeddings** (*Stub*) and **Vector Store** (*Interface*) record the milestone **as originally scoped**, not as delivered. Neither capability exists in the repository, and both are constitutionally reassigned to Milestone 1B (`docs/MILESTONE_1A.md` — *Repository Owner Scope Ruling (P3.7.3)*; register **1B-01, 1B-02, 1B-04**). Correcting those two cells would alter an existing column, which A7 bars; leaving them without this note would state something untrue. The note is the resolution.
 
 ---
 
