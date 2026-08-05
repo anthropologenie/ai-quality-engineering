@@ -33,7 +33,22 @@ REQUIRED_DOCUMENT_FIELDS = {
     "source": str,
     "hash": str,
     "indexed": bool,
+    "canonical": bool,
 }
+
+# Canonical document designation — Sprint P3.7.5, discharging RO-01
+# (docs/P3.7.3_Repository_Owner_Constitutional_Decision.md §3.4, §4.4 R-RO-01).
+#
+# A Repository Owner corpus-composition decision, declared explicitly rather
+# than derived: docs/MILESTONE_1A.md build item 1 keeps *filenames* authoritative
+# for document versioning, so parsing `v2_2`/`v2_3` here would have this module
+# infer an approval decision from a version string. Approval and version are
+# different properties — a corpus with no versions at all would still need one
+# document designated canonical — and only the Repository Owner may set it.
+#
+# Membership is by normalized source path, the same identity `generate_document_id`
+# hashes, so designation and document identity cannot disagree.
+CANONICAL_SOURCES = frozenset({"documents/resume/Karthik_SR_Resume_v2_3.docx"})
 
 
 class ManifestValidationError(Exception):
@@ -76,13 +91,31 @@ def generate_document_id(source: str) -> str:
     return hashlib.sha256(source.encode("utf-8")).hexdigest()[:12]
 
 
-def build_document_entry(document_id: str, source: str, file_hash: str) -> dict:
-    """Build a single in-memory document entry matching the documented schema."""
+def is_canonical(source: str) -> bool:
+    """Return whether `source` is a canonical document.
+
+    A total function of the normalized source path and the declared
+    `CANONICAL_SOURCES` set — no filesystem access, no filename parsing, no
+    ordering dependence — so the designation is reproducible for any corpus.
+    A source absent from the declaration is superseded, which makes the default
+    for an undesignated corpus "nothing is canonical" rather than a guess.
+    """
+    return source in CANONICAL_SOURCES
+
+
+def build_document_entry(document_id: str, source: str, file_hash: str, canonical: bool) -> dict:
+    """Build a single in-memory document entry matching the documented schema.
+
+    `canonical` is appended last, after the four fields Sprint 1A.1 froze, so
+    existing key order is preserved byte-for-byte and only the new field's
+    presence distinguishes this entry from its predecessor.
+    """
     return {
         "id": document_id,
         "source": source,
         "hash": file_hash,
         "indexed": False,
+        "canonical": canonical,
     }
 
 
@@ -179,6 +212,22 @@ def validate_manifest(manifest: Mapping) -> Mapping:
     return manifest
 
 
+def load_canonical_document_ids() -> set:
+    """Return the document ids the persisted Manifest designates canonical.
+
+    Reads the Manifest through the same `validate_manifest(load_manifest())`
+    gate every other consumer uses, so a structurally invalid Manifest cannot
+    reach retrieval as a silently empty canonical set. Returns ids rather than
+    sources because `chunks[].document_id` is what retrieval joins on.
+
+    An empty set is a meaningful, non-exceptional result: it means no document
+    is designated, and retrieval tie-breaking then falls through to committed
+    corpus order exactly as it did before Sprint P3.7.5.
+    """
+    manifest = validate_manifest(load_manifest())
+    return {entry["id"] for entry in manifest["documents"] if entry["canonical"]}
+
+
 def main() -> None:
     discovered_paths = discover_documents(DOCUMENTS_ROOT)
     normalized_sources = sorted(
@@ -190,7 +239,7 @@ def main() -> None:
         absolute_path = SAMPLE_RAG_ROOT / source
         file_hash = compute_sha256(absolute_path)
         document_id = generate_document_id(source)
-        entries.append(build_document_entry(document_id, source, file_hash))
+        entries.append(build_document_entry(document_id, source, file_hash, is_canonical(source)))
 
     manifest = assemble_manifest(entries)
     write_manifest(manifest)

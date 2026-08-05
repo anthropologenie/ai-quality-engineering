@@ -110,26 +110,48 @@ class Retriever:
     calls.
     """
 
-    def __init__(self, chunks: list):
+    def __init__(self, chunks: list, canonical_document_ids: set = None):
         """Bind the retriever to an already-loaded, already-validated chunk collection.
 
         The collection is copied into a private list so that later mutation by a
         caller cannot change what this retriever sees, and so the retriever
         itself has nothing to write back to. Corpus order is preserved exactly
         as committed — it is the tie-break authority used by `rank_candidates`.
+
+        `canonical_document_ids` carries the Knowledge Manifest's canonical
+        designation (Sprint P3.7.5). It is *passed in* rather than read, because
+        `docs/architecture.md` §6 bars `sample_rag/` from importing `scripts/`,
+        and the Manifest is `scripts/build_manifest.py`'s artifact — the same
+        constraint that already keeps this module free of any `scripts/` import.
+        Defaulting to the empty set means an omitted designation reproduces
+        pre-P3.7.5 ordering exactly, so the parameter is additive rather than
+        behaviour-changing on its own.
         """
         self._chunks = list(chunks)
+        self._canonical_document_ids = frozenset(canonical_document_ids or ())
 
     def rank_candidates(self, query_terms: set) -> list[tuple]:
         """Score every chunk and order the matches deterministically.
 
-        Ordering is descending score, then ascending committed corpus position.
-        The positional tie-break matters: overlap counts collide often on a
-        corpus this size, and without it equal-scoring chunks would be ordered
-        by whatever `sorted` happened to see first. Anchoring ties to the Chunk
-        Corpus's own persisted order — Knowledge Manifest document order, then
-        `chunk_index` (Sprint P3.2.2) — makes ranking a property of the
-        committed corpus rather than of this function's iteration.
+        Ordering is descending score, then canonical documents ahead of
+        superseded ones, then ascending committed corpus position.
+
+        The canonical term sits *between* score and position and touches
+        neither. It cannot change which chunks are candidates, cannot change any
+        chunk's score, and cannot reorder two chunks whose scores differ — it
+        selects only among candidates the lexical scorer already ranked equal,
+        where the prior behaviour was to take whichever document the Manifest
+        happened to list first. That default silently preferred the superseded
+        resume version, because the Manifest orders sources alphabetically and
+        `v2_2` sorts before `v2_3`.
+
+        The positional tie-break remains, and remains last: overlap counts
+        collide often on a corpus this size, and canonical rank collides too
+        whenever both candidates sit in the same document. Anchoring the final
+        tie to the Chunk Corpus's own persisted order — Knowledge Manifest
+        document order, then `chunk_index` (Sprint P3.2.2) — keeps ranking a
+        property of the committed corpus rather than of this function's
+        iteration.
 
         Chunks with zero overlap are not candidates: retrieving them would be
         recording a match the query has no lexical basis for.
@@ -140,8 +162,25 @@ class Retriever:
             if overlap:
                 candidates.append((overlap, position, chunk, matched))
 
-        candidates.sort(key=lambda candidate: (-candidate[0], candidate[1]))
+        candidates.sort(
+            key=lambda candidate: (
+                -candidate[0],
+                self._canonical_rank(candidate[2]),
+                candidate[1],
+            )
+        )
         return candidates
+
+    def _canonical_rank(self, chunk: dict) -> int:
+        """Return 0 for a chunk of a canonical document, 1 otherwise.
+
+        A sort rank, not a score: it is never combined with, added to, or
+        compared against a retrieval score, and it is read only after the score
+        comparison above has already tied. Returning a fixed small integer
+        rather than a weight is what makes that structural instead of
+        conventional — there is no magnitude here to leak into ranking.
+        """
+        return 0 if chunk["document_id"] in self._canonical_document_ids else 1
 
     def retrieve(self, query: str, filters: dict) -> RetrievalResult:
         """Execute lexical retrieval for one query.

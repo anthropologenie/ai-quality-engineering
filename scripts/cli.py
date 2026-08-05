@@ -81,7 +81,7 @@ import sys
 from sample_rag.generator import Generator, serialize
 from sample_rag.retriever import Retriever
 
-from scripts.run_retrieval import DEFAULT_FILTERS, load_corpus
+from scripts.run_retrieval import DEFAULT_FILTERS, load_canonical_documents, load_corpus
 
 
 def parse_args(argv: list = None) -> argparse.Namespace:
@@ -127,7 +127,8 @@ def main(argv: list = None) -> int:
     """
     arguments = parse_args(argv)
     chunks = load_corpus()
-    retriever = Retriever(chunks)
+    canonical_documents = load_canonical_documents()
+    retriever = Retriever(chunks, canonical_documents)
     retrieval = retriever.retrieve(arguments.question, DEFAULT_FILTERS)
     generator = Generator()
     generation = generator.generate(arguments.question, retrieval)

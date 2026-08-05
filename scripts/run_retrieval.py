@@ -22,6 +22,7 @@ P3.3.2's responsibility.
 from sample_rag.retriever import Retriever
 from scripts.build_chunks import load_chunks, validate_chunks
 from scripts.build_evidence_trace import load_evidence_trace, validate_evidence_trace
+from scripts.build_manifest import load_canonical_document_ids
 
 # The frozen interface takes a filter mapping; an empty one selects the
 # retriever's own DEFAULT_TOP_K and exercises no SQL-filter behavior.
@@ -36,6 +37,17 @@ def load_corpus() -> list:
     runtime consumes the corpus through the same gate every other consumer does.
     """
     return validate_chunks(load_chunks())["chunks"]
+
+
+def load_canonical_documents() -> set:
+    """Return the canonical document ids, for construction of a `Retriever`.
+
+    Re-exported from `scripts/build_manifest.py`, which owns the Knowledge
+    Manifest, rather than re-read here — the same reason `load_corpus` delegates
+    to `validate_chunks(load_chunks())`. Consumers reach the Manifest through
+    one gate, so no two of them can disagree about which document is canonical.
+    """
+    return load_canonical_document_ids()
 
 
 def load_questions() -> list:
@@ -92,7 +104,7 @@ def main() -> None:
     """Execute the Retrieval Runtime and report observed characteristics."""
     chunks = load_corpus()
     questions = load_questions()
-    results = execute(Retriever(chunks), questions)
+    results = execute(Retriever(chunks, load_canonical_documents()), questions)
 
     statistics = summarize(results, len(chunks))
     for name, value in statistics.items():

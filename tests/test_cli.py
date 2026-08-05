@@ -53,7 +53,7 @@ from sample_rag.generator import OUTCOME_ABSTAIN, Generator, serialize
 from sample_rag.retriever import Retriever
 
 from scripts import cli
-from scripts.run_retrieval import DEFAULT_FILTERS, load_corpus
+from scripts.run_retrieval import DEFAULT_FILTERS, load_canonical_documents, load_corpus
 
 # A question the committed corpus answers, and one no chunk shares a term with.
 # Neither is asserted to produce particular *content* — the abstention question
@@ -83,11 +83,19 @@ CONTROL_FLOW_NODES = (
     ast.Compare,
 )
 
-# Work Package 3's sequence, in order: parse, load, construct, invoke, construct,
-# invoke, serialize, emit.
+# Work Package 3's sequence, in order: parse, load, load canonical designation,
+# construct, invoke, construct, invoke, serialize, emit.
+#
+# `load_canonical_documents` was added at Sprint P3.7.5. It is a *loading* step,
+# adjacent to `load_corpus` and before any component is constructed, so the
+# pipeline's shape — load everything, then construct, then invoke — is unchanged.
+# The CLI still reaches the Knowledge Manifest only through `scripts/run_retrieval.py`,
+# exactly as it already reaches the Chunk Corpus, and imports no barred module
+# itself (`test_the_cli_does_not_reach_the_evaluation_layers` is unchanged).
 APPROVED_CALL_SEQUENCE = [
     "parse_args",
     "load_corpus",
+    "load_canonical_documents",
     "Retriever",
     "retrieve",
     "Generator",
@@ -162,7 +170,9 @@ def expected_output(question):
     assembled here rather than by the CLI — so a specification comparing the two
     is comparing the CLI's output against the pipeline's, not against itself.
     """
-    retrieval = Retriever(load_corpus()).retrieve(question, DEFAULT_FILTERS)
+    retrieval = Retriever(load_corpus(), load_canonical_documents()).retrieve(
+        question, DEFAULT_FILTERS
+    )
 
     return serialize(Generator().generate(question, retrieval))
 

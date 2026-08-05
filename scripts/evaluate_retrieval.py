@@ -30,7 +30,7 @@ from pathlib import Path
 from evaluation.retrieval_evaluation import evaluate, run_validation_suite, summarize
 from sample_rag.retriever import Retriever
 from scripts.build_evidence_trace import load_evidence_trace, validate_evidence_trace
-from scripts.run_retrieval import execute, load_corpus, load_questions
+from scripts.run_retrieval import execute, load_canonical_documents, load_corpus, load_questions
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 
@@ -90,7 +90,7 @@ def observe(chunks: list) -> dict:
     it records, so ranking order is carried here only because discarding it would
     be this layer editing the runtime's output; nothing in this sprint reads it.
     """
-    results = execute(Retriever(chunks), load_questions())
+    results = execute(Retriever(chunks, load_canonical_documents()), load_questions())
     return {
         entry_id: list(result.diagnostics["retrieved_chunk_ids"])
         for entry_id, result in results
