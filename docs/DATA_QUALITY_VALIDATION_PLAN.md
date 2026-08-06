@@ -733,6 +733,18 @@ Recorded, not resolved. Each states its impact and what would close it.
 >
 > Canonical authority for all four: `docs/DEFERRED_ITEMS_REGISTER.md`. §8.1, §11.2 W6 and §13 of this plan are unchanged.
 
+> **O-6 — closed at Sprint 1B.2.** Appended, leaving the P3.7.4 note above intact: that note recorded the status accurately when written, and this records what changed since.
+>
+> | Item | Register id | Status |
+> |---|---|---|
+> | **O-6 / DQ-5** — chunk validity as a corpus property | **1B-08** | ✅ **Implemented** at Sprint 1B.1, commit `f4544bf` — `tests/test_data_quality.py` |
+> | **O-6 / DQ-6** — chunk referential integrity, incl. Chunk invariant 3's full form | **1B-09** | ✅ **Implemented** at Sprint 1B.1, commit `f4544bf` — `tests/test_data_quality.py` |
+> | **O-6 / DQ-7** — index coverage | **1B-10** | ✅ **Implemented** at Sprint 1B.2. Its recorded blocker — *"the Index Layer and `EmbeddingProvider` still do not exist"* — cleared in the same sprint at register **1B-03** (`sample_rag/indexer.py`) and **1B-01** (`sample_rag/embedding.py`) |
+>
+> **O-6 is discharged: no DQV failure class in §8.1 remains unimplemented.** O-5 (**1B-13**) is unaffected by this note and remains as the P3.7.4 note records it.
+>
+> §8.1's *Status at P3.1.8.1* column, §11.2's W6 row and §13 are **not** amended: each is explicitly scoped to Sprint P3.1.8.1 and states that sprint's position accurately.
+
 **Gate verdict: PASS with one blocking governance item (O-1).** The architecture is complete and the boundaries are unambiguous. Sprint P3.1.8.1 must not begin the DQ-2 uniqueness check until the D-2 erratum is approved; the remaining work is unblocked. **Implementation may begin only after repository owner approval** of this plan and of the §10 governance recommendation.
 
 ---

@@ -250,10 +250,11 @@ W1–W5 complete the DQ-1 … DQ-4 checks planned for Sprint P3.1.8.1. **Sprint
 (register **1B-09**) — whose recorded blocker has cleared: `sample_rag/chunks.json`
 did not exist when plan §11.2 scoped W6 and does exist now.
 
-**DQ-7 remains blocked** on the Index Layer and an `EmbeddingProvider`
-implementation (plan §8.1, §16 open item O-6), which are register **1B-10**,
-**1B-03** and **1B-01**. It is absent from this file for that reason, not by
-oversight, and Sprint 1B.1 does not implement it.
+**Sprint 1B.1 completes W6** by adding **DQ-7** (register **1B-10**). Its
+recorded blocker has cleared in the same sprint: plan §8.1 and §16 O-6 record
+DQ-7 as blocked on *"no Index Layer, no `EmbeddingProvider` implementation"*,
+and register **1B-03** and **1B-01** supply both — `sample_rag/indexer.py` and
+`sample_rag/embedding.py`. **No DQV failure class remains unimplemented.**
 
 W6 and the single-artifact validator (plan §6.1 rows 5 and 7)
 --------------------------------------------------------------
@@ -302,6 +303,7 @@ from scripts.build_manifest import (
 )
 
 from sample_rag.chunker import generate_chunk_id
+from sample_rag.indexer import Indexer
 from sample_rag.knowledge_source import resolve_source_path
 
 
@@ -1263,3 +1265,153 @@ def test_dq6_reconstruction_skips_chunks_whose_document_does_not_resolve():
 
     assert reconstruction_failures([entry], {}) == []
     assert orphaned_chunk_document_ids([entry], set()) == ["doc-absent"]
+
+
+# --- W6 / DQ-7 predicate ----------------------------------------------------
+
+
+def unindexed_chunk_ids(entries, index):
+    """Return the ids of chunks with no representation in `index`.
+
+    **DQ-7's failure condition**, stated positively.
+    `docs/DATA_QUALITY_VALIDATION_PLAN.md` §8.1 defines the class as *"A chunk
+    lacks a deterministic placeholder representation behind
+    `EmbeddingProvider`"*, and `docs/MILESTONE_1A.md` build item 2 states the
+    property it validates: *"Index Coverage Validation ensures every chunk
+    produced during indexing has a deterministic placeholder representation
+    behind the `EmbeddingProvider` interface. This validates indexing
+    completeness rather than real embedding quality."*
+
+    Membership is asked through `Index.covers`, the Index's own vocabulary,
+    rather than by reaching into `Index.vectors`. Restating what coverage means
+    here would duplicate the definition that `sample_rag/indexer.py` owns —
+    the drift `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §5 rates **High**.
+
+    Sorted, and a report rather than a bool, following every other W6
+    predicate above.
+    """
+    return sorted(entry["id"] for entry in entries if not index.covers(entry["id"]))
+
+
+def index_over(entries):
+    """Build the Index over `entries` with the Milestone 1B default provider.
+
+    The derivation is written here rather than hidden in a fixture because the
+    Index is **not a committed artifact** — no repository authority defines
+    one, and `sample_rag/indexer.py` builds it on demand. A `real_index`
+    fixture would read like an artifact reader beside `real_chunks`, and it is
+    not one.
+    """
+    return Indexer().index(entries)
+
+
+# --- W6 / DQ-7: index coverage ----------------------------------------------
+
+
+def test_dq7_every_committed_chunk_has_an_index_representation(real_chunks):
+    """W6 / DQ-7 — index coverage over the committed Chunk Corpus.
+
+    `docs/MILESTONE_1A.md` build item 2's own Index Coverage Validation clause,
+    which `docs/DEFERRED_ITEMS_REGISTER.md` **1B-10** records the Build Item
+    Matrix as identifying plainly: *"Index Coverage Validation — this item's
+    own clause — **is** DQ-7."*
+
+    The last of the three checks plan §16 O-6 recorded as unimplementable.
+    Its blocker — *"no Index Layer, no `EmbeddingProvider` implementation"* —
+    cleared in this sprint, at register **1B-03** and **1B-01**.
+
+    Corpus-scoped, as DQ-5 and DQ-6 are: the claim is about the repository's
+    committed chunks, not about an arbitrary collection the Indexer is handed.
+    `tests/test_indexer.py` owns the component-level coverage claim.
+
+    Were `real_chunks` ever empty, the assertion would pass vacuously; the
+    guard makes that visible rather than silent.
+    """
+    assert real_chunks, "the committed chunk collection must contain at least one chunk"
+
+    index = index_over(real_chunks)
+
+    assert unindexed_chunk_ids(real_chunks, index) == [], (
+        f"committed chunks with no index representation: "
+        f"{unindexed_chunk_ids(real_chunks, index)}"
+    )
+
+
+def test_dq7_index_coverage_of_the_committed_corpus_is_exact(real_chunks):
+    """W6 / DQ-7 — the Index represents the committed chunks and nothing else.
+
+    Coverage in the narrowing direction alone would be satisfied by an Index
+    that represented every chunk *and* ids the corpus does not contain. Such an
+    Index would break the join `sample_rag/retriever.py` ranks on and that DQ-6
+    protects, while reporting full coverage.
+
+    Stated over the committed corpus, so it is a repository claim. The
+    component-level form — *"the Indexer introduces no chunk of its own"* —
+    is `tests/test_indexer.py`'s.
+    """
+    index = index_over(real_chunks)
+
+    assert set(index.vectors) == {entry["id"] for entry in real_chunks}
+
+
+def test_dq7_every_committed_representation_carries_the_declared_dimension(real_chunks):
+    """W6 / DQ-7 — a representation is present *and* well-formed.
+
+    Build item 2 requires each chunk have *"a deterministic placeholder
+    representation"*. A key present with a zero-length or ragged vector is a
+    key, not a representation; coverage alone cannot distinguish the two.
+
+    `Index.dimension` is compared against rather than a literal, so the check
+    holds under a Milestone 2 provider of a different width
+    (`docs/DEFERRED_ITEMS_REGISTER.md` **M2-01**) without being rewritten. Per
+    plan §12, *"behaviour, not artefacts"* — no vector value and no width
+    constant is frozen here.
+    """
+    index = index_over(real_chunks)
+
+    ragged = sorted(
+        chunk_id
+        for chunk_id, vector in index.vectors.items()
+        if len(vector) != index.dimension
+    )
+
+    assert ragged == [], f"committed chunks whose representation is not full width: {ragged}"
+
+
+def test_dq7_the_committed_index_is_a_placeholder_index(real_chunks):
+    """W6 / DQ-7 — the Index declares itself a stub, as Milestone 1B requires.
+
+    `docs/architecture.md` §9 scopes Milestone 1B as *"Still no vector
+    database, no real embeddings, no LLM"*, and `docs/altm.md` §12 as *"Still
+    no real metric at any stage"*. Build item 2 draws the same line for this
+    check: it *"validates indexing completeness rather than real embedding
+    quality."*
+
+    Asserting the marker keeps that scope legible from the validation layer:
+    if a real provider were ever wired in as the default, this specification
+    fails and the milestone boundary is re-examined deliberately rather than
+    crossed silently.
+    """
+    assert index_over(real_chunks).stub is True
+
+
+def test_dq7_a_chunk_missing_from_the_index_is_detected():
+    """W6 / DQ-7, synthetic — the negative case plan §12 requires.
+
+    It cannot be taken from the real corpus, which is correct by construction:
+    `Indexer.index` represents every chunk it receives, and
+    `tests/test_indexer.py` specifies that directly. So the uncovered condition
+    is manufactured here by withholding a chunk from indexing while leaving it
+    in the collection — the shape a partially-rebuilt Index would have.
+
+    Without this case, the real-corpus specifications above would be
+    compatible with a predicate that never reports anything.
+    """
+    entries = [
+        {"id": "c0", "text": "alpha"},
+        {"id": "c1", "text": "beta"},
+    ]
+
+    index = index_over(entries[:1])
+
+    assert unindexed_chunk_ids(entries, index) == ["c1"]
