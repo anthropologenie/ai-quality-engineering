@@ -321,6 +321,23 @@ def real_chunks():
 
 
 @pytest.fixture
+def real_chunk_collection():
+    """The committed Chunk collection exactly as stored — **not** validated.
+
+    Deliberately distinct from `real_chunks` above, which chains
+    `validate_chunks(load_chunks())`. Sprint 1B.1's DQ-5 gate specification
+    asserts that the committed artifact *passes* that gate; a fixture that had
+    already run it would make the specification assert a property its own
+    fixture guaranteed. The same reasoning `real_evidence_trace_collection`
+    records for `validate_evidence_trace`.
+
+    `load_chunks` performs *"no structural contract validation and no mutation
+    or repair"*, so this is the artifact as committed, container included.
+    """
+    return load_chunks()
+
+
+@pytest.fixture
 def real_chunks_by_id(real_chunks):
     """The committed Chunk Corpus keyed by chunk `id`."""
     return {chunk["id"]: chunk for chunk in real_chunks}

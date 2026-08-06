@@ -433,8 +433,12 @@ Every class below traces to a named repository source. None is invented. `docs/r
 | Manifest structural failures (missing/mistyped `manifest_version`, `documents`, or a required entry field) | Structural Artifact Validation — `ManifestValidationError` | `scripts/build_manifest.py` `validate_manifest` |
 | Chunk structural/representation failures | Structural Artifact Validation — `ChunkValidationError` | `scripts/build_chunks.py` `validate_chunks` |
 | Determinism failures | Executable Specification Suite (closed) | `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3 |
-| Empty `Document.text` | **Not a failure at all** — legal, and legally produces zero chunks | `docs/DOCUMENT_CONTRACT.md` §8.3 (Non-empty guarantee deliberately absent), invariant 2; `docs/CHUNK_CONTRACT.md` §11 |
+| **Blank `Document.text`** — empty, or containing no non-whitespace character | **Not a failure at all** — legal, and legally produces zero chunks | `docs/DOCUMENT_CONTRACT.md` §8.3 (Non-empty guarantee deliberately absent), invariant 2; `docs/CHUNK_CONTRACT.md` §11 (*"zero or more"*) |
 | Retrieval, generation, or regression failures | Future Evaluation, Layers 2–4 | `docs/roadmap.md` §5 |
+
+**Wording synchronized at Sprint 1B.1.** This row previously read *"Empty `Document.text`"*. Implementing DQ-6's Manifest-side coverage check required stating the zero-chunk condition exactly, and the Chunker's condition is slightly wider than *empty*: `sample_rag/chunker.py` `detect_structural_boundaries` returns `[]` for **any** text with no non-whitespace run, because `_strip_span` discards whitespace-only spans — which `docs/CHUNK_CONTRACT.md` §17 invariant 1 (*non-empty*) requires it to do.
+
+**This is a wording synchronization, not a scope change.** The row's classification is unchanged — still *not* a DQV failure class, still owned by nobody as a failure, still resting on the same two contract citations. No validation rule is added, no acceptance criterion in §13 or §14 is altered, and no failure class in §8.1 gains or loses a case. The row is widened to describe the behaviour the repository already had; had it been read literally, a whitespace-only corpus document would have been reported as a defect against legal repository state.
 
 ### 8.3 A note on DQ-3, so it is not implemented as a false positive
 

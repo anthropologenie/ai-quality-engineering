@@ -4,8 +4,10 @@ Sprint P3.1.8.1A implemented **Phase W1 — Manifest structural gate** from the
 approved `docs/DATA_QUALITY_VALIDATION_PLAN.md` §11.2. Sprint P3.1.8.1B added
 **Phase W2 — Identifier uniqueness (DQ-2)**, closing finding **F-1**. Sprint
 P3.1.8.1C added **Phase W3 — Freshness / integrity (DQ-1)**. Sprint P3.1.8.1D
-added **Phase W4 — Completeness, Case A (DQ-3)**. Sprint P3.1.8.1E adds
-**Phase W5 — Referential integrity (DQ-4)**.
+added **Phase W4 — Completeness, Case A (DQ-3)**. Sprint P3.1.8.1E added
+**Phase W5 — Referential integrity (DQ-4)**. **Sprint 1B.1 (Corpus Integrity)
+adds Phase W6's unblocked half — DQ-5 (chunk validity) and DQ-6 (chunk
+referential integrity)**, register capabilities **1B-08** and **1B-09**.
 
 W1 is the repository's first executable Manifest specification. Until now the
 committed `sample_rag/knowledge_manifest.json` was validated only when
@@ -243,15 +245,52 @@ it does not assert uniqueness, and ownership of F-1 stays with W2.
 
 Scope boundary
 --------------
-W1–W5 complete the DQ-1 … DQ-4 checks planned for Sprint P3.1.8.1. DQ-5, DQ-6,
-and DQ-7 remain **blocked** on artifacts that do not exist at HEAD —
-`sample_rag/chunks.json`, the Index Layer, and an `EmbeddingProvider`
-implementation (plan §8.1, §11.2 W6, §16 open item O-6) — and are absent from
-this file for that reason, not by oversight.
+W1–W5 complete the DQ-1 … DQ-4 checks planned for Sprint P3.1.8.1. **Sprint
+1B.1 adds W6's chunk-dependent half** — DQ-5 (register **1B-08**) and DQ-6
+(register **1B-09**) — whose recorded blocker has cleared: `sample_rag/chunks.json`
+did not exist when plan §11.2 scoped W6 and does exist now.
+
+**DQ-7 remains blocked** on the Index Layer and an `EmbeddingProvider`
+implementation (plan §8.1, §16 open item O-6), which are register **1B-10**,
+**1B-03** and **1B-01**. It is absent from this file for that reason, not by
+oversight, and Sprint 1B.1 does not implement it.
+
+W6 and the single-artifact validator (plan §6.1 rows 5 and 7)
+--------------------------------------------------------------
+`scripts/build_chunks.py`'s `validate_chunks` already owns everything decidable
+from `chunks.json` alone: the container, the six field types, invariants 1, 2,
+4, 5, 6 and 7. Plan §6.1 assigns that to **Structural Artifact Validation**
+(row 5), and §6.2 resolves the collision with DQV explicitly — *"Row 7 vs.
+`validate_chunks()` → DQV. `docs/CHUNK_VALIDATION_PLAN.md` §P5 explicitly
+declined 'a fifth layer inside `validate_chunks()` itself'."*
+
+W6 therefore restates none of it. DQ-5 calls the existing gate rather than
+reimplementing it, and adds only what the gate does not decide: that the
+committed collection carries **exactly** the contract's six fields (§17 —
+*"No fields beyond the six above exist in this version of the contract"*), and
+that each `id` is the **derived** value §17 specifies rather than merely a
+unique one. DQ-6 is cross-artifact by construction (plan §6.1 row 7) and could
+not live in a single-artifact validator at all.
+
+What W6 protects that nothing protected before
+-----------------------------------------------
+A Manifest cataloguing a document the chunk collection does not cover was
+undetectable at HEAD: `validate_chunks` cannot see the Manifest, and no DQV
+check read `chunks.json`. Corpus expansion made that reachable in practice.
+`test_dq6_every_manifest_document_is_represented_in_the_chunk_collection` is
+the specification that closes it.
 """
 
 import json
 
+import pytest
+
+from scripts.build_chunks import (
+    REQUIRED_CHUNK_FIELDS,
+    ChunkValidationError,
+    load_chunks,
+    validate_chunks,
+)
 from scripts.build_manifest import (
     DOCUMENTS_ROOT,
     SAMPLE_RAG_ROOT,
@@ -262,6 +301,7 @@ from scripts.build_manifest import (
     validate_manifest,
 )
 
+from sample_rag.chunker import generate_chunk_id
 from sample_rag.knowledge_source import resolve_source_path
 
 
@@ -661,3 +701,565 @@ def test_dq4_correspondence_holds_across_a_multi_document_corpus(synthetic_corpu
         assert len([entry for entry in entries if entry["id"] == document.id]) == 1
 
     assert len(documents) == len(entries)
+
+
+# --- W6 predicates ----------------------------------------------------------
+#
+# Each returns a *report* rather than a bool, for the reason `duplicate_ids`
+# states: one predicate then serves both the real-corpus specification (assert
+# the report is empty) and the synthetic negative (assert the report names the
+# planted defect). A bool would force the synthetic case to restate the
+# predicate — the duplication `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §5
+# rates a **High** drift risk.
+#
+# All five are pure, read-only, and total functions of their arguments: no
+# filesystem access, no iteration-order dependence (every report is sorted),
+# no clock, no environment. Plan §7.5.
+
+
+def chunks_with_unexpected_fields(entries):
+    """Return `(chunk_index_position, sorted_actual_fields)` for entries whose
+    field set is not exactly the Chunk Contract's six.
+
+    `docs/CHUNK_CONTRACT.md` §17 — *"**No fields beyond the six above exist in
+    this version of the contract.** Every candidate field evaluated in Section
+    15 is explicitly deferred, not silently included as optional."*
+
+    `validate_chunks` cannot make this claim: `_validate_chunk_entry` iterates
+    `REQUIRED_CHUNK_FIELDS` and checks presence and type, so it detects a
+    *missing* field and is silent about an *extra* one. The deferral in §15 is
+    what makes the difference load-bearing — a field appearing here would be a
+    deferred candidate arriving without the governance §15 requires.
+
+    The expected set is read from `REQUIRED_CHUNK_FIELDS` rather than written
+    out, so this predicate cannot drift from the validator's own notion of the
+    contract's fields.
+    """
+    expected = set(REQUIRED_CHUNK_FIELDS)
+    return [
+        (position, sorted(entry))
+        for position, entry in enumerate(entries)
+        if set(entry) != expected
+    ]
+
+
+def misderived_chunk_ids(entries):
+    """Return `(stored_id, expected_id)` for entries whose `id` is not the
+    contract's positional derivation.
+
+    `docs/CHUNK_CONTRACT.md` §17 — *"`id` … Globally unique, deterministic
+    identifier, **derived from position (`document_id` + `chunk_index`), not
+    content**"* (§10, §14.1).
+
+    This is not invariant 7 restated. `validate_chunks`'
+    `_validate_collection_invariants` asserts ids are pairwise *distinct*;
+    distinctness is satisfied by any injective function, including a
+    content-derived digest — which is precisely what §17 rules out. Uniqueness
+    and derivation are different guarantees, and only one of them was enforced
+    at HEAD.
+
+    `generate_chunk_id` is called rather than reproduced. Reimplementing
+    `sha256(f"{document_id}:{chunk_index}")[:16]` here would make the
+    specification agree with a *copy* of the rule instead of the rule, and
+    would survive a change to the real one.
+    """
+    return [
+        (entry["id"], generate_chunk_id(entry["document_id"], entry["chunk_index"]))
+        for entry in entries
+        if entry["id"] != generate_chunk_id(entry["document_id"], entry["chunk_index"])
+    ]
+
+
+def orphaned_chunk_document_ids(entries, known_document_ids):
+    """Return the `document_id` values in `entries` absent from `known_document_ids`.
+
+    The foreign-key direction `docs/CHUNK_CONTRACT.md` §11 freezes —
+    *"`document_id` **must equal** the corresponding entry's `id` field in
+    `knowledge_manifest.json`'s `documents[]` array"* — and which §11 then
+    defers by name: *"Referential integrity … is **not** part of this
+    structural contract … deferred to P2.4 (Chunk Validation) or later."* Plan
+    §6.1 row 7 is where "or later" landed.
+
+    Sorted, so the report does not depend on set iteration order (plan §7.5).
+    """
+    return sorted({entry["document_id"] for entry in entries} - set(known_document_ids))
+
+
+def unchunked_document_ids(entries, documents):
+    """Return the ids of documents that have chunkable text and no chunks.
+
+    The Manifest → chunks direction. This is the condition that was
+    undetectable at HEAD, and it is deliberately **not** stated as *"every
+    document has at least one chunk"*, because that would contradict the
+    cardinality `docs/CHUNK_CONTRACT.md` §11 freezes — *"one document produces
+    **zero** or more chunks (1:N)"* — and plan §8.2, which classifies empty
+    `Document.text` as *"**Not a failure at all** — legal, and legally produces
+    zero chunks."*
+
+    The guard is therefore `text.strip()`. Plan §8.2 words the legal-zero case
+    as *empty* text; the Chunker's actual zero-chunk condition is slightly
+    wider — `detect_structural_boundaries` returns `[]` for any text with no
+    non-whitespace run, because `_strip_span` discards whitespace-only spans,
+    and invariant 1 (*non-empty*) is what forces that. Using `.strip()` keeps
+    this predicate from reporting a whitespace-only document as a defect. The
+    widening is recorded rather than assumed — see the Sprint 1B.1 evidence
+    report, Engineering Findings.
+
+    This does not re-specify the Chunker. It asserts no chunk count, no
+    boundary, and no span; only that a document with chunkable content is
+    represented at all.
+    """
+    chunked = {entry["document_id"] for entry in entries}
+    return sorted(
+        document.id
+        for document in documents
+        if document.text.strip() and document.id not in chunked
+    )
+
+
+def reconstruction_failures(entries, documents_by_id):
+    """Return `(chunk_id, stored_text, reconstructed_text)` for entries whose
+    text is not the span its offsets name in the parent document.
+
+    **Chunk invariant 3 in full form** — `docs/CHUNK_CONTRACT.md` §17:
+    *"`text == document_text[character_start:character_end]` (half-open, Python
+    slicing semantics)"*. Plan §8.1 names exactly this as DQ-6's second half,
+    and §6.1 row 7 assigns *"Chunk invariant 3's full substring form"* to DQV.
+
+    `validate_chunks` enforces only invariant 2, `len(text) == end - start`.
+    That is the form decidable without the parent document, and it is strictly
+    weaker: a chunk carrying the *right length* of the *wrong* text satisfies
+    it. Closing that gap requires the document text, which is a second
+    artifact — which is why the contract deferred it and why it lands here.
+
+    Offsets are Unicode code points (§17), and Python string slicing is
+    code-point indexed, so the comparison is the contract's semantics directly.
+    Chunks whose `document_id` does not resolve are skipped, not reported: that
+    is `orphaned_chunk_document_ids`' claim, and reporting it twice would make
+    one defect fail two specifications for two different stated reasons.
+    """
+    failures = []
+    for entry in entries:
+        document = documents_by_id.get(entry["document_id"])
+        if document is None:
+            continue
+        reconstructed = document.text[entry["character_start"] : entry["character_end"]]
+        if entry["text"] != reconstructed:
+            failures.append((entry["id"], entry["text"], reconstructed))
+    return failures
+
+
+def chunk_entry(document_id, chunk_index, text, character_start):
+    """Build one contract-shaped chunk entry for a synthetic collection.
+
+    A fixture helper, not a second Chunker: `id` comes from `generate_chunk_id`
+    and offsets are supplied by the caller, so a synthetic entry is well-formed
+    by default and each negative case perturbs exactly one property.
+    """
+    return {
+        "id": generate_chunk_id(document_id, chunk_index),
+        "document_id": document_id,
+        "text": text,
+        "chunk_index": chunk_index,
+        "character_start": character_start,
+        "character_end": character_start + len(text),
+    }
+
+
+# --- W6 / DQ-5: chunk validity as a corpus property -------------------------
+
+
+def test_dq5_committed_chunk_collection_passes_the_contract_gate(real_chunk_collection):
+    """W6 / DQ-5 — `validate_chunks(load_chunks())` succeeds against the committed collection.
+
+    The chunk counterpart of W1, and it closes the same class of gap. Until
+    now the committed `sample_rag/chunks.json` was validated only when
+    `scripts/build_chunks.py` `main()` was run by hand, or incidentally by
+    `scripts/run_retrieval.py` at runtime. No specification asserted that the
+    *artifact in the repository* conforms to the Chunk Contract, so a
+    hand-edited or partially-regenerated collection could sit committed and
+    green.
+
+    `real_chunk_collection` is deliberately the **unvalidated** fixture. The
+    existing `real_chunks` fixture chains `validate_chunks(load_chunks())`
+    itself; using it here would make this specification assert a property its
+    own fixture had already guaranteed — the trap `tests/conftest.py` records
+    for `real_evidence_trace_collection`.
+
+    Reuse, not reimplementation (plan §11.1): the gate is called, not restated.
+    `validate_chunks` raises `ChunkValidationError` on the first violation in
+    Representation → Entity → Collection order, so a failure here names the
+    offending entry and the invariant it broke.
+
+    This is corpus-scoped in the sense plan §8.1 distinguishes: the claim is
+    about the committed corpus's chunk collection, not about an arbitrary
+    collection the validator happens to be handed.
+    """
+    assert validate_chunks(real_chunk_collection) is real_chunk_collection
+
+
+def test_dq5_committed_chunks_carry_exactly_the_six_contract_fields(real_chunk_collection):
+    """W6 / DQ-5 — no committed chunk carries a field the contract does not define.
+
+    `docs/CHUNK_CONTRACT.md` §17's closing clause, which no code enforces:
+    *"No fields beyond the six above exist in this version of the contract.
+    Every candidate field evaluated in Section 15 is explicitly deferred, not
+    silently included as optional."*
+
+    The guard is not decoration. §15 defers real candidates — an embedding
+    reference among them — and Milestone 1B builds the Index Layer that would
+    want one (register **1B-01**, **1B-03**, **1B-04**). This specification is
+    what makes such a field arrive through the contract rather than through a
+    serializer.
+
+    Were `chunks[]` ever empty, the assertion below would pass vacuously; the
+    non-empty guard makes that visible rather than silent.
+    """
+    entries = real_chunk_collection["chunks"]
+
+    assert entries, "the committed chunk collection must contain at least one chunk"
+
+    assert chunks_with_unexpected_fields(entries) == [], (
+        "chunks carrying fields outside the Chunk Contract's six: "
+        f"{chunks_with_unexpected_fields(entries)}"
+    )
+
+
+def test_dq5_committed_chunk_ids_are_derived_from_position(real_chunk_collection):
+    """W6 / DQ-5 — every committed `id` is the positional derivation §17 specifies.
+
+    `docs/CHUNK_CONTRACT.md` §17: *"derived from position (`document_id` +
+    `chunk_index`), **not content**"*.
+
+    Distinct from invariant 7, which `validate_chunks` already enforces:
+    uniqueness is satisfied by any injective id function, so a collection whose
+    ids were content digests would pass the existing gate and violate the
+    contract. `misderived_chunk_ids`' docstring carries the full reasoning.
+
+    No literal id is frozen here. The specification compares two computed
+    values, exactly as DQ-1 compares two computed hashes — plan §12,
+    *"Behaviour, not artefacts"*.
+    """
+    entries = real_chunk_collection["chunks"]
+
+    assert entries, "the committed chunk collection must contain at least one chunk"
+
+    assert misderived_chunk_ids(entries) == [], (
+        f"chunk ids not derived from (document_id, chunk_index): {misderived_chunk_ids(entries)}"
+    )
+
+
+def test_dq5_an_extra_field_on_a_chunk_is_detected():
+    """W6 / DQ-5, synthetic — a chunk carrying a seventh field is reported.
+
+    The negative case plan §12 requires. It cannot be taken from the real
+    corpus, which is correct by construction: `serialize_chunk` writes the six
+    fields explicitly, so the committed artifact can only acquire a seventh by
+    hand-editing or by a future serializer change — which is exactly the drift
+    this check exists to catch.
+
+    `embedding` is not an arbitrary choice: `docs/CHUNK_CONTRACT.md` §15
+    evaluates and defers a vector representation, and Milestone 1B's Index
+    Layer is the work that would introduce one.
+    """
+    entry = chunk_entry("doc-a", 0, "alpha", 0)
+    entry["embedding"] = [0.0, 1.0]
+
+    report = chunks_with_unexpected_fields([entry])
+
+    assert report == [
+        (
+            0,
+            [
+                "character_end",
+                "character_start",
+                "chunk_index",
+                "document_id",
+                "embedding",
+                "id",
+                "text",
+            ],
+        )
+    ]
+
+
+def test_dq5_a_missing_field_on_a_chunk_is_detected():
+    """W6 / DQ-5, synthetic — a chunk missing a contract field is reported.
+
+    The other direction of the same predicate. `validate_chunks` also detects
+    this, and detecting it twice is deliberate rather than redundant: the two
+    layers make different claims, and the predicate here must be shown to be
+    an equality over the field set rather than a one-sided superset test. A
+    predicate that only caught extras would silently pass a truncated chunk.
+    """
+    entry = chunk_entry("doc-a", 0, "alpha", 0)
+    del entry["character_end"]
+
+    report = chunks_with_unexpected_fields([entry])
+
+    assert report == [
+        (0, ["character_start", "chunk_index", "document_id", "id", "text"])
+    ]
+
+
+def test_dq5_a_content_derived_chunk_id_is_detected():
+    """W6 / DQ-5, synthetic — an id derived from content rather than position is reported.
+
+    The mutant §17 rules out by name, and the one the existing gate cannot see:
+    the collection below has unique ids, contiguous indices, and valid offsets,
+    so `validate_chunks` accepts it. Only the derivation check rejects it.
+    """
+    first = chunk_entry("doc-a", 0, "alpha", 0)
+    second = chunk_entry("doc-a", 1, "beta", 6)
+    second["id"] = "0123456789abcdef"
+
+    assert validate_chunks({"schema_version": "1.0", "chunks": [first, second]}) is not None
+
+    report = misderived_chunk_ids([first, second])
+
+    assert report == [("0123456789abcdef", generate_chunk_id("doc-a", 1))]
+
+
+def test_dq5_a_structurally_invalid_collection_is_refused_by_the_gate():
+    """W6 / DQ-5, synthetic — the gate this check delegates to actually rejects.
+
+    Guards the delegation itself. `test_dq5_committed_chunk_collection_passes_the_contract_gate`
+    asserts a call succeeds; on its own that is compatible with a validator
+    that never rejects anything. This specification shows the gate has teeth,
+    so the passing assertion carries information.
+
+    Not a restatement of `validate_chunks`' own specifications: one violation
+    is presented, not the taxonomy. The Chunk Validation suite owns coverage of
+    the validator; this owns the claim that DQ-5's delegation is meaningful.
+    """
+    entry = chunk_entry("doc-a", 0, "alpha", 0)
+    entry["character_end"] = entry["character_start"]
+
+    with pytest.raises(ChunkValidationError):
+        validate_chunks({"schema_version": "1.0", "chunks": [entry]})
+
+
+# --- W6 / DQ-6: chunk referential integrity ---------------------------------
+
+
+def test_dq6_every_committed_chunk_resolves_to_a_manifest_entry(
+    real_chunks, real_manifest_entries
+):
+    """W6 / DQ-6 — no committed chunk is an orphan against the Knowledge Manifest.
+
+    `docs/CHUNK_CONTRACT.md` §11's foreign key, checked in the narrowing
+    direction: every `chunks[].document_id` names a `documents[].id` that
+    exists. Plan §6.1 row 7 assigns it to DQV because it is *"two artifacts by
+    definition"* — `validate_chunks` cannot see the Manifest at all.
+
+    The Manifest side is read from `real_manifest_entries`, which parses the
+    artifact with `json` directly, so the comparison is against the committed
+    artifact rather than against a code path that also produced it.
+    """
+    manifested_ids = {entry["id"] for entry in real_manifest_entries}
+
+    assert real_chunks, "the committed chunk collection must contain at least one chunk"
+
+    assert orphaned_chunk_document_ids(real_chunks, manifested_ids) == [], (
+        "chunk document_id values with no Manifest entry: "
+        f"{orphaned_chunk_document_ids(real_chunks, manifested_ids)}"
+    )
+
+
+def test_dq6_every_committed_chunk_resolves_to_a_loaded_document(real_chunks, real_documents):
+    """W6 / DQ-6 — every committed chunk resolves to a `Document` from `load()`.
+
+    Plan §6.1 row 7 names both targets — *"`Chunk.document_id` ↔
+    **Manifest/`Document`**"* — and both are specified, for the reason plan
+    §11.2 W2 gives for specifying two coinciding predicates: under identity
+    strategy S1 the two sets coincide, and specifying both makes the
+    coincidence a protected property rather than an assumption.
+
+    The distinction is not hypothetical here. DQ-4 guarantees `Document` →
+    Manifest; nothing guarantees that a chunk keyed to a manifested id is
+    keyed to a document `load()` actually produced, which is what the Chunk
+    Layer consumes.
+    """
+    loaded_ids = {document.id for document in real_documents}
+
+    assert real_chunks, "the committed chunk collection must contain at least one chunk"
+
+    assert orphaned_chunk_document_ids(real_chunks, loaded_ids) == [], (
+        "chunk document_id values with no loaded Document: "
+        f"{orphaned_chunk_document_ids(real_chunks, loaded_ids)}"
+    )
+
+
+def test_dq6_every_manifest_document_is_represented_in_the_chunk_collection(
+    real_chunks, real_documents
+):
+    """W6 / DQ-6 — no catalogued document with chunkable text is missing from the collection.
+
+    **The condition that was undetectable at HEAD.** A Manifest entry the chunk
+    collection does not cover breaks no structural invariant: `validate_chunks`
+    cannot see the Manifest, `validate_manifest` cannot see the chunks, and
+    every DQ-1 … DQ-4 check passes over a manifest whose documents were never
+    chunked. The repository could carry a stale `chunks.json` against a current
+    Manifest and report a fully green suite.
+
+    Stated as *documents with chunkable text*, not *all documents*, because
+    `docs/CHUNK_CONTRACT.md` §11 fixes the cardinality at *"zero or more"* and
+    plan §8.2 rules empty `Document.text` *"not a failure at all."*
+    `unchunked_document_ids`' docstring carries the exact predicate and why it
+    uses `.strip()`.
+
+    No chunk count, boundary, or span is asserted. Chunking behaviour belongs
+    to the Chunker and its own suite; this is a coverage claim only.
+    """
+    assert real_documents, "the committed corpus must contain at least one document"
+
+    assert unchunked_document_ids(real_chunks, real_documents) == [], (
+        "catalogued documents with chunkable text and no chunks: "
+        f"{unchunked_document_ids(real_chunks, real_documents)}"
+    )
+
+
+def test_dq6_every_committed_chunk_text_equals_its_source_document_span(
+    real_chunks, real_documents_by_id
+):
+    """W6 / DQ-6 — Chunk invariant 3 in full form, against the real corpus.
+
+    `docs/CHUNK_CONTRACT.md` §17 invariant 3 — *"`text ==
+    document_text[character_start:character_end]`"* — the reconstruction
+    guarantee the repository has carried as a contract statement since Sprint
+    P2.1 with nothing enforcing it end to end.
+
+    `validate_chunks` enforces invariant 2 only, `len(text) == end - start`,
+    which is what a single artifact can decide. Invariant 3 is strictly
+    stronger and needs the parent document: a chunk with correct length and
+    wrong content satisfies invariant 2 and violates the contract. That gap is
+    the substance of this specification.
+
+    What this protects concretely: it ties the chunk collection to the *bytes
+    currently in the corpus*, through extraction and N1–N5 normalization. If a
+    source document were edited and the collection not rebuilt, DQ-1 would
+    catch the hash drift and this check would independently catch every chunk
+    whose text no longer reconstructs — the two failures naming the same cause
+    from opposite ends.
+
+    No literal text is frozen. Both sides are computed from committed state,
+    per plan §12's *"behaviour, not artefacts."*
+    """
+    assert real_chunks, "the committed chunk collection must contain at least one chunk"
+
+    failures = reconstruction_failures(real_chunks, real_documents_by_id)
+
+    assert failures == [], (
+        f"chunks whose text does not reconstruct from its document span: "
+        f"{[chunk_id for chunk_id, _, _ in failures]}"
+    )
+
+
+def test_dq6_an_orphaned_chunk_is_detected():
+    """W6 / DQ-6, synthetic — a chunk keyed to an unknown document is reported.
+
+    The negative case for the foreign-key direction. It cannot arise from the
+    real corpus: `scripts/build_chunks.py` `main()` chunks the documents
+    `load()` emits, so every `document_id` it writes is manifested by
+    construction. The check exists for the collection that was *not* produced
+    that way — hand-edited, partially regenerated, or carried across a Manifest
+    change.
+    """
+    entries = [
+        chunk_entry("doc-present", 0, "alpha", 0),
+        chunk_entry("doc-absent", 0, "beta", 0),
+    ]
+
+    assert orphaned_chunk_document_ids(entries, {"doc-present"}) == ["doc-absent"]
+
+
+def test_dq6_a_manifest_document_absent_from_the_chunk_collection_is_detected():
+    """W6 / DQ-6, synthetic — a catalogued, chunkable document with no chunks is reported.
+
+    The negative case for **the exact condition that motivated this sprint**:
+    the Manifest advanced, the chunk collection did not, and nothing noticed.
+
+    `_Document` below is a two-attribute stand-in, not a fixture corpus. The
+    predicate consumes only `.id` and `.text` — the same minimal shape
+    `sample_rag/chunker.py` `_validate_document` assumes — so a synthetic
+    corpus would add a filesystem round trip without adding a claim.
+    """
+
+    class _Document:
+        def __init__(self, id, text):
+            self.id = id
+            self.text = text
+
+    documents = [_Document("doc-chunked", "alpha"), _Document("doc-stale", "beta")]
+    entries = [chunk_entry("doc-chunked", 0, "alpha", 0)]
+
+    assert unchunked_document_ids(entries, documents) == ["doc-stale"]
+
+
+def test_dq6_a_document_with_no_chunkable_text_is_not_reported():
+    """W6 / DQ-6, synthetic — a blank document with zero chunks is legal, not a defect.
+
+    The complement of the case above, and the reason
+    `unchunked_document_ids` guards on `text.strip()` rather than on presence.
+    Plan §8.2 classifies empty `Document.text` as *"**Not a failure at all** —
+    legal, and legally produces zero chunks"*, and `docs/CHUNK_CONTRACT.md`
+    §11 fixes the cardinality at *"zero or more."*
+
+    Both the empty and the whitespace-only case are presented, because the
+    Chunker treats them identically — `detect_structural_boundaries` returns
+    `[]` for either — while plan §8.2 words only the first. Specifying both is
+    what keeps this check from reporting a legal corpus as broken.
+    """
+
+    class _Document:
+        def __init__(self, id, text):
+            self.id = id
+            self.text = text
+
+    documents = [_Document("doc-empty", ""), _Document("doc-blank", "   \n\t  ")]
+
+    assert unchunked_document_ids([], documents) == []
+
+
+def test_dq6_a_chunk_whose_text_does_not_reconstruct_is_detected():
+    """W6 / DQ-6, synthetic — right length, wrong content, and invariant 3 catches it.
+
+    The mutant that separates invariant 3 from invariant 2. `"beta"` and
+    `"gamm"` are both four characters, so `len(text) == end - start` holds and
+    `validate_chunks` accepts the entry — asserted below, so the distinction is
+    demonstrated rather than claimed. Only reconstruction against the parent
+    document rejects it.
+    """
+
+    class _Document:
+        def __init__(self, id, text):
+            self.id = id
+            self.text = text
+
+    document = _Document("doc-a", "alpha beta gamma")
+    entry = chunk_entry("doc-a", 0, "beta", 6)
+    entry["text"] = "gamm"
+
+    assert validate_chunks({"schema_version": "1.0", "chunks": [entry]}) is not None
+
+    failures = reconstruction_failures([entry], {"doc-a": document})
+
+    assert failures == [(entry["id"], "gamm", "beta")]
+
+
+def test_dq6_reconstruction_skips_chunks_whose_document_does_not_resolve():
+    """W6 / DQ-6, synthetic — an orphan is reported once, by the check that owns it.
+
+    Boundary between two predicates. An orphaned chunk has no parent document
+    to reconstruct against; treating that as a reconstruction failure would
+    make one defect fail two specifications for two different stated reasons,
+    and would leave a reader unable to tell which claim the corpus actually
+    broke.
+
+    `orphaned_chunk_document_ids` owns that defect. This specification fixes
+    the division so a later change cannot quietly blur it.
+    """
+    entry = chunk_entry("doc-absent", 0, "alpha", 0)
+
+    assert reconstruction_failures([entry], {}) == []
+    assert orphaned_chunk_document_ids([entry], set()) == ["doc-absent"]
