@@ -13,6 +13,13 @@
       "source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
       "hash": "c6e8b756116100e0df47ec2bae142c1cbdb37affc13d12816857145ae939bdde",
       "indexed": false,
+      "canonical": false
+    },
+    {
+      "id": "d1a4d530f9c1",
+      "source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
+      "hash": "3a0ad7d6ddebd7612cd8cb9de11a380a5eac19fd121f80da9f60f82cc19ad225",
+      "indexed": false,
       "canonical": true
     }
   ]

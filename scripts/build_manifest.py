@@ -36,8 +36,12 @@ REQUIRED_DOCUMENT_FIELDS = {
     "canonical": bool,
 }
 
-# Canonical document designation — Sprint P3.7.5, discharging RO-01
-# (docs/P3.7.3_Repository_Owner_Constitutional_Decision.md §3.4, §4.4 R-RO-01).
+# Canonical document designation — Repository Owner decision RO-01.
+# First declared at Sprint P3.7.5 (v2.3); redesignated to v3.0 by the approved
+# RO-01 decision executed as Milestone 1B's first engineering activity. v2.2 and
+# v2.3 remain historical corpus artifacts, catalogued with canonical: false.
+# (docs/P3.7.3_Repository_Owner_Constitutional_Decision.md §3.4, §4.4 R-RO-01;
+#  docs/P3.7.6_Milestone_1A_Closure_and_Frozen_Baseline.md, appended erratum.)
 #
 # A Repository Owner corpus-composition decision, declared explicitly rather
 # than derived: docs/MILESTONE_1A.md build item 1 keeps *filenames* authoritative
@@ -48,7 +52,7 @@ REQUIRED_DOCUMENT_FIELDS = {
 #
 # Membership is by normalized source path, the same identity `generate_document_id`
 # hashes, so designation and document identity cannot disagree.
-CANONICAL_SOURCES = frozenset({"documents/resume/Karthik_SR_Resume_v2_3.docx"})
+CANONICAL_SOURCES = frozenset({"documents/resume/Karthik_SR_Resume_v3_0.docx"})
 
 
 class ManifestValidationError(Exception):

@@ -134,7 +134,8 @@ This is a summary for architectural context. Stage-by-stage failure diagnosis, a
 | Directory | Purpose |
 |---|---|
 | `docs/` | Governance artifacts — roadmap, architecture, ALTM, glossary, interview notes, learning log. Source of truth for design decisions. |
-| `datasets/` | Golden Dataset and evidence-trace data (`datasets/golden/`), plus any experimental or fallback data (`datasets/synthetic/`) — see scope note in Section 11. |
+| `docs/corpus/` | Documentation describing the knowledge corpus — its composition, versioning, and canonical designation. Documentation only: nothing here is corpus content, and nothing here is discoverable under `SUPPORTED_EXTENSIONS`. |
+| `datasets/` | Golden Dataset and evidence-trace data (`datasets/golden/`). |
 | `evaluation/` | One subdirectory per evaluation tool — `deepeval/`, `promptfoo/`, `ragas/` — each owning its own configuration and test definitions. |
 | `sample_rag/` | The pipeline under test — `retriever.py`, `generator.py`, `documents/`. This is the system being evaluated, not the evaluation logic itself. |
 | `tests/` | pytest suite — primarily Layer 1 (Data Quality) validation in Milestone 1A. |
@@ -329,8 +330,9 @@ Deferred intentionally. Not forgotten — do not reintroduce without a recorded 
 | GPU optimization | Out of scope entirely |
 | Production orchestration / deployment infrastructure | Out of scope entirely |
 | A second GitHub project | Not planned |
+| Synthetic datasets | Out of scope entirely — see note below |
 
-Note on `datasets/synthetic/`: this directory exists in the current scaffold but has no defined role under the locked Golden Dataset design (`docs/roadmap.md` Section 2), which is explicitly reverse-engineered from real data rather than synthetic. Its purpose should be decided explicitly — repurposed, removed, or scoped to a specific documented use — before Milestone 1A writes data into it.
+Note on synthetic datasets: this section previously carried a pending scope decision for a `datasets/synthetic/` directory that existed in the scaffold with no defined role under the locked Golden Dataset design (`docs/roadmap.md` Section 2), which is explicitly reverse-engineered from real data rather than synthetic. That decision — **RO-05** — was taken by the Repository Owner and the directory was removed; Milestone 1A never wrote data into it. Any future introduction of synthetic datasets requires an explicit Repository Owner decision identifying both the architectural purpose and the milestone that consumes them. The forward expectation previously recorded at `datasets/README.md` (*"becomes relevant during Milestone 2+"*) is superseded by that decision.
 
 ---
 

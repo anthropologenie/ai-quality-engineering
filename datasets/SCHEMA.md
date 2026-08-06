@@ -103,18 +103,16 @@ The source prefix (`resume`, `job`, `jobops`) is carried through every derived I
 datasets/
 ├── README.md
 ├── SCHEMA.md
-├── golden/
-│   ├── resume_facts.json
-│   ├── resume_qa_pairs.json
-│   ├── resume_evidence_trace.json
-│   ├── job_facts.json
-│   ├── job_qa_pairs.json
-│   ├── job_evidence_trace.json
-│   ├── jobops_facts.json
-│   ├── jobops_qa_pairs.json
-│   └── jobops_evidence_trace.json
-└── synthetic/
-    └── .gitkeep
+└── golden/
+    ├── resume_facts.json
+    ├── resume_qa_pairs.json
+    ├── resume_evidence_trace.json
+    ├── job_facts.json
+    ├── job_qa_pairs.json
+    ├── job_evidence_trace.json
+    ├── jobops_facts.json
+    ├── jobops_qa_pairs.json
+    └── jobops_evidence_trace.json
 ```
 
 | File | Responsibility |

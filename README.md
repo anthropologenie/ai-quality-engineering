@@ -16,7 +16,7 @@ regression suites, CI, and reporting — to LLM, RAG, and agent systems.
 ## Structure
 
 - `docs/` — roadmap, architecture, learning log, interview notes, glossary
-- `datasets/` — synthetic and RAG-related sample data used for evaluation
+- `datasets/` — the Golden Dataset and evidence-trace data used for evaluation
 - `evaluation/` — DeepEval, Promptfoo, and Ragas configs and metrics
 - `sample_rag/` — a minimal retriever + generator pipeline used as the evaluation target
 - `reports/` — baseline and regression evaluation reports (numbers, not just tool names)

@@ -1376,6 +1376,702 @@
       "chunk_index": 85,
       "character_start": 10569,
       "character_end": 10625
+    },
+    {
+      "id": "231725ce833c0e06",
+      "document_id": "d1a4d530f9c1",
+      "text": "KARTHIK S R",
+      "chunk_index": 0,
+      "character_start": 0,
+      "character_end": 11
+    },
+    {
+      "id": "acbd53090323e15a",
+      "document_id": "d1a4d530f9c1",
+      "text": "Senior QA Lead | Data & AI Platform Quality Engineer | AI Quality Engineering & Evaluation",
+      "chunk_index": 1,
+      "character_start": 13,
+      "character_end": 103
+    },
+    {
+      "id": "182555f03416b66c",
+      "document_id": "d1a4d530f9c1",
+      "text": "+91 9380410692  |  karthikkattemane7@gmail.com  |  Bengaluru, Karnataka  |  linkedin.com/in/karthiksrqalead  |  github.com/anthropologenie",
+      "chunk_index": 2,
+      "character_start": 105,
+      "character_end": 243
+    },
+    {
+      "id": "52818d3274309298",
+      "document_id": "d1a4d530f9c1",
+      "text": "PROFESSIONAL SUMMARY",
+      "chunk_index": 3,
+      "character_start": 245,
+      "character_end": 265
+    },
+    {
+      "id": "42e83e0174ddf3aa",
+      "document_id": "d1a4d530f9c1",
+      "text": "Quality Engineering leader with around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering \u2014 evaluation, diagnosis, and deterministic system design. Engineered and led Python-based test automation frameworks (Pytest, Pandas, SQLAlchemy) that reduced ETL test execution time by 40% while sustaining 98%+ pass rates across 100+ scenarios for large-scale enterprise data migration programs at Maruti Suzuki, Betts Group, and Red Earth. Led cross-functional QA teams of 5+, owning test strategy, stakeholder communication, and delivery across Oracle, Teradata, Redshift, Databricks, and Snowflake environments.",
+      "chunk_index": 4,
+      "character_start": 267,
+      "character_end": 914
+    },
+    {
+      "id": "f579c15c64e8547b",
+      "document_id": "d1a4d530f9c1",
+      "text": "Extended this data-quality discipline into agentic AI and evaluation engineering. On HP\u2019s OMEN Gaming Hub program, engineered and validated a five-agent Autonomous RCA pipeline (CrewAI, Pydantic v2), cutting alert-to-RCA turnaround from hours/days to 10-15 minutes, alongside GA4 data quality investigations, a Redshift-to-Databricks Unity Catalog migration, and GitHub Enterprise API integration. In parallel, built an independent AI evaluation methodology \u2014 a deterministic retrieval evaluation pipeline with dataset validation and evidence traceability \u2014 applying the same root-cause discipline to AI system evaluation. Acts as the technical bridge between engineering, platform, and client stakeholders on enterprise AI and data delivery programs.",
+      "chunk_index": 5,
+      "character_start": 916,
+      "character_end": 1667
+    },
+    {
+      "id": "0b19c6cee3ce3d9b",
+      "document_id": "d1a4d530f9c1",
+      "text": "SELECTED ACHIEVEMENTS",
+      "chunk_index": 6,
+      "character_start": 1669,
+      "character_end": 1690
+    },
+    {
+      "id": "656dcd7aecdbcba7",
+      "document_id": "d1a4d530f9c1",
+      "text": "Reduced ETL test automation execution time by 40% through a Python-based framework (Pytest, Pandas, SQLAlchemy), sustaining a 98% pass rate across 100+ test scenarios",
+      "chunk_index": 7,
+      "character_start": 1692,
+      "character_end": 1858
+    },
+    {
+      "id": "16b18b5a8f6b7aec",
+      "document_id": "d1a4d530f9c1",
+      "text": "Led QA delivery for a data analytics platform serving 2,000+ dealer service centers, managing a cross-functional team of 5",
+      "chunk_index": 8,
+      "character_start": 1860,
+      "character_end": 1982
+    },
+    {
+      "id": "7c3a058159e83320",
+      "document_id": "d1a4d530f9c1",
+      "text": "Engineered and validated a five-agent Autonomous Root Cause Analysis (RCA) pipeline targeting a 10-15 minute alert-to-RCA turnaround, versus 2 hours to days of manual investigation",
+      "chunk_index": 9,
+      "character_start": 1984,
+      "character_end": 2164
+    },
+    {
+      "id": "b2432d8367872f92",
+      "document_id": "d1a4d530f9c1",
+      "text": "Profiled data quality across 172 columns spanning 14 GA4 analytics tables, identifying critical field-level reliability issues that informed downstream analytics",
+      "chunk_index": 10,
+      "character_start": 2166,
+      "character_end": 2327
+    },
+    {
+      "id": "c813a10d274197d7",
+      "document_id": "d1a4d530f9c1",
+      "text": "CORE SKILLS",
+      "chunk_index": 11,
+      "character_start": 2329,
+      "character_end": 2340
+    },
+    {
+      "id": "3e4509fbbfabd4b1",
+      "document_id": "d1a4d530f9c1",
+      "text": "Data Engineering: ETL Testing, Data Warehouse Testing, Data Migration Testing, Data Quality, Data Validation, Data Integrity, Data Profiling, Data Lineage, Test Data Management (TDM)",
+      "chunk_index": 12,
+      "character_start": 2342,
+      "character_end": 2524
+    },
+    {
+      "id": "c87c9bf2f18d569c",
+      "document_id": "d1a4d530f9c1",
+      "text": "AI Evaluation & Quality Engineering: AI Quality Engineering, LLM Evaluation & Validation, Agent Evaluation, RAG Evaluation, Retrieval Evaluation, Dataset Validation (Golden Dataset, Ground Truth), Evidence Traceability, AI Test Automation, Root Cause Analysis (RCA) Automation, Prompt Engineering",
+      "chunk_index": 13,
+      "character_start": 2526,
+      "character_end": 2822
+    },
+    {
+      "id": "e5f7116088a0251b",
+      "document_id": "d1a4d530f9c1",
+      "text": "AI Frameworks & Protocols: Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), Pydantic v2",
+      "chunk_index": 14,
+      "character_start": 2824,
+      "character_end": 2933
+    },
+    {
+      "id": "d06900f6c457dec2",
+      "document_id": "d1a4d530f9c1",
+      "text": "Programming & Automation: Python, Pytest, SQL, PL/SQL, Pandas, NumPy, SQLAlchemy, REST Assured, Postman, Selenium, Playwright, Shell Scripting",
+      "chunk_index": 15,
+      "character_start": 2935,
+      "character_end": 3077
+    },
+    {
+      "id": "7a2d04804ef2712f",
+      "document_id": "d1a4d530f9c1",
+      "text": "Cloud Platforms: AWS (S3, Lambda, EC2, Glue, Redshift, Bedrock, CloudWatch), Databricks (Unity Catalog, SQL Warehouses), Snowflake, Spark SQL, Medallion Architecture, Azure (basics)",
+      "chunk_index": 16,
+      "character_start": 3079,
+      "character_end": 3260
+    },
+    {
+      "id": "ce79437ea4ad2d05",
+      "document_id": "d1a4d530f9c1",
+      "text": "Databases: Oracle, Teradata, AWS Redshift, PostgreSQL, MySQL, SQL Server, NoSQL",
+      "chunk_index": 17,
+      "character_start": 3262,
+      "character_end": 3341
+    },
+    {
+      "id": "d04642479bf50a36",
+      "document_id": "d1a4d530f9c1",
+      "text": "Analytics: GA4 Analytics, Session-Grain Analytics, Cloud Analytics, Analytics Engineering, Tableau, Power BI, Excel",
+      "chunk_index": 18,
+      "character_start": 3343,
+      "character_end": 3458
+    },
+    {
+      "id": "dd579592bde573b3",
+      "document_id": "d1a4d530f9c1",
+      "text": "DevOps & Platform Engineering: GitHub REST API, GitHub Enterprise, Backend API Testing, Backend Systems Testing, Git, Jenkins, CI/CD Pipeline, Docker, JIRA, HP ALM",
+      "chunk_index": 19,
+      "character_start": 3460,
+      "character_end": 3623
+    },
+    {
+      "id": "a32392f97f787f64",
+      "document_id": "d1a4d530f9c1",
+      "text": "Leadership: Team Leadership (5+ engineers), Stakeholder Communication, Cross-Functional Coordination, Test Strategy & Technical Ownership, Engineering Documentation, Defect Management",
+      "chunk_index": 20,
+      "character_start": 3625,
+      "character_end": 3808
+    },
+    {
+      "id": "f664e5240221dc10",
+      "document_id": "d1a4d530f9c1",
+      "text": "PROFESSIONAL EXPERIENCE",
+      "chunk_index": 21,
+      "character_start": 3810,
+      "character_end": 3833
+    },
+    {
+      "id": "84802007ca0a1103",
+      "document_id": "d1a4d530f9c1",
+      "text": "Senior Engineer (Agentic AI & Data Platform Engineering)  |  Ascendion \u2014 HP AAVA / OMEN Gaming Hub Analytics Program",
+      "chunk_index": 22,
+      "character_start": 3835,
+      "character_end": 3951
+    },
+    {
+      "id": "c6d26affa15b1727",
+      "document_id": "d1a4d530f9c1",
+      "text": "Jan 2026 \u2013 Present",
+      "chunk_index": 23,
+      "character_start": 3953,
+      "character_end": 3971
+    },
+    {
+      "id": "ff5fe53aa464d326",
+      "document_id": "d1a4d530f9c1",
+      "text": "Embedded on HP\u2019s OMEN Gaming Hub product, contributing to agentic AI pipeline engineering and GA4 data analytics",
+      "chunk_index": 24,
+      "character_start": 3973,
+      "character_end": 4085
+    },
+    {
+      "id": "d051b58dbf6c088c",
+      "document_id": "d1a4d530f9c1",
+      "text": "Technologies: Python \u2022 SQL \u2022 Databricks \u2022 Redshift \u2022 Spark SQL \u2022 CrewAI \u2022 Pydantic v2 \u2022 GitHub Enterprise \u2022 Jira \u2022 FastAPI \u2022 GA4 \u2022 Unity Catalog",
+      "chunk_index": 25,
+      "character_start": 4087,
+      "character_end": 4231
+    },
+    {
+      "id": "c1f46b65132c51ec",
+      "document_id": "d1a4d530f9c1",
+      "text": "Contributed to the engineering and validation of a five-agent Autonomous Root Cause Analysis (RCA) pipeline (Alert Trigger \u2192 Evidence Retrieval \u2192 Evidence Assembly \u2192 Deterministic RCA Agent \u2192 GitHub Report Writer), targeting a 10-15 minute alert-to-RCA turnaround versus 2 hours to days of manual investigation",
+      "chunk_index": 26,
+      "character_start": 4233,
+      "character_end": 4543
+    },
+    {
+      "id": "0093f01ab9dfa438",
+      "document_id": "d1a4d530f9c1",
+      "text": "Developed a 12-step deterministic Autonomous Root Cause Analysis (RCA) reasoning agent (v2.5) with confidence scoring and anomaly classification logic, validated against real test cases",
+      "chunk_index": 27,
+      "character_start": 4545,
+      "character_end": 4730
+    },
+    {
+      "id": "808d8265ddfa2ed8",
+      "document_id": "d1a4d530f9c1",
+      "text": "Established production agent specifications (Role, Goal, Behaviour, Expected Output, Guardrails) and optimized LLM configuration parameters (temperature, top-p, execution limits) to eliminate hallucinated retries and duplicate-write collisions",
+      "chunk_index": 28,
+      "character_start": 4732,
+      "character_end": 4975
+    },
+    {
+      "id": "5a8cb1ed69697b89",
+      "document_id": "d1a4d530f9c1",
+      "text": "Diagnosed and resolved Pydantic v2 schema-generation failures, standardizing validator syntax across the platform\u2019s agent codebase",
+      "chunk_index": 29,
+      "character_start": 4977,
+      "character_end": 5107
+    },
+    {
+      "id": "3bba1dc02de7862d",
+      "document_id": "d1a4d530f9c1",
+      "text": "Engineered custom Python/FastAPI tools to integrate with HP GitHub Enterprise\u2019s Contents and Git Trees APIs, including a timestamped, collision-safe write architecture for parallel agent execution",
+      "chunk_index": 30,
+      "character_start": 5109,
+      "character_end": 5305
+    },
+    {
+      "id": "2eeb8abd050d2249",
+      "document_id": "d1a4d530f9c1",
+      "text": "Delivered a Redshift-to-Databricks Spark SQL syntax and schema translation reference, mapping legacy analytics tables to Unity Catalog equivalents",
+      "chunk_index": 31,
+      "character_start": 5307,
+      "character_end": 5453
+    },
+    {
+      "id": "f73cfc62d4a0d309",
+      "document_id": "d1a4d530f9c1",
+      "text": "Profiled and measured data quality across 172 columns spanning 14 gold-layer tables in a GA4 telemetry pipeline built on a Bronze-Silver-Gold-Diamond medallion architecture, producing field-level reliability evidence used to inform downstream analytics",
+      "chunk_index": 32,
+      "character_start": 5455,
+      "character_end": 5707
+    },
+    {
+      "id": "04ec986cdc9d6907",
+      "document_id": "d1a4d530f9c1",
+      "text": "Implemented alert threshold logic (percentage-point deltas, direction classification, volume floors) for a Boosted vs. Launched Games anomaly-detection alert, and diagnosed a Databricks IP allowlisting failure, producing the remediation path for client-side infrastructure administrators",
+      "chunk_index": 33,
+      "character_start": 5709,
+      "character_end": 5996
+    },
+    {
+      "id": "c9d8398748934f1a",
+      "document_id": "d1a4d530f9c1",
+      "text": "Standardized versioned technical documentation (Alert Understanding Documents, Architecture Understanding Documents, Practitioner Guides) and status-tracking frameworks for non-technical stakeholder reporting",
+      "chunk_index": 34,
+      "character_start": 5998,
+      "character_end": 6206
+    },
+    {
+      "id": "7d07d9b27c4f8011",
+      "document_id": "d1a4d530f9c1",
+      "text": "Coordinated with HP\u2019s Databricks administrators, the AAVA platform team, and cross-functional QA colleagues to unblock infrastructure and reporting dependencies across the program",
+      "chunk_index": 35,
+      "character_start": 6208,
+      "character_end": 6387
+    },
+    {
+      "id": "701e6394894ad90c",
+      "document_id": "d1a4d530f9c1",
+      "text": "QA Lead / Test Module Lead  |  Happiest Minds Technologies, Bengaluru",
+      "chunk_index": 36,
+      "character_start": 6389,
+      "character_end": 6458
+    },
+    {
+      "id": "50894df5af24e30a",
+      "document_id": "d1a4d530f9c1",
+      "text": "Sep 2023 \u2013 Apr 2025",
+      "chunk_index": 37,
+      "character_start": 6460,
+      "character_end": 6479
+    },
+    {
+      "id": "89f0eb9572fbbe6a",
+      "document_id": "d1a4d530f9c1",
+      "text": "Maruti Suzuki India \u2014 Service Performance & Customer Experience Analytics Platform",
+      "chunk_index": 38,
+      "character_start": 6481,
+      "character_end": 6563
+    },
+    {
+      "id": "61d889737214a595",
+      "document_id": "d1a4d530f9c1",
+      "text": "Technologies: Python \u2022 SQL \u2022 AWS (S3, Redshift) \u2022 Postman \u2022 REST Assured \u2022 Tableau \u2022 JIRA",
+      "chunk_index": 39,
+      "character_start": 6565,
+      "character_end": 6654
+    },
+    {
+      "id": "5ec29b6799617941",
+      "document_id": "d1a4d530f9c1",
+      "text": "Led a cross-functional QA team of 5, owning test strategy and stakeholder communication for a multi-tier data analytics platform tracking dealer service performance across 2,000+ service centers, analyzing trends at Service Advisor, Workshop, Zone, and Region levels",
+      "chunk_index": 40,
+      "character_start": 6656,
+      "character_end": 6922
+    },
+    {
+      "id": "f7d4bfc0c2938aa3",
+      "document_id": "d1a4d530f9c1",
+      "text": "Engineered and executed 100+ ETL test cases with Test Data Management (TDM), validating complex data transformations during a legacy-to-AWS cloud migration and ensuring data lineage and integrity across source and target systems",
+      "chunk_index": 41,
+      "character_start": 6924,
+      "character_end": 7152
+    },
+    {
+      "id": "9825919ac01c2e7b",
+      "document_id": "d1a4d530f9c1",
+      "text": "Improved data accuracy by 25% through data profiling and root cause analysis, implementing corrective actions for identified data quality issues",
+      "chunk_index": 42,
+      "character_start": 7154,
+      "character_end": 7298
+    },
+    {
+      "id": "6fe1edde8de4f2aa",
+      "document_id": "d1a4d530f9c1",
+      "text": "Achieved 95% test coverage across 50+ API endpoints (Postman, REST Assured) and validated data pipeline integrity across S3, Redshift, and Tableau using joins, subqueries, window functions, and analytical functions",
+      "chunk_index": 43,
+      "character_start": 7300,
+      "character_end": 7514
+    },
+    {
+      "id": "3828d60142d187f7",
+      "document_id": "d1a4d530f9c1",
+      "text": "Standardized defect management practices in JIRA, tracking and resolving 50+ bugs per sprint while maintaining 100% sprint delivery commitment",
+      "chunk_index": 44,
+      "character_start": 7516,
+      "character_end": 7658
+    },
+    {
+      "id": "2a3c1e6eb43ee3e4",
+      "document_id": "d1a4d530f9c1",
+      "text": "Mercury Healthcare \u2014 Marketing Analytics POC",
+      "chunk_index": 45,
+      "character_start": 7660,
+      "character_end": 7704
+    },
+    {
+      "id": "d95928e47c57bbfd",
+      "document_id": "d1a4d530f9c1",
+      "text": "Validated architectural integrity and real-time data flow across a batch/stream ingestion pipeline spanning S3, Snowflake, and Elasticsearch through comprehensive data profiling",
+      "chunk_index": 46,
+      "character_start": 7706,
+      "character_end": 7883
+    },
+    {
+      "id": "739da89e3a3847ee",
+      "document_id": "d1a4d530f9c1",
+      "text": "Delivered end-to-end functional, regression, and automated testing for marketing campaign data analyzing hospital footfall and patient conversion metrics",
+      "chunk_index": 47,
+      "character_start": 7885,
+      "character_end": 8038
+    },
+    {
+      "id": "0f32d2428716a9a7",
+      "document_id": "d1a4d530f9c1",
+      "text": "ETL Test Engineer / QA Engineer  |  MGS Technologies (Clients: Mindtree & Accenture), Hyderabad (Remote)",
+      "chunk_index": 48,
+      "character_start": 8040,
+      "character_end": 8144
+    },
+    {
+      "id": "5f85a19ac2a3c392",
+      "document_id": "d1a4d530f9c1",
+      "text": "Apr 2019 \u2013 Aug 2023",
+      "chunk_index": 49,
+      "character_start": 8146,
+      "character_end": 8165
+    },
+    {
+      "id": "a02f3ad41ca4d275",
+      "document_id": "d1a4d530f9c1",
+      "text": "Betts Group \u2014 Sales Data Warehouse (Australian Footwear Retailer)",
+      "chunk_index": 50,
+      "character_start": 8167,
+      "character_end": 8232
+    },
+    {
+      "id": "bcb9b87c0db09691",
+      "document_id": "d1a4d530f9c1",
+      "text": "Engineered a Python-based test automation framework (Pytest, Pandas, NumPy, SQLAlchemy), reducing test execution time by 40% and increasing test coverage by 25%",
+      "chunk_index": 51,
+      "character_start": 8234,
+      "character_end": 8394
+    },
+    {
+      "id": "0800edfd2a3892c1",
+      "document_id": "d1a4d530f9c1",
+      "text": "Executed 100+ automated ETL test cases at a 98% pass rate for a critical data migration project, contributing to on-time delivery of a Star Schema sales data warehouse",
+      "chunk_index": 52,
+      "character_start": 8396,
+      "character_end": 8563
+    },
+    {
+      "id": "483ccec9fac42021",
+      "document_id": "d1a4d530f9c1",
+      "text": "Validated complex data transformation logic and lineage between Oracle and Teradata using advanced SQL (minus queries, joins, analytical functions) and data profiling",
+      "chunk_index": 53,
+      "character_start": 8565,
+      "character_end": 8731
+    },
+    {
+      "id": "9fb41a330418bdba",
+      "document_id": "d1a4d530f9c1",
+      "text": "Delivered regression and ETL performance testing across quarterly/yearly data refresh cycles, validating Slowly Changing Dimensions (SCD Type 2)",
+      "chunk_index": 54,
+      "character_start": 8733,
+      "character_end": 8877
+    },
+    {
+      "id": "d553af690466feb3",
+      "document_id": "d1a4d530f9c1",
+      "text": "Red Earth \u2014 Customer Data Warehouse (International Cosmetics Retailer)",
+      "chunk_index": 55,
+      "character_start": 8879,
+      "character_end": 8949
+    },
+    {
+      "id": "06da1bc0b85b75eb",
+      "document_id": "d1a4d530f9c1",
+      "text": "Improved data accuracy and reliability by 30% through systematic root cause analysis, resolving 100+ data quality issues",
+      "chunk_index": 56,
+      "character_start": 8951,
+      "character_end": 9071
+    },
+    {
+      "id": "86f7155e3442ff44",
+      "document_id": "d1a4d530f9c1",
+      "text": "Established test documentation and TDM procedures from business requirements, raising 80+ defects to successful closure",
+      "chunk_index": 57,
+      "character_start": 9073,
+      "character_end": 9192
+    },
+    {
+      "id": "5f7f2af16304b46e",
+      "document_id": "d1a4d530f9c1",
+      "text": "Associate Software Engineer  |  Robert Bosch Engineering Solutions, Bengaluru",
+      "chunk_index": 58,
+      "character_start": 9194,
+      "character_end": 9271
+    },
+    {
+      "id": "ddb60c4ca61dbac4",
+      "document_id": "d1a4d530f9c1",
+      "text": "Aug 2018 \u2013 Apr 2019",
+      "chunk_index": 59,
+      "character_start": 9273,
+      "character_end": 9292
+    },
+    {
+      "id": "ae4fc8110cd68403",
+      "document_id": "d1a4d530f9c1",
+      "text": "Implemented HMI (Human Machine Interface) testing and automation for a Bombardier Recreational Products digital cluster infotainment system using Python and CGI tools",
+      "chunk_index": 60,
+      "character_start": 9294,
+      "character_end": 9460
+    },
+    {
+      "id": "d5393da2c30142e9",
+      "document_id": "d1a4d530f9c1",
+      "text": "Executed test cases across product prototypes, gaining exposure to the complete SDLC from initial design through production deployment",
+      "chunk_index": 61,
+      "character_start": 9462,
+      "character_end": 9596
+    },
+    {
+      "id": "ebb1f64bde947976",
+      "document_id": "d1a4d530f9c1",
+      "text": "Engineering Intern  |  Hindustan Aeronautics Limited (HAL), Bengaluru",
+      "chunk_index": 62,
+      "character_start": 9598,
+      "character_end": 9667
+    },
+    {
+      "id": "abe3386deb96e395",
+      "document_id": "d1a4d530f9c1",
+      "text": "Jul 2017 \u2013 Aug 2017",
+      "chunk_index": 63,
+      "character_start": 9669,
+      "character_end": 9688
+    },
+    {
+      "id": "53e011f2a579de17",
+      "document_id": "d1a4d530f9c1",
+      "text": "Supported avionics equipment design testing for the Sukhoi Su-30 MKI fighter aircraft, gaining exposure to defense-grade quality assurance procedures",
+      "chunk_index": 64,
+      "character_start": 9690,
+      "character_end": 9839
+    },
+    {
+      "id": "76a3d8a8c11aabfc",
+      "document_id": "d1a4d530f9c1",
+      "text": "TECHNICAL PROJECTS",
+      "chunk_index": 65,
+      "character_start": 9841,
+      "character_end": 9859
+    },
+    {
+      "id": "a13e06e63abded33",
+      "document_id": "d1a4d530f9c1",
+      "text": "AI Quality Evaluation Suite",
+      "chunk_index": 66,
+      "character_start": 9861,
+      "character_end": 9888
+    },
+    {
+      "id": "f228c7d9d8934159",
+      "document_id": "d1a4d530f9c1",
+      "text": "Independent Portfolio Project",
+      "chunk_index": 67,
+      "character_start": 9890,
+      "character_end": 9919
+    },
+    {
+      "id": "378e9af26e8e59f8",
+      "document_id": "d1a4d530f9c1",
+      "text": "Architected and built a deterministic, stdlib-only Python retrieval evaluation pipeline (Knowledge \u2192 Index \u2192 Retrieve \u2192 Generate) demonstrating reproducible AI Quality Engineering methodology, backed by 372 passing test specifications with zero surviving mutants across mutation-tested, load-bearing suites",
+      "chunk_index": 68,
+      "character_start": 9921,
+      "character_end": 10227
+    },
+    {
+      "id": "884add1a5e48d0a2",
+      "document_id": "d1a4d530f9c1",
+      "text": "Designed a Golden Dataset (26 facts, 22 QA pairs) covering a full seven-category failure taxonomy \u2014 Exact Fact, Paraphrase, Multi-hop, No Answer, False Premise, Stale Version, Contradiction \u2014 plus an Evidence Trace Dataset defining machine-checkable expected retrieval behavior for every test case",
+      "chunk_index": 69,
+      "character_start": 10229,
+      "character_end": 10526
+    },
+    {
+      "id": "2d0716df9fa1fa27",
+      "document_id": "d1a4d530f9c1",
+      "text": "Built a four-layer Retrieval Evaluation \u2192 Metrics \u2192 Diagnosis stack computing classical IR metrics (Chunk Precision@K, Recall@K, Hit Rate) and attributing each finding to a specific pipeline stage using a custom AI Lifecycle Traceability diagnostic framework",
+      "chunk_index": 70,
+      "character_start": 10528,
+      "character_end": 10786
+    },
+    {
+      "id": "5f7e6038ade90eae",
+      "document_id": "d1a4d530f9c1",
+      "text": "Root-caused and fixed a real retrieval defect by tracing it to a Knowledge-stage labeling gap rather than a retrieval-algorithm issue, producing a measurable improvement across every retrieval metric (Precision, Recall, Hit Rate)",
+      "chunk_index": 71,
+      "character_start": 10788,
+      "character_end": 11017
+    },
+    {
+      "id": "5aa8a3850c2a9280",
+      "document_id": "d1a4d530f9c1",
+      "text": "Enforced rigorous engineering discipline throughout \u2014 contract-frozen data structures, independently re-derived metrics with zero shared code, and mutation testing as a validation gate \u2014 mirroring production AI-evaluation practices",
+      "chunk_index": 72,
+      "character_start": 11019,
+      "character_end": 11250
+    },
+    {
+      "id": "902133e4e61daf8f",
+      "document_id": "d1a4d530f9c1",
+      "text": "JobOps Platform \u2014 Automated Job Discovery & Application Tracking System",
+      "chunk_index": 73,
+      "character_start": 11252,
+      "character_end": 11323
+    },
+    {
+      "id": "b50503adeed10c40",
+      "document_id": "d1a4d530f9c1",
+      "text": "Oct 2025 \u2013 Present",
+      "chunk_index": 74,
+      "character_start": 11325,
+      "character_end": 11343
+    },
+    {
+      "id": "5b4e1e4476da93ad",
+      "document_id": "d1a4d530f9c1",
+      "text": "Engineered a full-stack backend platform automating job discovery, application tracking, and workflow management using Python, FastAPI, REST APIs, and SQLite",
+      "chunk_index": 75,
+      "character_start": 11345,
+      "character_end": 11502
+    },
+    {
+      "id": "b270745f1b80207e",
+      "document_id": "d1a4d530f9c1",
+      "text": "Implemented production-grade data engineering practices including SQLite WAL mode for concurrent access, thread-local database connection management, schema migrations, automated triggers, and structured error handling",
+      "chunk_index": 76,
+      "character_start": 11504,
+      "character_end": 11722
+    },
+    {
+      "id": "0433be855e3925f4",
+      "document_id": "d1a4d530f9c1",
+      "text": "Designed deterministic data validation and provenance workflows using schema versioning, content-hash verification, and import tracking to ensure reproducible datasets and establish a trusted structured data foundation for downstream AI quality evaluation workflows",
+      "chunk_index": 77,
+      "character_start": 11724,
+      "character_end": 11989
+    },
+    {
+      "id": "4688b736b6847ce9",
+      "document_id": "d1a4d530f9c1",
+      "text": "CERTIFICATIONS & TRAINING",
+      "chunk_index": 78,
+      "character_start": 11991,
+      "character_end": 12016
+    },
+    {
+      "id": "666dae983225dcff",
+      "document_id": "d1a4d530f9c1",
+      "text": "AWS Certified Cloud Practitioner (In Progress)",
+      "chunk_index": 79,
+      "character_start": 12018,
+      "character_end": 12064
+    },
+    {
+      "id": "700ea387378105ba",
+      "document_id": "d1a4d530f9c1",
+      "text": "ISTQB Certified Tester Foundation Level (2023)",
+      "chunk_index": 80,
+      "character_start": 12066,
+      "character_end": 12112
+    },
+    {
+      "id": "552fee60b0d409f5",
+      "document_id": "d1a4d530f9c1",
+      "text": "Completed training: Python for Test Automation, ETL Testing Best Practices, Agile Testing Methodologies",
+      "chunk_index": 81,
+      "character_start": 12114,
+      "character_end": 12217
+    },
+    {
+      "id": "0c4254570ad09200",
+      "document_id": "d1a4d530f9c1",
+      "text": "EDUCATION",
+      "chunk_index": 82,
+      "character_start": 12219,
+      "character_end": 12228
+    },
+    {
+      "id": "fba7b4a8403c74f3",
+      "document_id": "d1a4d530f9c1",
+      "text": "Bachelor of Engineering in Electronics & Communication | CGPA: 8.83/10",
+      "chunk_index": 83,
+      "character_start": 12230,
+      "character_end": 12300
+    },
+    {
+      "id": "a71df7bf5127a11c",
+      "document_id": "d1a4d530f9c1",
+      "text": "M.S. Ramaiah Institute of Technology, Bengaluru | 2014 \u2013 2018",
+      "chunk_index": 84,
+      "character_start": 12302,
+      "character_end": 12363
+    },
+    {
+      "id": "7d5c6f36c53030fe",
+      "document_id": "d1a4d530f9c1",
+      "text": "LANGUAGES",
+      "chunk_index": 85,
+      "character_start": 12365,
+      "character_end": 12374
+    },
+    {
+      "id": "52ce89776e07834c",
+      "document_id": "d1a4d530f9c1",
+      "text": "English (Fluent)  |  Hindi (Fluent)  |  Kannada (Native)",
+      "chunk_index": 86,
+      "character_start": 12376,
+      "character_end": 12432
     }
   ]
 }

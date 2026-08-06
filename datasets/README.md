@@ -6,10 +6,9 @@ This directory contains the datasets used throughout the `ai-quality-engineering
 
 ## Dataset Organization
 
-Two dataset categories exist, each with a single, non-overlapping responsibility:
+One dataset category exists:
 
 - `datasets/golden/` — the human-verified reference dataset
-- `datasets/synthetic/` — reserved for artificially constructed datasets, currently empty by design
 
 ---
 
@@ -28,25 +27,13 @@ Two dataset categories exist, each with a single, non-overlapping responsibility
 
 ---
 
-### datasets/synthetic/
-
-Reserved for artificially constructed evaluation datasets, including examples such as:
-
-- adversarial scenarios
-- regression stress cases
-- scalability datasets
-- generated edge-case corpora
-
-**Status: empty by design.**
-
-The directory is intentionally not populated during Milestone 1A. The Golden Dataset (constructed from verified resume and JobOps data) is the sole evaluation corpus throughout Milestone 1A.
-
-`datasets/synthetic/` is **deferred intentionally, not forgotten**. It becomes relevant during Milestone 2+ once the deterministic retrieval and generation pipeline exists and empirical testing identifies genuine edge cases that cannot be adequately represented within the Golden Dataset.
-
----
-
 ## Repository Principle
 
 - Real, verified data before artificial data.
 - Documentation before implementation.
-- Synthetic datasets complement the Golden Dataset rather than replace it.
+
+> **Repository Note — RO-05**
+>
+> This document previously described a `datasets/synthetic/` directory, reserved for artificially constructed datasets and recorded as *"deferred intentionally, not forgotten"* with an expectation that it would become relevant during Milestone 2+. That directory was never populated, and the Repository Owner decision **RO-05** removed it: the repository's knowledge corpus is intentionally composed of real, versioned knowledge artifacts and their associated Golden Datasets.
+>
+> Any future introduction of synthetic datasets requires an explicit Repository Owner decision identifying both the architectural purpose and the milestone that consumes them. The Milestone 2+ expectation recorded here previously is superseded by that decision, not carried forward.
