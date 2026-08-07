@@ -17,7 +17,7 @@
 - **Session 1 (LLM Core Six Baseline) and Session 2 (RAG Architecture Closure): Finalized.** Architecture is locked; no further architectural debate is scheduled. See Section 8 for a summary of decisions made in each session.
 - **Milestone 0.5 (Documentation Synchronization): Complete.** This document is part of that synchronization — bringing architectural decisions that existed only in working notes into the repository itself, so the repository is self-contained and does not depend on external chat history to be understood. Its six documents are committed.
 - **Milestone 1A (Deterministic Knowledge Pipeline): Implementation and validation complete; awaiting closure.** The full pipeline exists and runs end to end from a terminal; 372 executable specifications pass; manual review is complete and accepted. The North Star Question is answered **yes, by demonstration**. Three Definition of Done items remain unmet, and the capabilities that would meet them are constitutionally reassigned to Milestone 1B. Canonical record: `docs/MILESTONE_1A.md` — *Milestone Synchronization Record (P3.7.2)* and *Repository Owner Scope Ruling (P3.7.3)*.
-- **Milestone 1B (Retrieval Infrastructure Foundation): Established, not started.** Constituted by `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` Decision 2. Its capability set is the canonical register at `docs/DEFERRED_ITEMS_REGISTER.md`.
+- **Milestone 1B (Retrieval Infrastructure Foundation): Engineering implementation complete** as of commit `e76623f`, by Repository Owner ruling **RO-06 — Milestone 1B Corpus Capability Reallocation**. Constituted by `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` Decision 2. Its capability set is the canonical register at `docs/DEFERRED_ITEMS_REGISTER.md`. *(This line previously read "Established, not started," which was accurate when written and was overtaken by Sprints 1B.1, 1B.2, 1B.2A, 1B.2B and 1B.2C.)* Nine capabilities were discharged; **four — the Job Description corpus, JobOps ingest, SQL filtering and the `job_*` / `jobops_*` Golden Dataset — were reallocated to Milestone 2B by RO-06**, because their remaining work is external-data integration rather than deterministic repository engineering. Three non-blocking, trigger-bound capabilities remain allocated to Milestone 1B.
 
 ---
 
@@ -43,8 +43,8 @@ These documents together form the repository documentation set:
 | **Milestone 0** | Repository scaffold |
 | **Milestone 0.5** | Documentation synchronization (`docs/roadmap.md`, `docs/architecture.md`, `docs/altm.md`, `docs/glossary.md`, `docs/interview-notes.md`, `docs/learning-log.md`) |
 | **Milestone 1A** | Golden Dataset → Data Quality Validation → Deterministic Retrieval Pipeline → CLI |
-| **Milestone 1B** | Retrieval Infrastructure Foundation — Index Layer, `EmbeddingProvider` / `VectorStore` interfaces, corpus expansion (job descriptions, JobOps), DQ-5 / DQ-6 / DQ-7 |
-| **Milestone 2** | Embeddings, Vector Retrieval, Retrieval Evaluation (Ragas), Generation Evaluation (DeepEval) |
+| **Milestone 1B** | Retrieval Infrastructure Foundation — Index Layer, `EmbeddingProvider` / `VectorStore` interfaces, DQ-5 / DQ-6 / DQ-7. *(Corpus expansion — job descriptions, JobOps — reallocated to Milestone 2B by ruling **RO-06**; see §1.1.)* |
+| **Milestone 2** | Embeddings, Vector Retrieval, Retrieval Evaluation (Ragas), Generation Evaluation (DeepEval). **Executes in three stages — 2A, 2B, 2C — by ruling RO-07; see §1.1** |
 | **Milestone 3** | Regression (Promptfoo), Production Readiness |
 
 **Milestone 1B — amendment recorded, Sprint P3.7.4, 2026-08-04.** This section previously stated *"There is no Milestone 1B."* Milestone 1B is established by `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md` Decision 2 §2.2, and this table is amended under its authorization **A3**. **The reasoning behind the original statement is retained in full and still governs:** retrieval evaluation and generation evaluation are both Milestone 2 activities, gated behind a working deterministic pipeline from Milestone 1A — they are not a separate numbered milestone.
@@ -79,19 +79,89 @@ Index Layer
 EmbeddingProvider / VectorStore Interfaces
         │
         ▼
-Corpus Expansion (Job Descriptions, JobOps)
-        │
-        ▼
-Milestone 2
+Milestone 2A
 Embeddings
+Semantic + Lexical Retrieval
 Retrieval Evaluation
 Generation Evaluation
+        │
+        ▼
+Milestone 2B
+Corpus Expansion (Job Descriptions, JobOps)
+Structured SQL Retrieval
+Full Hybrid Retrieval
+        │
+        ▼
+Milestone 2C
+Remaining Milestone 2 Capabilities
         │
         ▼
 Milestone 3
 Regression
 Production Readiness
 ```
+
+*Corpus Expansion moved from Milestone 1B to Milestone 2B by ruling **RO-06**; Milestone 2's three stages are ruling **RO-07**. The Hybrid Retrieval architecture is unchanged — only the order in which its branches are exercised.*
+
+---
+
+## 1.1 Milestone 2 Execution Sequence
+
+**Recorded at Sprint RO-02 / RO-03**, under Repository Owner rulings **RO-06 — Milestone 1B Corpus Capability Reallocation** and **RO-07 — Milestone 2 Execution Sequencing**. This section owns *stage within Milestone 2*; `docs/DEFERRED_ITEMS_REGISTER.md` owns *which milestone a capability belongs to* and remains the canonical capability authority. That split follows register §1.2, which bars it from carrying sequence within a milestone.
+
+**RO-07 is sequencing only.** The approved Hybrid Retrieval architecture — *Structured (SQL) + Lexical (BM25) + Semantic (Vector) → RRF → Context Builder → Generation → Evaluation* — is unchanged. No capability is added, removed or split, and Milestone 3 is unaltered. What changes is *when* each branch is exercised, so engineering complexity rises one concept at a time.
+
+### Milestone 2A — Controlled single-corpus semantic retrieval
+
+Resume corpus only. Introduces the first probabilistic components against a fully controlled corpus.
+
+| Capability | Register id |
+|---|---|
+| BGE embeddings — real `EmbeddingProvider` | **M2-01** |
+| Vector store implementation | **M2-02** |
+| Real BM25 | **M2-03** |
+| Hybrid retrieval — semantic and lexical routes, RRF over two routes | **M2-04** *(staged activation — see below)* |
+| Assemble stage — Context Builder, `Prompt` artifact | **M2-12** |
+| DeepSeek API generation | **M2-06** |
+| `docs/architecture.md` §5 `Generator` row — Milestone 2 restatement | **M2-14** |
+| Ragas activation — Layer 2 | **M2-07** |
+| DeepEval activation — Layer 3 | **M2-08** |
+| Answer Relevancy (**Q-4**) | **M2-09** |
+| Context Precision / Context Recall | **M2-10** |
+| `requirements.txt` → real imports; `ragas/` and `deepeval/` populated | **M3-06** *(Milestone 2 portion; `promptfoo/` remains Milestone 3)* |
+
+**Structured SQL retrieval is part of the approved architecture and is deliberately not exercised at 2A**, because no JobOps corpus is connected. That is a corpus state, not an architectural exclusion.
+
+### Milestone 2B — Structured corpus integration (JobOps activation)
+
+Activates the structured branch and completes the Hybrid Retrieval architecture.
+
+| Capability | Register id |
+|---|---|
+| Job Description corpus | **1B-05** *(reallocated by RO-06)* |
+| JobOps structured data ingest | **1B-06** *(reallocated by RO-06)* |
+| SQL filtering exercised, incl. an exclusion-criteria case | **1B-07** *(reallocated by RO-06)* |
+| Golden Dataset population for `job_*` / `jobops_*` | **1B-12** *(reallocated by RO-06)* |
+| Hybrid retrieval — structured branch activated, RRF across all three routes | **M2-04** *(same capability, completed)* |
+
+The four reallocated capabilities keep their `1B-` identifiers, which record where a capability was first allocated rather than where it is now. `docs/MILESTONE_1A.md` criteria **F-1** and **F-2** become satisfiable in substance here rather than at Milestone 1B, since 1B-05 is F-1's second half and 1B-07 is F-2.
+
+### Milestone 2C — Remaining approved Milestone 2 capabilities
+
+| Capability | Register id |
+|---|---|
+| Reranking | **M2-05** |
+| Document Recall | **M2-11** |
+| Post-Process guardrail layer | **M2-13** |
+| Embedding benchmarking; retrieval-quality optimization; prompt optimization | **M2-15** |
+| Semi-structured sources (LinkedIn / Greenhouse / Lever JSON) | **M2-16** |
+| Chunk-size / overlap benchmarking | **M2-17** |
+
+**M2-15 and M2-17 are placed here because both require a retrieval-quality signal to optimize against**, and that signal is Ragas (M2-07), which lands at 2A.
+
+### M2-04 — one capability, staged activation
+
+**M2-04 is not split.** Repository Owner clarification: it remains one repository capability and one register row. Milestone 2A exercises its semantic and lexical routes; Milestone 2B activates the structured SQL branch and completes the approved architecture. The capability is *activated in stages*, not divided into parts, and repository planning represents it as one capability throughout.
 
 ---
 
