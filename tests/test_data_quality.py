@@ -8,6 +8,10 @@ added **Phase W4 — Completeness, Case A (DQ-3)**. Sprint P3.1.8.1E added
 **Phase W5 — Referential integrity (DQ-4)**. **Sprint 1B.1 (Corpus Integrity)
 adds Phase W6's unblocked half — DQ-5 (chunk validity) and DQ-6 (chunk
 referential integrity)**, register capabilities **1B-08** and **1B-09**.
+**Sprint 1B.2C (Verification) added no phase**: it verified register capability
+**1B-13** (plan §16 open item **O-5**) and found the corpus-scale vacuity it
+records already cleared by corpus expansion, updating the disclosures below to
+match. No predicate changed.
 
 W1 is the repository's first executable Manifest specification. Until now the
 committed `sample_rag/knowledge_manifest.json` was validated only when
@@ -81,21 +85,32 @@ deferral — not W2.
 
 Corpus scale, recorded not glossed (plan §12, §16 O-5)
 -------------------------------------------------------
-The committed corpus is one document. That does not weaken W1 — a structural
-gate is decidable from the artifact alone at any size (§6.1 row 1) — but it is
-the reason no specification below counts entries or asserts anything about how
-many there are. Per Register §3.5's finding **I-6**, no specification names a
-corpus filename.
+Corpus scale does not weaken W1 — a structural gate is decidable from the
+artifact alone at any size (§6.1 row 1) — and it remains the reason no
+specification below counts entries or asserts anything about how many there
+are. Per Register §3.5's finding **I-6**, no specification names a corpus
+filename.
 
-It does, however, make **W2 vacuously true on the committed corpus**: one id
-cannot collide with itself. Plan §12 requires this be stated rather than
-glossed. The real-corpus specifications below are therefore *regression
-protection for a corpus that will grow*, and they are honest about carrying no
-protective force today. **W2's protection comes from its synthetic
-specifications**, which present a two-entry corpus sharing one id — the exact
-shape Sprint P3.1.7.1 used to reproduce F-1 — and confirm the predicate reports
-it. Both the real and the synthetic cases run the same predicate function, so
-the synthetic cases genuinely exercise what the real ones assert.
+**Updated at Sprint 1B.2C (register 1B-13 / plan §16 O-5).** When W2 was
+written the committed corpus held one document, which made **W2 vacuously true
+on the real corpus**: one id cannot collide with itself. Plan §12 required that
+limitation be stated rather than glossed, and plan §16 **O-5** named **corpus
+expansion** as what would close it. That trigger has fired. The Manifest now
+catalogues three documents, so the real-corpus specifications below quantify
+over three pairwise-distinct ids and carry genuine protective force. They are
+no longer *regression protection for a corpus that will grow*; they are live
+checks on a corpus that has grown.
+
+**W2's synthetic specifications remain the negative case** — they are no longer
+compensating for a vacuous real one. They present a two-entry corpus sharing
+one id — the exact shape Sprint P3.1.7.1 used to reproduce F-1 — and confirm
+the predicate reports it, which a conforming corpus can never demonstrate at
+any size. Both the real and the synthetic cases run the same predicate
+function, so the synthetic cases genuinely exercise what the real ones assert.
+
+No specification below hardcodes the corpus count, and none should: plan §12's
+corpus-scale honesty requires the disclosure to track the corpus, not the
+corpus to be pinned to a number.
 
 W3 — what a hash comparison does and does not detect
 -----------------------------------------------------
@@ -121,16 +136,17 @@ specification below invents one; the gap is documented, not closed. Reading
 these specifications as a guarantee about `Document.text` is precisely the
 over-reading plan §9.1 warns of.
 
-Corpus scale — W3 differs from W2 here
+Corpus scale — W3 never depended on it
 ---------------------------------------
-W2's uniqueness predicate is vacuous on a one-document corpus. **W3's is not.**
-A single entry carrying a real catalogued digest and a real file on disk is a
-complete DQ-1 comparison, so the real-corpus specification below has full
-protective force today — it would fail the moment the corpus file changed
-without the Manifest being rebuilt. The synthetic specification is not
-compensating for a vacuous real case here, as it is for W2; it exists because
-plan §12 requires the negative direction to be exercised, and the committed
-corpus is (correctly) fresh and so can never demonstrate detection.
+W2's uniqueness predicate was vacuous at corpus scale 1. **W3's never was.** A
+single entry carrying a real catalogued digest and a real file on disk is
+already a complete DQ-1 comparison, so the real-corpus specification below has
+had full protective force at every corpus size — it would fail the moment a
+corpus file changed without the Manifest being rebuilt. The synthetic
+specification was never compensating for a vacuous real case here, as it once
+was for W2; it exists because plan §12 requires the negative direction to be
+exercised, and a correctly-fresh committed corpus can never demonstrate
+detection.
 
 No specification below freezes a digest. Plan §12 requires DQ-1 to *"compare
 two computed values"* rather than assert a literal hash, because a digest is a
@@ -173,11 +189,12 @@ remains correct and unmodified.
 
 Corpus scale — W4 is not vacuous
 ---------------------------------
-Plan §16 open item **O-5** names **DQ-2 and DQ-4** as the checks made vacuously
-true by the one-document corpus. **DQ-3 is deliberately not among them**, and
-the enumeration bears that out: `sample_rag/documents/**` yields one supported
-file today, so the real-corpus specification below quantifies over a non-empty
-set and every element of it is genuinely compared against the Manifest. It
+Plan §16 open item **O-5** names **DQ-2 and DQ-4** as the checks that were made
+vacuously true by the one-document corpus. **DQ-3 was deliberately not among
+them**, and the enumeration bears that out: `sample_rag/documents/**` has
+yielded a non-empty set of supported files at every corpus size, so the
+real-corpus specification below quantifies over that set and every element of
+it is genuinely compared against the Manifest. It
 would fail the moment a supported file were added to the corpus without the
 Manifest being rebuilt — which is precisely the Case A blind spot.
 
@@ -207,13 +224,23 @@ unchanged (A5)"* — appending exactly one `Document` per entry. A `Document.id`
 with no corresponding entry is therefore not merely improbable: it is
 unreachable through normal repository execution, at **any** corpus size. This is
 a structural guarantee of S1, and it is distinct from plan §16 open item
-**O-5**, which records DQ-4 as vacuous for a different reason — the corpus holds
-one document.
+**O-5**, which recorded DQ-4 as vacuous for a different reason — the corpus
+held one document.
 
-Both limits are real and neither is glossed:
+The two limits were always independent, and **only one of them has cleared**:
 
-    O-5 (scale)      one document, so the correspondence is trivially small
-    S1 (structure)   the failure state cannot be produced by `load()` at all
+    O-5 (scale)      CLEARED at Sprint 1B.2C. The Manifest catalogues three
+                     documents, so the correspondence is no longer trivially
+                     small and W5 asserts a real three-way one-to-one mapping
+    S1 (structure)   UNCHANGED. The failure state cannot be produced by
+                     `load()` at all, at any corpus size
+
+O-5's clearing therefore strengthens W5's real-corpus case without touching the
+structural limit: the correspondence asserted below is now non-trivial, but a
+violation of it still cannot arise from the committed implementation. What the
+specifications are worth is consequently unchanged by scale — it is the
+regression cover the next paragraph describes, and S1, not O-5, is what bounds
+it.
 
 **What the specifications below are therefore worth.** They are regression
 protection, not live detection. They hold `load()` to strategy S1: were a future
@@ -233,8 +260,11 @@ the determination, its reasoning, its scope, and its approval. Retained here as
 implementation context only: no synthetic corpus can manufacture a DQ-4
 violation without fabricating a state `load()` cannot produce, so the
 specification exercises the correspondence over a three-document corpus
-instead — the scale the committed corpus cannot supply, and precisely what O-5
-means by *"synthetic cases carry the protection"*.
+instead. When it was written, that was a scale the committed corpus could not
+supply — precisely what O-5 meant by *"synthetic cases carry the protection"*.
+Since Sprint 1B.2C the committed corpus supplies that scale too, so the
+synthetic case now corroborates the real one at equal scale rather than
+standing in for it.
 
 **One-to-one is DQ-4's cardinality, not a restatement of DQ-2.** Plan §9.1
 records §8.5's one-to-one relationship as *"the cardinality DQ-4 asserts"*. A
@@ -390,9 +420,12 @@ def test_dq2_committed_manifest_document_ids_are_pairwise_distinct(real_manifest
     parses `knowledge_manifest.json` with `json` directly rather than through
     any code path that produced or consumes those values.
 
-    Vacuous on today's one-document corpus (see the module docstring). Its
-    protective force is regression cover as the corpus grows; the live check on
-    this predicate is the synthetic specification below.
+    Non-vacuous since Sprint 1B.2C (register **1B-13**, plan §16 **O-5**): the
+    committed Manifest catalogues three documents, so this predicate performs
+    genuine pairwise comparisons rather than comparing one id with itself (see
+    the module docstring). The synthetic specification below remains the
+    negative case — a conforming Manifest cannot demonstrate detection at any
+    size — but it is no longer the only live check on this predicate.
     """
     ids = [entry["id"] for entry in real_manifest_entries]
 
@@ -408,7 +441,7 @@ def test_dq2_loaded_document_ids_are_pairwise_distinct(real_documents):
 
     This is the predicate Contract Erratum E-1 states in its own terms: two
     `Document` values returned by one `KnowledgeSource.load()` must not share an
-    `id`. Vacuous on today's corpus, for the same reason as predicate A.
+    `id`. Non-vacuous since Sprint 1B.2C, for the same reason as predicate A.
     """
     ids = [document.id for document in real_documents]
 
@@ -669,10 +702,16 @@ def test_dq4_document_to_manifest_entry_correspondence_is_one_to_one(
 def test_dq4_correspondence_holds_across_a_multi_document_corpus(synthetic_corpus):
     """W5, synthetic — the correspondence holds over a corpus larger than one document.
 
-    The committed corpus holds one document, which plan §16 open item **O-5**
-    records as making DQ-4 vacuously true; O-5 states the protection comes from
-    synthetic cases. This is that case: three documents, three entries, checked
-    for the same correspondence the real specifications assert.
+    Written when the committed corpus held one document, which plan §16 open
+    item **O-5** recorded as making DQ-4 vacuously true; O-5 stated the
+    protection comes from synthetic cases. This is that case: three documents,
+    three entries, checked for the same correspondence the real specifications
+    assert. **O-5 cleared at Sprint 1B.2C** (register **1B-13**) and the
+    committed corpus now catalogues three documents itself, so this
+    specification corroborates the real ones at equal scale instead of
+    supplying a scale they lacked. It is retained: it fixes the multi-document
+    correspondence as a protected property rather than one contingent on the
+    corpus staying larger than one.
 
     Deliberately **not** a negative case, under the owner-approved governance
     deviation whose authoritative record is
@@ -681,10 +720,10 @@ def test_dq4_correspondence_holds_across_a_multi_document_corpus(synthetic_corpu
     strategy S1, so manufacturing one would require fabricating a state the
     repository cannot reach.
 
-    What this specification does add over the real ones is scale: with three
-    entries, a `load()` that dropped, duplicated, or reordered a `Document` would
-    break the correspondence here while a one-document corpus could not reveal
-    it.
+    What this specification adds over the real ones is independence from the
+    committed corpus: with three fixed entries, a `load()` that dropped,
+    duplicated, or reordered a `Document` breaks the correspondence here
+    regardless of how the real corpus later grows or shrinks.
     """
     synthetic_corpus.text_file("documents/a.txt", "alpha")
     synthetic_corpus.text_file("documents/b.txt", "beta")

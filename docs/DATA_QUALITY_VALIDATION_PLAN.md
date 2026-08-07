@@ -746,6 +746,20 @@ Recorded, not resolved. Each states its impact and what would close it.
 >
 > §8.1's *Status at P3.1.8.1* column, §11.2's W6 row and §13 are **not** amended: each is explicitly scoped to Sprint P3.1.8.1 and states that sprint's position accurately.
 
+> **O-5 — closed at Sprint 1B.2C.** Appended, leaving both notes above intact. The P3.7.4 note recorded O-5 as unchanged, and that was accurate when written; this records what has changed since.
+>
+> | Item | Register id | Status |
+> |---|---|---|
+> | **O-5** — DQ-2 and DQ-4 vacuously true at corpus scale 1 | **1B-13** | ✅ **Closed by its own recorded trigger.** The trigger is *"corpus expansion"*; the corpus now catalogues **three** documents |
+>
+> **O-5 closed without implementation, and that is the correct outcome for this item.** Its mitigation was never code: this plan bounded it as *"disclosed"*, with protection carried by synthetic cases and §12 requiring the limitation to be stated in the specifications. The DQ-2 and DQ-4 checks written at Sprint P3.1.8.1 are corpus-size agnostic — they quantify over the Manifest and over `load()` and assert no count — so corpus expansion discharged the item without any predicate changing. DQ-2's real-corpus predicates now perform three genuine pairwise comparisons instead of comparing one id with itself; DQ-4's asserts a real three-way one-to-one correspondence.
+>
+> **What did require synchronization was the disclosure, not the checks.** §12's corpus-scale-honesty requirement is a standing obligation on the specifications, and `tests/test_data_quality.py` still stated the one-document limitation as present fact. Those statements were updated at Sprint 1B.2C; no predicate, fixture or assertion was modified.
+>
+> **DQ-4's second limit is unaffected.** `tests/test_data_quality.py` records two independent limits on DQ-4 — O-5 (scale) and **S1** (structure: under identity strategy S1 a `Document.id` without a Manifest entry cannot be produced by `load()` at any corpus size). Only O-5 is closed here. S1 is a structural property of the implementation, was never O-5, and continues to bound what DQ-4's real-corpus specifications can detect.
+>
+> §12, §15 and the **O-5** row above are **not** amended: each is explicitly scoped to Sprint P3.1.8.1 and states that sprint's position accurately. Canonical authority: `docs/DEFERRED_ITEMS_REGISTER.md`.
+
 **Gate verdict: PASS with one blocking governance item (O-1).** The architecture is complete and the boundaries are unambiguous. Sprint P3.1.8.1 must not begin the DQ-2 uniqueness check until the D-2 erratum is approved; the remaining work is unblocked. **Implementation may begin only after repository owner approval** of this plan and of the §10 governance recommendation.
 
 ---

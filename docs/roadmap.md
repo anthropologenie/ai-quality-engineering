@@ -140,11 +140,13 @@ The dataset intentionally includes difficult categories, not only happy-path que
 | **Paraphrase** | Tests semantic retrieval | "What background does Karthik have in data engineering?" |
 | **Multi-hop** | Requires combining multiple resume sections | "Which project best demonstrates AI Quality Engineering?" |
 | **No Answer** | Tests abstention | "What Kubernetes cluster did he manage?" |
-| **Stale Version** | Tests freshness | Old resume version vs. current resume |
-| **Contradiction** | Tests conflict handling | Two resume versions disagree on the same fact |
+| **Stale Version** | Tests freshness | Historical knowledge vs. current canonical knowledge |
+| **Contradiction** | Tests conflict handling | Historical knowledge conflicts with current canonical knowledge on the same fact |
 | **False Premise** | Tests hallucination resistance | "Didn't Karthik work at Microsoft?" |
 
 Each category is deliberately targeted at a different ALTM failure stage (see `docs/altm.md`) — the taxonomy gives the Milestone 1A data-quality pytest suite something concrete to validate against.
+
+The **Stale Version** and **Contradiction** rows are expressed in terms of Historical Knowledge and Canonical Knowledge under Repository Owner ruling **R-01 — Historical Knowledge Semantics**, which retains historical knowledge *solely as evaluation evidence*; no document version is named. Their category names are unchanged: they are locked `failure_category` values in `datasets/golden/resume_qa_pairs.json`.
 
 ### 2.4 Evidence Trace Schema
 
