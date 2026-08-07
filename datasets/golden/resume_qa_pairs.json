@@ -10,7 +10,7 @@
       "question": "How many years of experience does Karthik have?",
       "question_category": "lexical",
       "failure_category": "Exact Fact",
-      "expected_answer": "Around 7.5 years of backend-focused engineering experience.",
+      "expected_answer": "Around 7.5 years, progressing from enterprise QA and ETL/data validation into AI Quality Engineering.",
       "answerable": true
     },
     {
@@ -82,7 +82,7 @@
       "question": "What background does Karthik have in data engineering?",
       "question_category": "semantic",
       "failure_category": "Paraphrase",
-      "expected_answer": "Around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance.",
+      "expected_answer": "Around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering — evaluation, diagnosis, and deterministic system design.",
       "answerable": true
     },
     {
@@ -133,7 +133,7 @@
       "question": "Summarize Karthik's professional background.",
       "question_category": "summarization",
       "failure_category": "Paraphrase",
-      "expected_answer": "A QA Lead with around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance, who has led cross-functional QA teams of 5 or more across Oracle, Teradata, Redshift, Databricks, and Snowflake environments, and whose Python-based test automation framework reduced ETL test execution time by 40% at a 98% pass rate across 100+ scenarios.",
+      "expected_answer": "A Quality Engineering leader with around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering, who has led cross-functional QA teams of 5 or more across Oracle, Teradata, Redshift, Databricks, and Snowflake environments, and whose Python-based test automation framework reduced ETL test execution time by 40% at a 98% pass rate across 100+ scenarios.",
       "answerable": true
     },
     {
@@ -161,7 +161,7 @@
       "question": "What are Karthik's AI engineering skills?",
       "question_category": "summarization",
       "failure_category": "Exact Fact",
-      "expected_answer": "AI Quality Engineering, LLM Validation, Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), Pydantic v2, Prompt Engineering, and Root Cause Analysis (RCA) Automation.",
+      "expected_answer": "In AI Evaluation & Quality Engineering: AI Quality Engineering, LLM Evaluation & Validation, Agent Evaluation, RAG Evaluation, Retrieval Evaluation, Dataset Validation (Golden Dataset, Ground Truth), Evidence Traceability, AI Test Automation, Root Cause Analysis (RCA) Automation, and Prompt Engineering. In AI Frameworks & Protocols: Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), and Pydantic v2.",
       "answerable": true
     },
     {
@@ -220,7 +220,7 @@
       "question": "Which work best demonstrates Karthik's move from ETL testing into AI Quality Engineering?",
       "question_category": "reasoning",
       "failure_category": "Multi-hop",
-      "expected_answer": "His background is around 7.5 years of ETL testing and data validation. His current role at Ascendion applies that discipline to agentic AI platform engineering, and on the JobOps Platform he designed deterministic validation and provenance workflows explicitly to establish a trusted data foundation for downstream AI quality evaluation workflows.",
+      "expected_answer": "His background is around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering. His current role at Ascendion applies that discipline to agentic AI platform engineering, and on the JobOps Platform he designed deterministic validation and provenance workflows explicitly to establish a trusted data foundation for downstream AI quality evaluation workflows.",
       "answerable": true
     },
     {

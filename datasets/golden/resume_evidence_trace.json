@@ -4,10 +4,10 @@
     {
       "id": "meta_qa_resume_f001_lexical_01",
       "question": "How many years of experience does Karthik have?",
-      "expected_answer": "Around 7.5 years of backend-focused engineering experience.",
-      "expected_source": "bac26d34f834",
+      "expected_answer": "Around 7.5 years, progressing from enterprise QA and ETL/data validation into AI Quality Engineering.",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "9a683663fc00a409"
+        "42e83e0174ddf3aa"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -24,9 +24,9 @@
       "id": "meta_qa_resume_f004_lexical_01",
       "question": "By what percentage did Karthik's Python test automation framework reduce ETL test execution time?",
       "expected_answer": "By 40%.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "987b9870bd4c04cf"
+        "656dcd7aecdbcba7"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -43,9 +43,9 @@
       "id": "meta_qa_resume_f005_lexical_01",
       "question": "How many engineers did Karthik lead on the dealer service analytics platform?",
       "expected_answer": "A cross-functional team of 5.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "72dbbd966fa7aac1"
+        "16b18b5a8f6b7aec"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -62,9 +62,9 @@
       "id": "meta_qa_resume_f016_lexical_01",
       "question": "How many columns and how many tables did Karthik profile in the GA4 telemetry pipeline?",
       "expected_answer": "172 columns spanning 14 gold-layer tables.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "8cf7b36f46343c3a"
+        "f73cfc62d4a0d309"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -81,9 +81,9 @@
       "id": "meta_qa_resume_f008_lexical_01",
       "question": "Which Kubernetes clusters has Karthik managed?",
       "expected_answer": "The resume does not state any Kubernetes experience. The DevOps and platform engineering skills it lists are GitHub REST API, GitHub Enterprise, Backend API Testing, Backend Systems Testing, Git, Jenkins, CI/CD Pipeline, Docker, JIRA, and HP ALM.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "5d55ec2468f24353"
+        "dd579592bde573b3"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -100,9 +100,9 @@
       "id": "meta_qa_resume_f002_semantic_01",
       "question": "What experience does Karthik have leading engineering teams?",
       "expected_answer": "He has led cross-functional QA teams of 5 or more, owning test strategy, stakeholder communication, and delivery across Oracle, Teradata, Redshift, Databricks, and Snowflake environments.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "9a683663fc00a409"
+        "42e83e0174ddf3aa"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -118,10 +118,10 @@
     {
       "id": "meta_qa_resume_f001_semantic_01",
       "question": "What background does Karthik have in data engineering?",
-      "expected_answer": "Around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance.",
-      "expected_source": "bac26d34f834",
+      "expected_answer": "Around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering \u2014 evaluation, diagnosis, and deterministic system design.",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "9a683663fc00a409"
+        "42e83e0174ddf3aa"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -138,9 +138,9 @@
       "id": "meta_qa_resume_f006_semantic_01",
       "question": "Has Karthik worked on autonomous or agentic AI systems?",
       "expected_answer": "Yes. He engineered and validated a five-agent Autonomous Root Cause Analysis (RCA) pipeline targeting a 10-15 minute alert-to-RCA turnaround, versus 2 hours to days of manual investigation.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "b1d9a45da5e3b731"
+        "7c3a058159e83320"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -157,9 +157,9 @@
       "id": "meta_qa_resume_f024_semantic_01",
       "question": "Does Karthik have experience making data pipelines reproducible?",
       "expected_answer": "Yes. On the JobOps Platform he designed deterministic data validation and provenance workflows using schema versioning, content-hash verification, and import tracking to ensure reproducible datasets.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "ed085eda021cc0d1"
+        "0433be855e3925f4"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -176,10 +176,10 @@
       "id": "meta_qa_resume_f017_semantic_01",
       "question": "What salary did Karthik earn at Happiest Minds Technologies?",
       "expected_answer": "The resume does not state compensation for any role. It states that he was QA Lead / Test Module Lead at Happiest Minds Technologies, Bengaluru, from Sep 2023 to Apr 2025.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "3f7d8d358d56371b",
-        "94b3d2e6cda4eae2"
+        "701e6394894ad90c",
+        "50894df5af24e30a"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -195,11 +195,11 @@
     {
       "id": "meta_qa_resume_f001_summarization_01",
       "question": "Summarize Karthik's professional background.",
-      "expected_answer": "A QA Lead with around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance, who has led cross-functional QA teams of 5 or more across Oracle, Teradata, Redshift, Databricks, and Snowflake environments, and whose Python-based test automation framework reduced ETL test execution time by 40% at a 98% pass rate across 100+ scenarios.",
-      "expected_source": "bac26d34f834",
+      "expected_answer": "A Quality Engineering leader with around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering, who has led cross-functional QA teams of 5 or more across Oracle, Teradata, Redshift, Databricks, and Snowflake environments, and whose Python-based test automation framework reduced ETL test execution time by 40% at a 98% pass rate across 100+ scenarios.",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "9a683663fc00a409",
-        "987b9870bd4c04cf"
+        "42e83e0174ddf3aa",
+        "656dcd7aecdbcba7"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Multi-hop",
@@ -216,13 +216,13 @@
       "id": "meta_qa_resume_f009_summarization_01",
       "question": "Describe what Karthik does in his current role.",
       "expected_answer": "As Senior Engineer (Agentic AI & Data Platform Engineering) at Ascendion on HP's AAVA / OMEN Gaming Hub Analytics Program since Jan 2026, he contributed to a five-agent Autonomous Root Cause Analysis (RCA) pipeline, developed a 12-step deterministic Autonomous Root Cause Analysis (RCA) reasoning agent with confidence scoring and anomaly classification, and profiled data quality across 172 columns in 14 gold-layer GA4 tables.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "fa0a39ec6c51fe2d",
-        "2eadca368c1ed5dc",
-        "6c5c8e0e91096e12",
-        "fe6ebf3041b5d426",
-        "8cf7b36f46343c3a"
+        "84802007ca0a1103",
+        "c6d26affa15b1727",
+        "c1f46b65132c51ec",
+        "0093f01ab9dfa438",
+        "f73cfc62d4a0d309"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Multi-hop",
@@ -238,10 +238,11 @@
     {
       "id": "meta_qa_resume_f007_summarization_01",
       "question": "What are Karthik's AI engineering skills?",
-      "expected_answer": "AI Quality Engineering, LLM Validation, Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), Pydantic v2, Prompt Engineering, and Root Cause Analysis (RCA) Automation.",
-      "expected_source": "bac26d34f834",
+      "expected_answer": "In AI Evaluation & Quality Engineering: AI Quality Engineering, LLM Evaluation & Validation, Agent Evaluation, RAG Evaluation, Retrieval Evaluation, Dataset Validation (Golden Dataset, Ground Truth), Evidence Traceability, AI Test Automation, Root Cause Analysis (RCA) Automation, and Prompt Engineering. In AI Frameworks & Protocols: Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), and Pydantic v2.",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "a6cbc5ebb11151db"
+        "c87c9bf2f18d569c",
+        "e5f7116088a0251b"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -258,12 +259,12 @@
       "id": "meta_qa_resume_f003_summarization_01",
       "question": "Which large-scale enterprise data migration programs has Karthik worked on?",
       "expected_answer": "Maruti Suzuki, Betts Group, and Red Earth.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "9a683663fc00a409",
-        "72dbbd966fa7aac1",
-        "8a1fb5a3027549a4",
-        "0c7b66d27d4a654f"
+        "42e83e0174ddf3aa",
+        "16b18b5a8f6b7aec",
+        "0800edfd2a3892c1",
+        "06da1bc0b85b75eb"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Multi-hop",
@@ -280,10 +281,10 @@
       "id": "meta_qa_resume_f019_reasoning_01",
       "question": "Across Karthik's ETL data warehouse projects, what measurable improvements in data accuracy were reported?",
       "expected_answer": "Two. On Maruti Suzuki he improved data accuracy by 25% through data profiling and root cause analysis, and on Red Earth he improved data accuracy and reliability by 30% through systematic root cause analysis while resolving 100+ data quality issues.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "5df39d2f3192de6a",
-        "0c7b66d27d4a654f"
+        "9825919ac01c2e7b",
+        "06da1bc0b85b75eb"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -300,10 +301,10 @@
       "id": "meta_qa_resume_f016_reasoning_01",
       "question": "What evidence shows Karthik has worked on both data quality assessment and AI agent reliability?",
       "expected_answer": "For data quality assessment, he profiled and measured data quality across 172 columns spanning 14 gold-layer GA4 tables, producing field-level reliability evidence. For AI agent reliability, he established production agent specifications and optimized LLM configuration parameters to eliminate hallucinated retries and duplicate-write collisions.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "8fa1efffb3cd8f9a",
-        "8cf7b36f46343c3a"
+        "808d8265ddfa2ed8",
+        "f73cfc62d4a0d309"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -319,13 +320,13 @@
     {
       "id": "meta_qa_resume_f001_reasoning_01",
       "question": "Which work best demonstrates Karthik's move from ETL testing into AI Quality Engineering?",
-      "expected_answer": "His background is around 7.5 years of ETL testing and data validation. His current role at Ascendion applies that discipline to agentic AI platform engineering, and on the JobOps Platform he designed deterministic validation and provenance workflows explicitly to establish a trusted data foundation for downstream AI quality evaluation workflows.",
-      "expected_source": "bac26d34f834",
+      "expected_answer": "His background is around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering. His current role at Ascendion applies that discipline to agentic AI platform engineering, and on the JobOps Platform he designed deterministic validation and provenance workflows explicitly to establish a trusted data foundation for downstream AI quality evaluation workflows.",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "9a683663fc00a409",
-        "fa0a39ec6c51fe2d",
-        "2eadca368c1ed5dc",
-        "ed085eda021cc0d1"
+        "42e83e0174ddf3aa",
+        "84802007ca0a1103",
+        "c6d26affa15b1727",
+        "0433be855e3925f4"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Multi-hop",
@@ -342,9 +343,9 @@
       "id": "meta_qa_resume_f012_reasoning_01",
       "question": "How has Karthik addressed reliability problems in LLM-driven systems?",
       "expected_answer": "He established production agent specifications (Role, Goal, Behaviour, Expected Output, Guardrails) and optimized LLM configuration parameters (temperature, top-p, execution limits) to eliminate hallucinated retries and duplicate-write collisions.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "8fa1efffb3cd8f9a"
+        "808d8265ddfa2ed8"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -361,9 +362,9 @@
       "id": "meta_qa_resume_f004_reasoning_01",
       "question": "Karthik's automation framework cut ETL test execution time by 70% \u2014 how did he achieve that?",
       "expected_answer": "The premise is incorrect. The resume states a 40% reduction in ETL test automation execution time, achieved through a Python-based framework using Pytest, Pandas, and SQLAlchemy, sustaining a 98% pass rate across 100+ test scenarios.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "987b9870bd4c04cf"
+        "656dcd7aecdbcba7"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",
@@ -380,9 +381,9 @@
       "id": "meta_qa_resume_f005_reasoning_01",
       "question": "Since Karthik managed a team of 15 engineers on the dealer analytics platform, how did he handle that scale?",
       "expected_answer": "The premise is incorrect. The resume states he managed a cross-functional team of 5 while leading QA delivery for a data analytics platform serving 2,000+ dealer service centers.",
-      "expected_source": "bac26d34f834",
+      "expected_source": "d1a4d530f9c1",
       "expected_chunk": [
-        "72dbbd966fa7aac1"
+        "16b18b5a8f6b7aec"
       ],
       "expected_retrieval_route": null,
       "expected_reasoning_type": "Single-hop",

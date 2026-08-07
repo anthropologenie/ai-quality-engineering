@@ -4,17 +4,17 @@
     {
       "id": "resume_f001",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL SUMMARY",
-      "fact": "Karthik has around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance.",
-      "source_text": "QA Lead with around 7.5 years of backend-focused engineering experience across ETL testing, SQL-driven data validation, and cloud data platform quality assurance."
+      "fact": "Karthik is a Quality Engineering leader with around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering — evaluation, diagnosis, and deterministic system design.",
+      "source_text": "Quality Engineering leader with around 7.5 years progressing from enterprise QA and ETL/data validation into AI Quality Engineering — evaluation, diagnosis, and deterministic system design."
     },
     {
       "id": "resume_f002",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL SUMMARY",
       "fact": "He has led cross-functional QA teams of 5 or more, owning test strategy, stakeholder communication, and delivery across Oracle, Teradata, Redshift, Databricks, and Snowflake environments.",
       "source_text": "Led cross-functional QA teams of 5+, owning test strategy, stakeholder communication, and delivery across Oracle, Teradata, Redshift, Databricks, and Snowflake environments."
@@ -22,17 +22,17 @@
     {
       "id": "resume_f003",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL SUMMARY",
       "fact": "The large-scale enterprise data migration programs he worked on include Maruti Suzuki, Betts Group, and Red Earth.",
-      "source_text": "for large-scale enterprise data migration programs for Maruti Suzuki, Betts Group, and Red Earth."
+      "source_text": "for large-scale enterprise data migration programs at Maruti Suzuki, Betts Group, and Red Earth."
     },
     {
       "id": "resume_f004",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "SELECTED ACHIEVEMENTS",
       "fact": "A Python-based test automation framework (Pytest, Pandas, SQLAlchemy) reduced ETL test automation execution time by 40% while sustaining a 98% pass rate across 100+ test scenarios.",
       "source_text": "Reduced ETL test automation execution time by 40% through a Python-based framework (Pytest, Pandas, SQLAlchemy), sustaining a 98% pass rate across 100+ test scenarios"
@@ -40,8 +40,8 @@
     {
       "id": "resume_f005",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "SELECTED ACHIEVEMENTS",
       "fact": "He led QA delivery for a data analytics platform serving 2,000+ dealer service centers, managing a cross-functional team of 5.",
       "source_text": "Led QA delivery for a data analytics platform serving 2,000+ dealer service centers, managing a cross-functional team of 5"
@@ -49,8 +49,8 @@
     {
       "id": "resume_f006",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "SELECTED ACHIEVEMENTS",
       "fact": "He engineered and validated a five-agent Autonomous Root Cause Analysis (RCA) pipeline targeting a 10-15 minute alert-to-RCA turnaround, versus 2 hours to days of manual investigation.",
       "source_text": "Engineered and validated a five-agent Autonomous Root Cause Analysis (RCA) pipeline targeting a 10-15 minute alert-to-RCA turnaround, versus 2 hours to days of manual investigation"
@@ -58,17 +58,17 @@
     {
       "id": "resume_f007",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
-      "section": "CORE SKILLS — AI Engineering",
-      "fact": "His AI engineering skills are AI Quality Engineering, LLM Validation, Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), Pydantic v2, Prompt Engineering, and Root Cause Analysis (RCA) Automation.",
-      "source_text": "AI Quality Engineering, LLM Validation, Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), Pydantic v2, Prompt Engineering, Root Cause Analysis (RCA) Automation"
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
+      "section": "CORE SKILLS — AI Evaluation & Quality Engineering / AI Frameworks & Protocols",
+      "fact": "His AI skills span AI Evaluation & Quality Engineering — AI Quality Engineering, LLM Evaluation & Validation, Agent Evaluation, RAG Evaluation, Retrieval Evaluation, Dataset Validation (Golden Dataset, Ground Truth), Evidence Traceability, AI Test Automation, Root Cause Analysis (RCA) Automation, and Prompt Engineering — and AI Frameworks & Protocols: Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), and Pydantic v2.",
+      "source_text": "AI Evaluation & Quality Engineering: AI Quality Engineering, LLM Evaluation & Validation, Agent Evaluation, RAG Evaluation, Retrieval Evaluation, Dataset Validation (Golden Dataset, Ground Truth), Evidence Traceability, AI Test Automation, Root Cause Analysis (RCA) Automation, Prompt Engineering\n\nAI Frameworks & Protocols: Agentic AI, Multi-Agent Systems, CrewAI, Model Context Protocol (MCP), Pydantic v2"
     },
     {
       "id": "resume_f008",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "CORE SKILLS — DevOps & Platform Engineering",
       "fact": "His DevOps and platform engineering skills are GitHub REST API, GitHub Enterprise, Backend API Testing, Backend Systems Testing, Git, Jenkins, CI/CD Pipeline, Docker, JIRA, and HP ALM.",
       "source_text": "GitHub REST API, GitHub Enterprise, Backend API Testing, Backend Systems Testing, Git, Jenkins, CI/CD Pipeline, Docker, JIRA, HP ALM"
@@ -76,8 +76,8 @@
     {
       "id": "resume_f009",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "His current role is Senior Engineer (Agentic AI & Data Platform Engineering) at Ascendion on the HP AAVA / OMEN Gaming Hub Analytics Program, from Jan 2026 to present.",
       "source_text": "Senior Engineer (Agentic AI & Data Platform Engineering)  |  Ascendion — HP AAVA / OMEN Gaming Hub Analytics Program\n\nJan 2026 – Present"
@@ -85,17 +85,17 @@
     {
       "id": "resume_f010",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "The five-agent Autonomous Root Cause Analysis (RCA) pipeline runs Alert Trigger, then Evidence Retrieval, then Evidence Assembly, then a Deterministic RCA Agent, then a GitHub Report Writer.",
-      "source_text": "Contributed to the engineering and validation of a five-agent Autonomous Root Cause Analysis (RCA) pipeline (Alert Trigger to Evidence Retrieval to Evidence Assembly to Deterministic RCA Agent to GitHub Report Writer), targeting a 10-15 minute alert-to-RCA turnaround versus 2 hours to days of manual investigation"
+      "source_text": "Contributed to the engineering and validation of a five-agent Autonomous Root Cause Analysis (RCA) pipeline (Alert Trigger → Evidence Retrieval → Evidence Assembly → Deterministic RCA Agent → GitHub Report Writer), targeting a 10-15 minute alert-to-RCA turnaround versus 2 hours to days of manual investigation"
     },
     {
       "id": "resume_f011",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "He developed a 12-step deterministic Autonomous Root Cause Analysis (RCA) reasoning agent (v2.5) with confidence scoring and anomaly classification logic, validated against real test cases.",
       "source_text": "Developed a 12-step deterministic Autonomous Root Cause Analysis (RCA) reasoning agent (v2.5) with confidence scoring and anomaly classification logic, validated against real test cases"
@@ -103,8 +103,8 @@
     {
       "id": "resume_f012",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "He established production agent specifications (Role, Goal, Behaviour, Expected Output, Guardrails) and optimized LLM configuration parameters (temperature, top-p, execution limits) to eliminate hallucinated retries and duplicate-write collisions.",
       "source_text": "Established production agent specifications (Role, Goal, Behaviour, Expected Output, Guardrails) and optimized LLM configuration parameters (temperature, top-p, execution limits) to eliminate hallucinated retries and duplicate-write collisions"
@@ -112,26 +112,26 @@
     {
       "id": "resume_f013",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "He diagnosed and resolved Pydantic v2 schema-generation failures, standardizing validator syntax across the platform's agent codebase.",
-      "source_text": "Diagnosed and resolved Pydantic v2 schema-generation failures, standardizing validator syntax across the platform's agent codebase"
+      "source_text": "Diagnosed and resolved Pydantic v2 schema-generation failures, standardizing validator syntax across the platform’s agent codebase"
     },
     {
       "id": "resume_f014",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "He engineered custom Python/FastAPI tools integrating HP GitHub Enterprise's Contents and Git Trees APIs, including a timestamped, collision-safe write architecture for parallel agent execution.",
-      "source_text": "Engineered custom Python/FastAPI tools to integrate with HP GitHub Enterprise's Contents and Git Trees APIs, including a timestamped, collision-safe write architecture for parallel agent execution"
+      "source_text": "Engineered custom Python/FastAPI tools to integrate with HP GitHub Enterprise’s Contents and Git Trees APIs, including a timestamped, collision-safe write architecture for parallel agent execution"
     },
     {
       "id": "resume_f015",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "He delivered a Redshift-to-Databricks Spark SQL syntax and schema translation reference, mapping legacy analytics tables to Unity Catalog equivalents.",
       "source_text": "Delivered a Redshift-to-Databricks Spark SQL syntax and schema translation reference, mapping legacy analytics tables to Unity Catalog equivalents"
@@ -139,8 +139,8 @@
     {
       "id": "resume_f016",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Ascendion",
       "fact": "He profiled and measured data quality across 172 columns spanning 14 gold-layer tables in a GA4 telemetry pipeline built on a Bronze-Silver-Gold-Diamond medallion architecture, producing field-level reliability evidence used to inform downstream analytics.",
       "source_text": "Profiled and measured data quality across 172 columns spanning 14 gold-layer tables in a GA4 telemetry pipeline built on a Bronze-Silver-Gold-Diamond medallion architecture, producing field-level reliability evidence used to inform downstream analytics"
@@ -148,8 +148,8 @@
     {
       "id": "resume_f017",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Happiest Minds Technologies",
       "fact": "He was QA Lead / Test Module Lead at Happiest Minds Technologies, Bengaluru, from Sep 2023 to Apr 2025.",
       "source_text": "QA Lead / Test Module Lead  |  Happiest Minds Technologies, Bengaluru\n\nSep 2023 – Apr 2025"
@@ -157,8 +157,8 @@
     {
       "id": "resume_f018",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Happiest Minds / Maruti Suzuki",
       "fact": "He engineered and executed 100+ ETL test cases with Test Data Management (TDM), validating data transformations during a legacy-to-AWS cloud migration and ensuring data lineage and integrity across source and target systems.",
       "source_text": "Engineered and executed 100+ ETL test cases with Test Data Management (TDM), validating complex data transformations during a legacy-to-AWS cloud migration and ensuring data lineage and integrity across source and target systems"
@@ -166,8 +166,8 @@
     {
       "id": "resume_f019",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — Happiest Minds / Maruti Suzuki",
       "fact": "He improved data accuracy by 25% through data profiling and root cause analysis, implementing corrective actions for identified data quality issues.",
       "source_text": "Improved data accuracy by 25% through data profiling and root cause analysis, implementing corrective actions for identified data quality issues"
@@ -175,8 +175,8 @@
     {
       "id": "resume_f020",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — MGS Technologies",
       "fact": "He was ETL Test Engineer / QA Engineer at MGS Technologies, working for clients Mindtree and Accenture, based in Hyderabad (Remote), from Apr 2019 to Aug 2023.",
       "source_text": "ETL Test Engineer / QA Engineer  |  MGS Technologies (Clients: Mindtree & Accenture), Hyderabad (Remote)\n\nApr 2019 – Aug 2023"
@@ -184,8 +184,8 @@
     {
       "id": "resume_f021",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — MGS / Betts Group",
       "fact": "For Betts Group he executed 100+ automated ETL test cases at a 98% pass rate for a critical data migration project, contributing to on-time delivery of a Star Schema sales data warehouse, and validated transformation logic and lineage between Oracle and Teradata using advanced SQL and data profiling.",
       "source_text": "Executed 100+ automated ETL test cases at a 98% pass rate for a critical data migration project, contributing to on-time delivery of a Star Schema sales data warehouse"
@@ -193,8 +193,8 @@
     {
       "id": "resume_f022",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "PROFESSIONAL EXPERIENCE — MGS / Red Earth",
       "fact": "For Red Earth he improved data accuracy and reliability by 30% through systematic root cause analysis, resolving 100+ data quality issues.",
       "source_text": "Improved data accuracy and reliability by 30% through systematic root cause analysis, resolving 100+ data quality issues"
@@ -202,26 +202,26 @@
     {
       "id": "resume_f023",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "TECHNICAL PROJECTS — JobOps Platform",
       "fact": "He engineered the JobOps Platform (Oct 2025 to present), a full-stack backend platform automating job discovery, application tracking, and workflow management using Python, FastAPI, REST APIs, and SQLite.",
-      "source_text": "Engineered a full-stack backend platform automating job discovery, application tracking, and workflow management using Python, FastAPI, REST APIs, and SQLite."
+      "source_text": "Engineered a full-stack backend platform automating job discovery, application tracking, and workflow management using Python, FastAPI, REST APIs, and SQLite"
     },
     {
       "id": "resume_f024",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "TECHNICAL PROJECTS — JobOps Platform",
       "fact": "He designed deterministic data validation and provenance workflows using schema versioning, content-hash verification, and import tracking to ensure reproducible datasets and establish a trusted structured data foundation for downstream AI quality evaluation workflows.",
-      "source_text": "Designed deterministic data validation and provenance workflows using schema versioning, content-hash verification, and import tracking to ensure reproducible datasets and establish a trusted structured data foundation for downstream AI quality evaluation workflows."
+      "source_text": "Designed deterministic data validation and provenance workflows using schema versioning, content-hash verification, and import tracking to ensure reproducible datasets and establish a trusted structured data foundation for downstream AI quality evaluation workflows"
     },
     {
       "id": "resume_f025",
       "source": "resume",
-      "document_id": "bac26d34f834",
-      "document_source": "documents/resume/Karthik_SR_Resume_v2_3.docx",
+      "document_id": "d1a4d530f9c1",
+      "document_source": "documents/resume/Karthik_SR_Resume_v3_0.docx",
       "section": "EDUCATION",
       "fact": "He holds a Bachelor of Engineering in Electronics & Communication with a CGPA of 8.83/10 from M.S. Ramaiah Institute of Technology, Bengaluru, 2014 to 2018.",
       "source_text": "Bachelor of Engineering in Electronics & Communication | CGPA: 8.83/10\n\nM.S. Ramaiah Institute of Technology, Bengaluru | 2014 – 2018"
