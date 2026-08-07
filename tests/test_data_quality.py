@@ -503,8 +503,10 @@ def test_dq1_source_file_changed_after_cataloguing_is_detected(synthetic_corpus)
 
     The expected hash is computed by the same function under test rather than
     hardcoded, per plan §12 — a literal digest would freeze a fact about one
-    snapshot. The manifest is written with all four contracted entry fields so
-    the only property under test is freshness, not structure.
+    snapshot. The manifest is written with the contracted entry fields so the
+    only property under test is freshness, not structure. `indexed` is absent:
+    Repository Owner ruling **R-02** removed it from the persisted schema
+    (`docs/MILESTONE_1A.md` build item 1 *Contract Change*).
     """
     source = "documents/a.txt"
     path = synthetic_corpus.text_file(source, "content as catalogued")
@@ -513,7 +515,7 @@ def test_dq1_source_file_changed_after_cataloguing_is_detected(synthetic_corpus)
         {
             "manifest_version": "1.0",
             "documents": [
-                {"id": "a", "source": source, "hash": catalogued, "indexed": False}
+                {"id": "a", "source": source, "hash": catalogued, "canonical": True}
             ],
         }
     )

@@ -250,6 +250,22 @@ Consolidated statement of the proposed v1 Document Contract.
 
 **6 — What this section does not do.** It does not add a fourth invariant to Section 8.7; does not add, remove, or retype a field; does not alter Section 8.4's identity rules; does not withdraw Section 8.5's referential-integrity deferral; does not reopen `ADR-P3.1.7.2-F2`; and does not authorize any implementation. Implementation of the corresponding check is Sprint P3.1.8.1's work, under `docs/DATA_QUALITY_VALIDATION_PLAN.md` §11.2 W2.
 
+### 8.10 Knowledge Manifest Catalog-Entry Fields After Repository Owner Ruling R-02 — Contract Erratum E-2
+
+*Added per Repository Owner ruling **R-02 — Runtime Index Semantics**, adopted and synchronized at Sprint 1B.2B. This section records the effect of that ruling on this document's descriptions of the Knowledge Manifest catalog entry. It adds no field to `Document`, changes no type, alters no invariant, and withdraws no deferral. **Sections 8.2 through 8.9 are byte-for-byte unchanged**, following the precedent Section 8.9 itself set. `Contract Version` remains `1.0`.*
+
+**Why an erratum rather than an edit.** This contract enumerates the Knowledge Manifest catalog entry as `(id, source, hash, indexed)` in several places — §8.1, and the Phase 1 and Phase 2 evidence tables. **This contract does not own that schema.** §8.9 item 3 states the ownership directly: *"`docs/MILESTONE_1A.md` build item 1 already freezes `documents[].id`."* The enumerations here are citations of that contract, not definitions of it. R-02 changed the cited contract; this section records that the citations are now historical.
+
+**1 — What R-02 rules.** `documents[].indexed` **SHALL be treated as a derived runtime property** and **SHALL NOT be persisted into the manifest.** The manifest SHALL remain solely a deterministic knowledge artifact; the runtime index SHALL remain executable retrieval state. The dependency direction SHALL remain `Knowledge Corpus → Manifest → Chunks → Index → DQ-7 Validation`, and **the reverse dependency SHALL NOT exist.**
+
+**2 — What this changes here.** Every enumeration in this document of the manifest catalog entry as carrying `indexed` — §8.1, Phase 1 (`scripts/build_manifest.py` and `sample_rag/knowledge_manifest.json` rows), Phase 2 — is **superseded as a statement of the current schema.** Each remains accurate as the observation it was when recorded, and none is edited: Phase 1 is declared *"Observation only"* at its own head, and Phase 2 is a precedent review. The current catalog-entry schema is `docs/MILESTONE_1A.md` build item 1, as amended by R-02.
+
+**3 — What this does not change.** `Document` is unaffected in every respect. `indexed` was never a `Document` field: §8.2's data model, §8.3's field-level contract, §8.4's identity rules and §8.7's invariant list neither contain it nor reference it. The `Document` ↔ manifest-entry distinction §8.1 and §8.5 draw is **strengthened** by R-02, not weakened — the manifest entry is now purely corpus description, with no runtime property in it at all.
+
+**4 — Enforcement owner is unchanged.** Completeness of runtime representation is proven by the Data Quality Validation layer (`docs/MILESTONE_1A.md` build item 2), the venue §8.9 item 4 already names for cross-artifact properties — **DQ-6** for manifest→chunk coverage and **DQ-7** for chunk→index coverage. No structural `Document` validator is required, designed, or implied by this section, and none is added.
+
+**5 — What this section does not do.** It does not add an invariant to §8.7; does not add, remove, or retype any `Document` field; does not alter §8.4's identity rules; does not withdraw §8.5's referential-integrity deferral; does not reopen §8.9 or `ADR-P3.1.7.2-F2`; and does not authorize any implementation. The corresponding change to `scripts/build_manifest.py` and the regeneration of `sample_rag/knowledge_manifest.json` are Sprint 1B.2B's synchronization of engineering to this ruling, performed under R-02's own authority and not created here.
+
 ---
 
 ## Phase 9 — Repository Boundaries

@@ -88,7 +88,6 @@ These two tracks are built together in M1A but tracked and extended separately f
    | `documents[].id` | string | Unique identifier for the document within the manifest. |
    | `documents[].source` | string | Filesystem path relative to `sample_rag/`. |
    | `documents[].hash` | string | SHA-256 digest of the document contents; the basis for freshness/integrity checks. |
-   | `documents[].indexed` | boolean | Whether the document has been successfully processed by the indexing stage. |
 
    These are the only fields in the contract. This versioning is documentation-level forward compatibility, not a new subsystem — the manifest remains one file.
 
@@ -104,6 +103,12 @@ These two tracks are built together in M1A but tracked and extended separately f
    - A creation timestamp is operational provenance, not a description of the corpus, and its presence would make the manifest non-deterministic for an identical corpus generated at two different times — in direct conflict with the deterministic artifact contract above.
    - Operational provenance is out of scope for Milestone 1A.
    - Future schema evolution may introduce provenance metadata if a concrete need justifies it; no such mechanism is designed by this note.
+
+   **Contract Change — `documents[].indexed` removed (Repository Owner ruling R-02, Sprint 1B.2B).** An earlier form of this contract included `documents[].indexed` (boolean, *"whether the document has been successfully processed by the indexing stage"*). The Repository Owner ruling **R-02 — Runtime Index Semantics** removes it from the persisted schema. It is superseded, not silently dropped, and is recorded here in the same form as the `created_at` removal below:
+   - `documents[].indexed` **SHALL be treated as a derived runtime property** and **SHALL NOT be persisted into the manifest.** Indexing state is executable retrieval state; the manifest is a deterministic knowledge artifact describing what the corpus *is*.
+   - Persisting it inverted the dependency direction R-02 fixes as `Knowledge Corpus → Manifest → Chunks → Index → DQ-7 Validation`. A manifest field describing index state makes the knowledge artifact depend on runtime state downstream of it. **The reverse dependency SHALL NOT exist.**
+   - Completeness of runtime representation is not lost: **DQ-7** remains the deterministic proof that every manifest document has valid runtime representation (`docs/DATA_QUALITY_VALIDATION_PLAN.md`; register **1B-10**), reached through DQ-6's manifest→chunk coverage and DQ-7's chunk→index coverage.
+   - `manifest_version` is **unchanged at `"1.0"`.** Amending it is a Repository Owner decision, and R-02 does not make one; the open finding on manifest versioning is recorded at `docs/P3.7.6_…` §7.1 and is untouched here.
 
    **Document version responsibility.** The Knowledge Manifest schema does not carry document version information. Filenames remain the authoritative source of document versioning; the manifest intentionally does not duplicate that metadata.
 
@@ -259,7 +264,7 @@ Full derivation, cross-reference audit and Deferred Repository Items Register: `
 
 | # | Build item | Implementing sprint(s) | Committed artifact | Executable evidence | Status |
 |---|---|---|---|---|---|
-| **1** | Knowledge Manifest | P1.2.0 (contract), P1.2.1–P1.2.2 (`92a35e9`, `19f8f48`), P1.3 (`25b6770`) | `sample_rag/knowledge_manifest.json`, `scripts/build_manifest.py` | W1 structural gate (3), W3 / DQ-1 freshness (2) | **Complete.** Digest `a1fa0857b723`. `documents[].indexed` is `false` for both entries — semantics open, see Deferred Register |
+| **1** | Knowledge Manifest | P1.2.0 (contract), P1.2.1–P1.2.2 (`92a35e9`, `19f8f48`), P1.3 (`25b6770`) | `sample_rag/knowledge_manifest.json`, `scripts/build_manifest.py` | W1 structural gate (3), W3 / DQ-1 freshness (2) | **Complete.** Digest `a1fa0857b723` at Milestone 1A closure; superseded by later corpus and governance synchronization — current value at `docs/P3.7.6_…` §E-4. `documents[].indexed` **semantics resolved by Repository Owner ruling R-02** and the field removed from the persisted schema (build item 1, *Contract Change*); register **1B-11** discharged |
 | **2** | Data Quality Validation | P3.1.8.1A–E (`78b5daf` … `3a32253`), P3.1.8.4 (`ea629b2`) | `tests/test_data_quality.py` | 14 specifications, DQ-1 … DQ-4; 23-mutant baseline | **Partially complete.** DQ-5, DQ-6, DQ-7 recorded **blocked** by `docs/DATA_QUALITY_VALIDATION_PLAN.md` §8.1, §11.2 W6, §16 O-6. Index Coverage Validation — this item's own clause — **is** DQ-7 |
 | **3** | Indexing | Chunking: `e556a98`, `11299b7`. Placeholder vectors: **no sprint** | `sample_rag/chunker.py`, `sample_rag/chunks.json` (172 chunks) | `tests/test_chunker.py` — 17 | **Partially complete.** Structure-aware chunking with recursive-character fallback shipped; digest `323723b4fe82`. **No `Indexer`, no `EmbeddingProvider`, no placeholder vectors exist in the repository** |
 | **4** | Retrieval | P3.3.1 — runtime committed under `dfe1b5b` (see Register §5) | `sample_rag/retriever.py`, `scripts/run_retrieval.py` | `RetrievalResult` exercised by 117 evaluation, 48 generation and 27 CLI specifications | **Complete for the corpus as committed.** Route `LEXICAL`. The SQL-filter stage is **not exercised** — the corpus carries no JobOps structured data; `diagnostics["sql_filter_applied"]` is `False` and unapplied filters are reported in `diagnostics["filters_ignored"]` rather than dropped |

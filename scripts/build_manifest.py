@@ -32,7 +32,6 @@ REQUIRED_DOCUMENT_FIELDS = {
     "id": str,
     "source": str,
     "hash": str,
-    "indexed": bool,
     "canonical": bool,
 }
 
@@ -110,15 +109,23 @@ def is_canonical(source: str) -> bool:
 def build_document_entry(document_id: str, source: str, file_hash: str, canonical: bool) -> dict:
     """Build a single in-memory document entry matching the documented schema.
 
-    `canonical` is appended last, after the four fields Sprint 1A.1 froze, so
-    existing key order is preserved byte-for-byte and only the new field's
-    presence distinguishes this entry from its predecessor.
+    `indexed` is **not** emitted. Repository Owner ruling **R-02 — Runtime Index
+    Semantics** (Sprint 1B.2B) treats it as a derived runtime property that is
+    never persisted: the manifest is a deterministic knowledge artifact, and
+    index state is executable retrieval state downstream of it. Emitting it here
+    would create the reverse dependency R-02 forbids — a knowledge artifact
+    carrying a value only the runtime index can determine. Runtime completeness
+    is proven instead by DQ-6 (manifest → chunk) and DQ-7 (chunk → index).
+    See `docs/MILESTONE_1A.md` build item 1 *Contract Change* and
+    `docs/DOCUMENT_CONTRACT.md` §8.10.
+
+    `canonical` is appended last, preserving the key order of the fields Sprint
+    1A.1 froze, so entry shape stays stable under the ruling.
     """
     return {
         "id": document_id,
         "source": source,
         "hash": file_hash,
-        "indexed": False,
         "canonical": canonical,
     }
 

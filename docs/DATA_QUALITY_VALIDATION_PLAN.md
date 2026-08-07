@@ -263,7 +263,8 @@ Recorded so P3.1.8.1 does not reopen them.
 | Text extraction ownership | **Knowledge Source.** Closed | `docs/DOCUMENT_CONTRACT.md` Phase 9, Phase 11 Q2 (ANSWERED); `docs/DOCUMENT_CONTRACT_REVIEW.md` F1 |
 | Identity derivation | **Manifest.** `Document.id` is read, never derived (S1) | `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3; `sample_rag/knowledge_source.py` `load()` |
 | Determinism verification | **Executable Specification Suite.** Closed | `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §20.3 |
-| Manifest generation and `documents[].indexed` | **`scripts/build_manifest.py`.** DQV reads, never writes | `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §6.2; P8 |
+| Manifest generation | **`scripts/build_manifest.py`.** DQV reads, never writes | `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §6.2; P8 |
+| Runtime index state | **Not a manifest concern.** Repository Owner ruling **R-02**: `documents[].indexed` is a *derived runtime property* and is **not persisted**. The manifest is a deterministic knowledge artifact; the index is executable retrieval state. Completeness is proven by **DQ-6** (manifest → chunk) and **DQ-7** (chunk → index), not read from a stored flag | R-02; `docs/MILESTONE_1A.md` build item 1 *Contract Change*; `docs/DOCUMENT_CONTRACT.md` §8.10 |
 | JobOps-as-`Document` | **Structurally excluded today.** DQV does not need it | `docs/DOCUMENT_CONTRACT.md` Phase 11 Q3 (F7 structural exclusion); a JobOps row cannot obtain a `documents[]` entry, so no DQV check can reach one |
 
 ---
@@ -333,7 +334,7 @@ Invocation is therefore `python3 -m pytest` — the same command that constitute
 |---|---|
 | pytest pass/fail per check | The report. See §8.4 |
 | **No repository artifact** | DQV writes nothing, repairs nothing, regenerates nothing (P8) |
-| **No mutation of `documents[].indexed`** | Owned by the Manifest lifecycle (§5.5) |
+| **No index state written anywhere** | Repository Owner ruling **R-02**: `documents[].indexed` is derived runtime state and is not persisted. DQV proves runtime completeness through **DQ-6** and **DQ-7**; it stores no flag and mutates no manifest field |
 
 **"Validated Corpus" is a state, not a file.** No `validated_corpus.json` exists or is proposed. The corpus is validated exactly when the DQV suite passes against it. This is stated explicitly so P3.1.8.1 does not invent an artifact — the same discipline `docs/DOCUMENT_CONSTRUCTION_PLAN.md` §4.3 applied when it recorded "No persisted `Document` artifact" as an explicit non-output.
 

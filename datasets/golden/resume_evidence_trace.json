@@ -398,8 +398,8 @@
     },
     {
       "id": "meta_qa_resume_f026_reasoning_01",
-      "question": "According to Karthik's resume, are his data migration programs described as Fortune 500 engagements?",
-      "expected_answer": "This wording appears in an earlier catalogued version of the resume (v2.2): 'Fortune 500 data migration programs including Maruti Suzuki, Betts Group, and Red Earth.' It has since been superseded \u2014 the current canonical resume (v2.3) uses 'large-scale enterprise data migration programs' instead, since none of these companies are Fortune 500. A system retrieving from a stale corpus snapshot would surface this outdated characterization as if it were current.",
+      "question": "Does current canonical knowledge describe Karthik's data migration programs as Fortune 500 engagements?",
+      "expected_answer": "No. Current canonical knowledge describes them as large-scale enterprise data migration programs at Maruti Suzuki, Betts Group, and Red Earth. The Fortune 500 characterization exists only in historical knowledge, which was corrected because none of these companies are Fortune 500. A system retrieving from historical knowledge without distinguishing it would surface that superseded characterization as current repository truth.",
       "expected_source": "3f3797c1134c",
       "expected_chunk": [
         "3d6b22d807ac3dfa"
@@ -417,8 +417,8 @@
     },
     {
       "id": "meta_qa_resume_f026_reasoning_02",
-      "question": "Do Karthik's resume versions agree on how his data migration programs are characterized?",
-      "expected_answer": "No. This entry's source (Resume v2.2) describes the programs as 'Fortune 500 data migration programs.' The current canonical version (v2.3) instead describes them as 'large-scale enterprise data migration programs,' since none of the named companies are Fortune 500. The two catalogued versions conflict on this characterization; v2.3's wording is the corrected one.",
+      "question": "Does historical knowledge about Karthik's data migration programs conflict with current canonical knowledge?",
+      "expected_answer": "Yes. Historical knowledge characterizes the programs as Fortune 500 data migration programs; current canonical knowledge characterizes them as large-scale enterprise data migration programs at Maruti Suzuki, Betts Group, and Red Earth. The conflict is a corrected factual claim, since none of the named companies are Fortune 500. Current canonical knowledge is repository truth; the historical characterization is retained solely as evaluation evidence and must never be presented as current.",
       "expected_source": "3f3797c1134c",
       "expected_chunk": [
         "3d6b22d807ac3dfa"

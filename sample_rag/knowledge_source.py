@@ -7,8 +7,9 @@ approved Document Construction Plan (docs/DOCUMENT_CONSTRUCTION_PLAN.md).
 
 Construction only: no chunking, no serialization, no independent validation
 component, no repository mutation. The Knowledge Manifest is read, never
-written — `scripts/build_manifest.py` owns that lifecycle, including
-`documents[].indexed` (Construction Plan §6.2).
+written — `scripts/build_manifest.py` owns that lifecycle (Construction Plan
+§6.2). It carries no index state to write: Repository Owner ruling **R-02**
+makes `documents[].indexed` a derived runtime property that is not persisted.
 
 Execution stages, one responsibility each (Construction Plan §7):
 

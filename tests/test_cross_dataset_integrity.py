@@ -58,14 +58,18 @@ a state no authority forbids. It *is* asserted for QA pairs, because the builder
 guarantees exactly one Evidence Trace entry per pair — there the bijection is a
 real invariant, and X-5 holds it.
 
-Alignment to the canonical corpus, added at Sprint 1B.2A
----------------------------------------------------------
+Alignment to current canonical knowledge, added at Sprint 1B.2A
+----------------------------------------------------------------
 X-1 … X-16 all resolve a reference to whatever document a fact *names*. None
 asks whether the Knowledge Manifest still designates that document canonical, so
-a corpus evolution can leave the whole Golden Dataset citing a superseded version
-with every specification above still green — internally consistent, externally
-stale. X-17 closes that gap, and is the only specification here that reads the
-Manifest's `canonical` flag.
+a corpus evolution can leave the whole Golden Dataset citing superseded
+knowledge with every specification above still green — internally consistent,
+externally stale. X-17 closes that gap, and is the only specification here that
+reads the Manifest's `canonical` flag. Its semantics follow Repository Owner
+ruling **R-01 — Historical Knowledge Semantics** (Sprint 1B.2B): current
+canonical knowledge defines repository truth, and historical knowledge is
+legitimate evidence only where evaluating it against canonical knowledge is the
+question's purpose.
 
 Runtime components are not involved, per Work Package 5. No retriever is
 constructed and no retrieval is executed; the only executed repository code is
@@ -83,15 +87,18 @@ from scripts.build_evidence_trace import (
 )
 
 
-# The two `docs/roadmap.md` §2.3 failure categories that test *disagreement
-# between catalogued versions of the same document*. Both are structurally
-# impossible to author against the canonical document alone — they require a
-# superseded version to remain reachable, which is why `docs/corpus/resume-corpus.md`
-# retains historical resume versions. Stated as a subset here rather than imported
-# from `tests/test_qa_pairs.py`, whose frozenset is the full seven-category
-# taxonomy: what X-17 needs is not the taxonomy but the two categories for which
-# a non-canonical parent document is the point.
-VERSION_DISAGREEMENT_CATEGORIES = frozenset({"Stale Version", "Contradiction"})
+# The two `docs/roadmap.md` §2.3 failure categories that evaluate *historical
+# knowledge against current canonical knowledge*, per Repository Owner ruling
+# **R-01 — Historical Knowledge Semantics**: historical knowledge exists solely
+# as evaluation evidence, and the comparison is historical-vs-canonical, not
+# version-vs-version. Both are structurally impossible to author against
+# canonical knowledge alone — they require historical knowledge to remain
+# reachable, which is why `docs/corpus/resume-corpus.md` retains superseded
+# resume artifacts. Stated as a subset here rather than imported from
+# `tests/test_qa_pairs.py`, whose frozenset is the full seven-category taxonomy:
+# what X-17 needs is not the taxonomy but the two categories for which a
+# non-canonical parent document is the point.
+HISTORICAL_KNOWLEDGE_CATEGORIES = frozenset({"Stale Version", "Contradiction"})
 
 
 def evidence_fact_ids(qa_pair):
@@ -514,37 +521,42 @@ def test_x16_every_cited_fact_is_grounded_in_the_expected_source_document(
             )
 
 
-# --- X-17: Golden Dataset ↔ canonical corpus alignment -----------------------
+# --- X-17: Golden Dataset ↔ current canonical knowledge alignment ------------
 
 
-def test_x17_only_version_disagreement_questions_cite_a_non_canonical_document(
+def test_x17_only_historical_knowledge_questions_cite_a_non_canonical_document(
     real_qa_pairs, real_facts_by_id, real_manifest_entries
 ):
-    """X-17 — a QA pair may cite a non-canonical document only to test version disagreement.
+    """X-17 — a QA pair may cite non-canonical knowledge only to evaluate historical knowledge.
 
-    The specification that makes canonical-corpus evolution *detectable* rather
-    than silent. Every check above resolves a reference to whatever document the
-    fact happens to name; none asks whether that document is still the one the
-    Knowledge Manifest designates canonical. So when a new canonical version
-    enters the corpus, the entire Golden Dataset can go on citing its predecessor
-    while every structural specification stays green — the expectations remain
+    The specification that makes corpus evolution *detectable* rather than
+    silent. Every check above resolves a reference to whatever document the fact
+    happens to name; none asks whether that document still carries the Knowledge
+    Manifest's canonical designation. So when new canonical knowledge enters the
+    corpus, the entire Golden Dataset can go on citing its predecessor while
+    every structural specification stays green — the expectations remain
     internally consistent and externally stale, and the drift surfaces only as
     degraded retrieval metrics, which read as a retrieval defect rather than a
     dataset one. That is precisely the Knowledge-stage-mistaken-for-Retrieve-stage
     confusion `docs/altm.md` exists to prevent.
 
-    **Why the invariant is not "every fact is canonical."** `docs/roadmap.md` §2.3's
-    Stale Version and Contradiction categories cannot be authored against the
-    canonical document at all: each needs two catalogued versions that disagree,
-    and the superseded one is the evidence. Requiring universal canonicality would
-    make two of the seven taxonomy categories unpopulatable and would fail the
-    repository for the state `docs/corpus/resume-corpus.md` deliberately maintains.
+    **Why the invariant is not "every fact is canonical."** Repository Owner
+    ruling **R-01 — Historical Knowledge Semantics** retains historical knowledge
+    *solely as evaluation evidence*, and `docs/roadmap.md` §2.3's Stale Version
+    and Contradiction categories exist to evaluate it: each compares historical
+    knowledge against current canonical knowledge, so historical knowledge must
+    remain reachable to be compared at all. Requiring universal canonicality
+    would make two of the seven taxonomy categories unpopulatable and would fail
+    the repository for the state `docs/corpus/resume-corpus.md` deliberately
+    maintains.
 
-    The invariant asserted is the conditional one: a non-canonical parent document
-    is legitimate **exactly** where testing version disagreement is the question's
-    purpose. Stated over the QA pair's full evidence set — parent fact and
-    supporting facts alike — because a supporting fact silently anchored to a
-    superseded version corrupts a multi-hop expectation just as completely.
+    The invariant asserted is the conditional one: non-canonical parentage is
+    legitimate **exactly** where evaluating historical knowledge is the
+    question's purpose. Everywhere else it means the dataset is asserting
+    historical knowledge as current repository truth, which R-01 forbids. Stated
+    over the QA pair's full evidence set — parent fact and supporting facts alike
+    — because a supporting fact silently anchored to superseded knowledge
+    corrupts a multi-hop expectation just as completely.
 
     Canonicality is read from `sample_rag/knowledge_manifest.json` itself, so the
     specification tracks whatever the Repository Owner has designated rather than
@@ -556,7 +568,7 @@ def test_x17_only_version_disagreement_questions_cite_a_non_canonical_document(
 
     misanchored = []
     for pair in real_qa_pairs:
-        if pair["failure_category"] in VERSION_DISAGREEMENT_CATEGORIES:
+        if pair["failure_category"] in HISTORICAL_KNOWLEDGE_CATEGORIES:
             continue
 
         for fact_id in evidence_fact_ids(pair):
@@ -565,7 +577,7 @@ def test_x17_only_version_disagreement_questions_cite_a_non_canonical_document(
                 misanchored.append(f"{pair['id']} → {fact_id} → {document_id}")
 
     assert misanchored == [], (
-        "QA pairs outside the version-disagreement categories citing facts anchored to a "
-        f"non-canonical document; the Golden Dataset has drifted from the canonical "
-        f"corpus and needs re-anchoring: {sorted(set(misanchored))}"
+        "QA pairs outside the historical-knowledge categories citing facts anchored to "
+        f"non-canonical knowledge; the Golden Dataset has drifted from current canonical "
+        f"knowledge and needs re-anchoring: {sorted(set(misanchored))}"
     )
