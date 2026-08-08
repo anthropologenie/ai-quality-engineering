@@ -25,13 +25,18 @@ guarantees that quantify over committed repository state (G-6, G-11).
 No answer text is frozen
 ------------------------
 No specification asserts that a particular question produces a particular
-answer. Contract §19.2 requires this: the Milestone 1A retriever is a documented
-lexical stub whose behaviour Milestone 2 is expected to change, and freezing
-today's answers would convert a retrieval improvement into a generation test
+answer. Contract §19.2 requires this: the Milestone 1A retriever was a documented
+lexical stub whose behaviour Milestone 2 was expected to change, and freezing
+today's answers would convert a retrieval change into a generation test
 failure — the same reasoning `tests/test_retrieval_evaluation.py` already
 records for retrieval classifications. What is asserted is *shape, evidence,
 ordering, determinism and traceability*, all of which must hold for any
 retrieval behaviour.
+
+Sprint M2.03 exercised that. BM25 replaced the overlap scorer (**M2-03**), so the
+corpus specifications below now quote different chunks in a different order, and
+not one of them needed editing. The Generator itself is untouched by that sprint
+and remains the deterministic quotation stub until **M2-06**.
 
 Validation may read what the runtime may not
 ---------------------------------------------

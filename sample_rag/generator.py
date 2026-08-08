@@ -70,9 +70,17 @@ OUTCOME_ABSTAIN = "Abstain"
 # `ALTM-INFER-2` (false confidence on an unanswerable question) describes.
 ABSTENTION_TEXT = "No supporting evidence was retrieved for this query."
 
-# §8.4 — the Milestone 1A stub marker, mirroring `RetrievalResult`'s own
-# `diagnostics["stub"]` and docs/architecture.md §9's record of Generation as a
-# Milestone 1A stub. Milestone 2's DeepSeek `Generator` is where this changes.
+# §8.4 — the Milestone 1A stub marker, following the `RetrievalResult`
+# `diagnostics["stub"]` precedent and docs/architecture.md §9's record of
+# Generation as a Milestone 1A stub. Milestone 2's DeepSeek `Generator` (**M2-06**)
+# is where this changes.
+#
+# It no longer *mirrors* the retrieval marker's value, and deliberately so: the
+# lexical route's marker reads `False` from Sprint M2.03, where BM25 replaced the
+# overlap scorer (`sample_rag/retriever.py` `LEXICAL_STUB`), while generation is
+# still the deterministic quotation stub. The two markers report two components,
+# which is the whole reason each carries its own — a shared value would have made
+# one stage's Milestone 2 arrival silently speak for the other's.
 GENERATION_STUB = True
 
 # Delegated decision 4 (§20.2) — the deterministic separator by which statements

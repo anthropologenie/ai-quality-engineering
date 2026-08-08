@@ -23,6 +23,12 @@ derivable from the record fields it is handed, which is what allows a future
 BM25, vector, or hybrid retriever to be measured without touching this file:
 a new retriever changes what the records *say*, not what a record *is*.
 
+**The BM25 half of that sentence is no longer future, and the claim held.** Sprint
+M2.03 replaced the lexical scorer with genuine BM25 (**M2-03**) and this module
+was not edited, imported differently or re-specified; only the numbers it reports
+moved. Vector and hybrid retrieval remain future — **M2-02**'s query stage exists
+but no evaluation record is produced from it, and fusion is **M2-04**.
+
     evaluation.Record[]  ->  Retrieval Metrics Engine  ->  metrics.Report
 """
 

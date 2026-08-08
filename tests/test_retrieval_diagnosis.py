@@ -17,12 +17,16 @@ claims to apply a rule written in `docs/altm.md` §5; if the transcription drift
 from the document, every diagnosis cites text the repository does not contain.
 `test_every_rule_symptom_appears_verbatim_in_altm` reads the document and checks.
 
-No specification asserts a *retrieval outcome* on the committed corpus. That
-today's evaluation yields ten `ALTM-RETRIEVE-4` diagnoses is a fact about Sprint
-P3.3.1's Milestone 1A lexical stub, which Milestone 2 is expected to change;
-freezing it would convert a retrieval improvement into a test failure. What is
-specified is that every diagnosis cites a documented rule, receives one reachable
-stage and one confidence value, and that both derivations agree.
+No specification asserts a *retrieval outcome* on the committed corpus. How many
+`ALTM-RETRIEVE-4` diagnoses an evaluation yields is a fact about the retrieval
+implementation of the day, not about this engine; freezing it would convert a
+retrieval change into a test failure. What is specified is that every diagnosis
+cites a documented rule, receives one reachable stage and one confidence value,
+and that both derivations agree.
+
+The count was ten under Sprint P3.3.1's overlap scorer and is no longer ten under
+the BM25 scorer Sprint M2.03 put in its place (**M2-03**). No specification here
+changed for it, which is the property this paragraph was written to buy.
 
 Observational only: every specification reads committed repository state and
 writes nothing.

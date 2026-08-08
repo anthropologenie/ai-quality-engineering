@@ -17,10 +17,20 @@ said; `test_chunk_precision_is_matched_over_retrieved` asserts `0.25` because
 one of four retrieved chunks was expected, and would fail if the engine ever
 divided by something else.
 
-No specification asserts a *retrieval outcome* on the committed corpus — that
-the corpus scores 0.1308 micro precision is a fact about Sprint P3.3.1's
-Milestone 1A lexical stub, which Milestone 2 is expected to change. Freezing
-today's values here would convert a retrieval improvement into a test failure.
+No specification asserts a *retrieval outcome* on the committed corpus — what
+micro precision the corpus scores is a fact about the retrieval implementation
+and the corpus of the day, not about this engine. Freezing today's values here
+would convert a retrieval change into a test failure.
+
+Both halves of that sentence have since moved, which is why no number is quoted
+in it any more. Sprint P3.3.1's figure of `0.1308` was measured against the
+two-document, 172-chunk corpus of Milestone 1A; the Milestone 1B Corpus
+Synchronization changed the corpus underneath it, and Sprint M2.03 then replaced
+the scorer with BM25 (**M2-03**). Current values are reported by
+`python -m scripts.evaluate_retrieval` and recorded in
+`docs/M2.03_Real_BM25_Lexical_Retrieval_Report.md` §11 — deliberately in a
+report, which is dated, rather than here, where it would read as a specification.
+
 What is specified about the corpus is that both derivation paths agree, that the
 report is total, and that measuring it changes nothing.
 

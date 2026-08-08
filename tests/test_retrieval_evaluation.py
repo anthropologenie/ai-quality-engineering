@@ -23,9 +23,15 @@ asserts that every question is classified exactly once and that the totals
 account for all of them; none asserts that a particular question lands in a
 particular category, because that is a fact about the current retrieval
 implementation, not a property of the evaluation engine — and Sprint P3.3.1's
-retriever is explicitly a Milestone 1A lexical stub whose behavior Milestone 2
-is expected to change. Freezing today's classifications here would convert a
-retrieval improvement into a test failure.
+retriever was explicitly a Milestone 1A lexical stub whose behavior Milestone 2
+was expected to change. Freezing today's classifications here would convert a
+retrieval change into a test failure.
+
+**Sprint M2.03 is where that expectation was realized**, and this module needed
+no edit for it: BM25 replaced the overlap scorer (**M2-03**), every committed
+question's classification moved, and every specification below still passes
+because none of them names one. The reasoning above is retained in the past
+tense rather than rewritten — it was a prediction, and it held.
 
 Observational only. Every specification below reads committed repository state
 and writes nothing; `test_repository_authorities_are_byte_identical` is the
