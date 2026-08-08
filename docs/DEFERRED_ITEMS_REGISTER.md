@@ -143,6 +143,8 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 **17 capabilities.** Every one affirmed at Milestone 2 by an existing authority; **none was moved here by `docs/P3.7.3_…`.** **One — M2-01 — is discharged and retained here with its discharge recorded**, per §1.3 (*a capability is never deleted*), by Sprint M2.01A. The count is unchanged for that reason: it counts capabilities allocated, not capabilities outstanding.
 
 > **M2-02's acceptance is staged by Repository Owner ruling RO-08 — see §4.1.** It remains **one capability and remains OPEN**: Sprint M2.01B may build the persistent FAISS-backed foundation without discharging it, and Sprint M2.01C completes the `VectorStore` Protocol. **No derivative identifier was created, no row was duplicated, and no capability was reallocated.** The count above is unaffected.
+>
+> **The artifacts M2-02 produces are governed by Repository Owner ruling RO-09 — see §4.2.** The FAISS index and its metadata are **derived, rebuildable runtime/build state**, not Git source artifacts; the canonical corpus remains authoritative; and **M2.01C owns the concrete runtime location and consumption lifecycle**. RO-09 discharges nothing and allocates nothing — M2-02's status above is unaffected by it.
 
 > **Criterion A-5 — the embedding-library portion lapsed at Sprint M2.01A.** `docs/MILESTONE_1A.md` criterion A-5 (*"Zero imports of any embedding, vector-store, or LLM-evaluation library anywhere in the codebase"*) was binding through Milestone 1A and **remained binding throughout Milestone 1B**, as §3's exit condition states and as it continues to state — that sentence is a Milestone 1B fact and is unaltered.
 >
@@ -238,6 +240,51 @@ This is a **scoped execution rule for the resume-only Milestone 2A implementatio
 **R-01**, **R-02**, **RO-06**, **RO-07**, **ADR-0001 §2**, the chunk contract, the manifest contract, the `VectorStore` Protocol, and the approved Hybrid Retrieval architecture — all unchanged. RO-08 establishes only the authority needed for M2.01B to proceed without inventing missing identity or lifecycle semantics.
 
 **Where the stage allocation lives.** As with RO-06 / RO-07, §1.2 bars this register from carrying sequence within a milestone. **The M2.01B / M2.01C staging of M2-02 within Milestone 2A is recorded in `docs/roadmap.md` §1.1**; this register continues to record only that M2-02 is one capability, allocated to Milestone 2, and still open.
+
+### 4.2 Repository Owner ruling RO-09 — Sprint RO-09
+
+Issued at Sprint **RO-09**, after Sprint **M2.01B** surfaced the artifact-policy question as finding **F-2** of `docs/M2.01B_FAISS_VectorStore_Foundation_Report.md` §15. It is fixed repository authority. **This section records it; it does not interpret it.**
+
+**On the section number.** This is the register's own §4.2, in the same sense §4.1 is the register's own — **not** the `§4.2` the *Rationale* column of §4's table cites, which points at `docs/P3.7.3_…` **Decision 4** (§2.3). The distinction is the one §4.1 already discloses, restated here because §4.2 is the more heavily cited of the two.
+
+**On the identifier.** **RO-09 is the next available unique Repository Owner ruling identifier**: RO-01 through RO-05 are in use in §7, RO-06 and RO-07 in §3.1, and RO-08 in §4.1. No identifier is reused and no historical ruling is renamed.
+
+**On its standing relative to M2.01B.** This ruling was made **after** M2.01B completed and is not represented as having existed during it. M2.01B is committed, complete and historical; **CP-3** governs, and neither its report nor its evidence is rewritten by this section.
+
+| Ruling | Title | Effect |
+|---|---|---|
+| **RO-09** | **FAISS index artifact policy** | The FAISS vector index produced by M2.01B is a **derived, rebuildable runtime/build artifact**; the **canonical corpus remains authoritative**; generated FAISS index artifacts and their generated metadata are **not Git source artifacts**; **Milestone 2A's M2.01C owns the concrete runtime artifact location and consumption lifecycle**. Creates no capability, discharges none, alters no contract and authorizes no retrieval |
+
+#### The decision
+
+The FAISS vector index produced by Sprint M2.01B is **derived, rebuildable runtime/build artifact state**. The canonical corpus remains the source of truth:
+
+    Canonical corpus → chunks / corpus representation → embeddings
+                     → FAISS index + metadata → retrieval
+
+The FAISS index is therefore **not canonical source material**.
+
+1. FAISS index artifacts are **derived**.
+2. They are **rebuildable** from the canonical corpus and the established embedding/index configuration.
+3. Generated FAISS index artifacts are **not repository source artifacts** and **SHALL NOT be committed to Git merely to make the index available**.
+4. This includes generated `index.faiss`, generated vector-index directories, and generated runtime FAISS binaries.
+5. `index_metadata.json` generated alongside the FAISS index is **likewise derived** runtime/build metadata.
+6. The **canonical corpus remains authoritative**.
+7. **M2.01C owns the concrete runtime artifact location and consumption lifecycle.**
+8. M2.01C must determine how the runtime **locates** the derived index, **determines whether it exists**, **validates compatibility**, **determines whether it is stale**, **loads** it, **rebuilds** it when necessary, and **exposes** it to the query/retrieval path.
+9. **This ruling prescribes no final runtime directory, filesystem path, CLI flag, environment variable, cache layout or API for M2.01C**, none being defined by existing repository authority.
+
+#### What this ruling explicitly preserves
+
+**M2-02 remains OPEN** and remains exactly one capability — this ruling **does not discharge it** and creates no derivative identifier. **Sprint M2.01B remains complete** and historical. **Sprint M2.01C remains the query/protocol completion stage**, and the only sprint that may discharge M2-02. **RO-08** stands unchanged in every part, including its Decision 3 freshness signal set. Canonical corpus identity, the chunk contract, the manifest contract, `sample_rag/chunks.json`, the `VectorStore` Protocol and M2-02's staged acceptance are all unchanged.
+
+#### What this ruling explicitly does not do
+
+**No retrieval implementation is authorized by this ruling** — not query semantics, top-k, similarity, ranking, BM25, RRF, or retrieval evaluation. **No new capability is created.** **No architecture redesign is performed.** **No timestamp or JobOps freshness mechanism is introduced** — no `created_at`, no persisted `documents[].indexed`, no last-indexed timestamp, no `generated_at`, no JobOps dependency, no timestamp-based manifest identity.
+
+#### On `.gitignore`
+
+**No `.gitignore` change is made by this ruling, and none is implied.** Item 3 states that generated FAISS artifacts are not committed; expressing that as an ignore rule requires naming a path, and item 9 reserves the concrete runtime location to M2.01C. An ignore rule written now would prescribe what this ruling declines to prescribe. Whether one is warranted is therefore a question for M2.01C, once the location exists.
 
 ---
 

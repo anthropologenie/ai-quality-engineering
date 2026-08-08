@@ -3,7 +3,7 @@
 **Repository:** `ai-quality-engineering`
 **Status:** Active — established at Sprint P3.1.7.2 (Assurance Remediation)
 **Scope at establishment:** Knowledge Layer (Milestone 1A). Later layers are added as their decisions are dispositioned.
-**Last synchronized:** Sprint P3.7.2 (Repository Governance Synchronization) — Retrieval, Evaluation, Dataset, Generation and CLI layers added, per `docs/P3.7.2_Repository_Governance_Synchronization_Report.md`
+**Last synchronized:** Sprint P3.7.2 (Repository Governance Synchronization) — Retrieval, Evaluation, Dataset, Generation and CLI layers added, per `docs/P3.7.2_Repository_Governance_Synchronization_Report.md`; then Sprint **RO-09**, which added one open observation (**M2.01B-F-1**, §3.5) and changed nothing else
 
 ---
 
@@ -120,6 +120,8 @@ Every finding the Sprint P3.1.7.1 Decision Gate classified as CONFIRMED, with th
 
 Recorded because they have a disposition, not because they are scheduled.
 
+**On the `M2.01B-F-1` identifier.** Sprint-report findings are numbered per report, so M2.01B's **F-1** is not this register's **F-1** (§3.1, duplicate manifest identifiers) and its **F-2** is not §3.2 (corpus-root containment). The row below is therefore qualified by its originating sprint, following the qualification this table already uses for `F-2-sym` and `P3.1.7-ARCH-01`. **The four §3.1 / §3.2 records keep their identifiers unchanged** — CP-3 governs, and nothing historical is renumbered.
+
 | ID | Observation | Disposition |
 |---|---|---|
 | **F-2-sym** | Containment reads the manifest value, so a corpus file that is a **symlink** pointing outside the root is not detected | Deliberate boundary of `ADR-P3.1.7.2-F2`. Candidate for Data Quality Validation if evidence ever emerges; none exists today |
@@ -127,6 +129,7 @@ Recorded because they have a disposition, not because they are scheduled.
 | **I-7** | `test_a15`'s allowlist tracks CPython-synthesized dataclass members (`__firstlineno__`, `__static_attributes__` are 3.13+; suite runs on 3.12) | Re-verify at the next CPython upgrade |
 | **A-3** | `discover_manifest_entries` performs admissibility checks bounded only by a docstring against growing into a second `validate_manifest` | Re-inspect if that function grows |
 | **P3.1.7-ARCH-01** | JobOps-as-`Document` classification unresolved (Contract Outstanding Question 3) | Intentionally deferred; structurally excluded today by the manifest discovery gate |
+| **M2.01B-F-1** | **Index embedding-provider provenance.** `Index` (`sample_rag/indexer.py`) does not intrinsically carry embedding-model/provider identity — it holds `vectors`, `dimension` and `stub`, and nothing recording what embedded them. A caller can therefore theoretically pair an Index built by one provider with a different provider at persistence time, and record a false model identity in the vector-index metadata | **Future hardening — not a current defect.** No repository path exhibits it: the one production caller supplies the same provider it indexed with, and `docs/architecture.md` §7 freezes `EmbeddingProvider` at a single `embed` method, so M2.01B read identity defensively via `getattr` rather than growing the seam. Revisit whether provider/model identity should become part of the Index contract, so a mismatched provider/index pairing is detectable rather than merely improbable. **No implementation is owed by this entry**, and it allocates no capability and changes no milestone. Surfaced as finding **F-1** of `docs/M2.01B_FAISS_VectorStore_Foundation_Report.md` §15; recorded here at Sprint RO-09 |
 
 ### 3.6 D-2 — Contract inconsistency on `Document.id` uniqueness
 
