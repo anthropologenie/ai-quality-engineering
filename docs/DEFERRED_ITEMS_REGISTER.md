@@ -36,9 +36,10 @@ The two registers are complementary and do not overlap. `docs/ENGINEERING_TRACEA
 
 - A capability is **added** only when a Repository Owner decision or a committed authority defers it. Adding one here does not defer it.
 - A capability is **reallocated** only by a Repository Owner constitutional decision, cited in the row.
-- A capability is **never deleted.** When built, it moves to §8 *Discharged* with the sprint that built it.
+- A capability is **never deleted.** When discharged, its original register row is **retained in place and marked ✅** with the sprint and the evidence that discharged it.
 - **Git is the authoritative implementation history; this register records engineering state.** A discharge names its **sprint** and its **evidence** — not a commit hash. No row carries a placeholder awaiting one, and no commit is made solely to insert one. Commit references already present are historical records and are retained under **CP-3** — see §8.1.
 - Every row cites both an **originating repository authority** and a **constitutional authorization**.
+- **An implementation sprint may synchronize this register** when **both** conditions hold: the sprint **explicitly discharges** a registered capability, and the sprint's brief **explicitly authorizes** register synchronization. Ratified by the Repository Owner at the Sprint M2.01A review; recorded here at Sprint **M2.01A-R**. Sprint **M2.01A**'s discharge of **M2-01** is the case it was ratified on, and that entry stands. The permission covers **recording engineering state only** — allocation, reallocation and creation remain governed by the rules above and require Repository Owner authority.
 - **This register creates nothing.** Sprint P3.7.4 reclassified no capability, reallocated no capability and introduced no capability.
 
 ---
@@ -139,7 +140,11 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 
 ## 4. Milestone 2 — AI-Enabled Retrieval & Generation
 
-**17 capabilities.** Every one affirmed at Milestone 2 by an existing authority; **none was moved here by `docs/P3.7.3_…`.**
+**17 capabilities.** Every one affirmed at Milestone 2 by an existing authority; **none was moved here by `docs/P3.7.3_…`.** **One — M2-01 — is discharged and retained here with its discharge recorded**, per §1.3 (*a capability is never deleted*), by Sprint M2.01A. The count is unchanged for that reason: it counts capabilities allocated, not capabilities outstanding.
+
+> **Criterion A-5 — the embedding-library portion lapsed at Sprint M2.01A.** `docs/MILESTONE_1A.md` criterion A-5 (*"Zero imports of any embedding, vector-store, or LLM-evaluation library anywhere in the codebase"*) was binding through Milestone 1A and **remained binding throughout Milestone 1B**, as §3's exit condition states and as it continues to state — that sentence is a Milestone 1B fact and is unaltered.
+>
+> Discharging **M2-01** required importing an embedding library, which is the transition Milestone 2 was always going to make: `docs/architecture.md` §9 places *"Real `EmbeddingProvider` implementation (BGE-small-en-v1.5 default)"* at Milestone 2, and a real implementation cannot exist under a zero-import rule. **The lapse is confined to the embedding library, in `sample_rag/embedding.py`, from Sprint M2.01A.** The **vector-store** portion (**M2-02**) and the **LLM-evaluation** portion (**M2-07**, **M2-08**, **M3-06**) are untouched and still hold, and `tests/test_indexer.py` enforces both structurally by AST allowlist rather than by convention. No criterion was amended: `docs/MILESTONE_1A.md` is a completed Milestone 1 artifact and is not edited here.
 
 > **Four further Milestone 2B capabilities are recorded in §3, not here.** Repository Owner ruling **RO-06 — Milestone 1B Corpus Capability Reallocation** moved **1B-05**, **1B-06**, **1B-07** and **1B-12** to Milestone 2B. Their rows stay in §3 with their full history, per §1.3 (*a capability is never deleted*) and **CP-3**; duplicating them here would create two records of one capability. **They retain their `1B-` identifiers**, which record where a capability was first allocated, not where it is now — see §3.1.
 >
@@ -147,7 +152,7 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 
 | id | Capability | Class | Blocking status | P3.7.2 class | Auth. | Originating repository authority | Rationale (full reasoning at) |
 |---|---|---|---|---|---|---|---|
-| **M2-01** | BGE embeddings — real `EmbeddingProvider` | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | The first probabilistic component; replaces 1B-01's stub behind an unchanged contract — §4.2 |
+| **M2-01** | BGE embeddings — real `EmbeddingProvider` | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | ✅ **DISCHARGED at Sprint M2.01A (Real Embedding Foundation).** `sample_rag/embedding.py` implements `BGEEmbeddingProvider` over **`BAAI/bge-small-en-v1.5`**, pinned at revision **`5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`**; `sample_rag/indexer.py` supplies it as the Index stage's default, so every committed chunk carries a real 384-component semantic embedding. **The contract was unchanged** — the `EmbeddingProvider` Protocol frozen at Sprint 1B.2 was not touched, which is what §4.1 R-1B-01/02 existed to make possible. The first probabilistic component; replaces 1B-01's stub behind an unchanged contract — §4.2. Evidence: `docs/M2.01A_Real_Embedding_Foundation_Report.md` |
 | **M2-02** | Vector store implementation | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | **A6** | `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | Replaces 1B-02's interface. **Implementation unresolved** — see §6 | §4.2 R-M2-02 |
 | **M2-03** | Real BM25 | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `sample_rag/retriever.py` docstring | A ranking function replacing plain distinct-term overlap — §4.2 |
 | **M2-04** | Hybrid retrieval — SQL + BM25 + Vector → RRF | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/architecture.md` §10; `docs/roadmap.md` §4 | Fusion is meaningful only once all three routes return real results — §4.2 |

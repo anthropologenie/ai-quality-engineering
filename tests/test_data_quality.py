@@ -1335,13 +1335,19 @@ def unindexed_chunk_ids(entries, index):
 
 
 def index_over(entries):
-    """Build the Index over `entries` with the Milestone 1B default provider.
+    """Build the Index over `entries` with the repository's default provider.
+
+    That provider is `BGEEmbeddingProvider` from Sprint M2.01A and was the
+    deterministic stand-in before it. The call is unchanged across that
+    transition — deliberately, since DQ-7 is a claim about the repository's
+    corpus and not about which provider represents it.
 
     The derivation is written here rather than hidden in a fixture because the
     Index is **not a committed artifact** — no repository authority defines
     one, and `sample_rag/indexer.py` builds it on demand. A `real_index`
     fixture would read like an artifact reader beside `real_chunks`, and it is
-    not one.
+    not one. Sprint M2.01A did not change that: it produced real embeddings,
+    not a stored index, which is register **M2-02**'s capability and unbuilt.
     """
     return Indexer().index(entries)
 
@@ -1419,21 +1425,32 @@ def test_dq7_every_committed_representation_carries_the_declared_dimension(real_
     assert ragged == [], f"committed chunks whose representation is not full width: {ragged}"
 
 
-def test_dq7_the_committed_index_is_a_placeholder_index(real_chunks):
-    """W6 / DQ-7 — the Index declares itself a stub, as Milestone 1B requires.
+def test_dq7_the_committed_index_is_a_real_semantic_index(real_chunks):
+    """W6 / DQ-7 — the Index declares real embeddings, as Milestone 2A requires.
 
-    `docs/architecture.md` §9 scopes Milestone 1B as *"Still no vector
-    database, no real embeddings, no LLM"*, and `docs/altm.md` §12 as *"Still
-    no real metric at any stage"*. Build item 2 draws the same line for this
-    check: it *"validates indexing completeness rather than real embedding
-    quality."*
-
-    Asserting the marker keeps that scope legible from the validation layer:
-    if a real provider were ever wired in as the default, this specification
+    **This specification is the tripwire that fired, and it fired as designed.**
+    Through Milestone 1B it read `stub is True`, and said so in its own words:
+    *"if a real provider were ever wired in as the default, this specification
     fails and the milestone boundary is re-examined deliberately rather than
-    crossed silently.
+    crossed silently."*
+
+    Sprint M2.01A is that deliberate crossing, and it carries the authority the
+    tripwire was waiting for: register **M2-01** (*"BGE embeddings — real
+    `EmbeddingProvider`"*, Milestone 2), Repository Owner ruling **RO-07**
+    placing M2-01 in stage 2A, and `docs/architecture.md` §9's Milestone 2 line
+    — *"Real `EmbeddingProvider` implementation (BGE-small-en-v1.5 default)"*.
+    The §9 sentence this specification used to cite — *"Still no vector
+    database, no real embeddings, no LLM"* — is the **Milestone 1B** entry, and
+    it remains true of Milestone 1B, which is now behind the repository.
+
+    The check is inverted rather than deleted, so the boundary stays guarded in
+    the opposite direction: a regression to placeholder vectors over the
+    committed corpus now fails here. What DQ-7 itself asserts is unchanged —
+    build item 2's *"validates indexing completeness rather than real embedding
+    quality"* still governs, and no specification in this file measures
+    embedding quality.
     """
-    assert index_over(real_chunks).stub is True
+    assert index_over(real_chunks).stub is False
 
 
 def test_dq7_a_chunk_missing_from_the_index_is_detected():
