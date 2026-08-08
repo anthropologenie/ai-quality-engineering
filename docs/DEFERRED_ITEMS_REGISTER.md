@@ -142,6 +142,8 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 
 **17 capabilities.** Every one affirmed at Milestone 2 by an existing authority; **none was moved here by `docs/P3.7.3_…`.** **One — M2-01 — is discharged and retained here with its discharge recorded**, per §1.3 (*a capability is never deleted*), by Sprint M2.01A. The count is unchanged for that reason: it counts capabilities allocated, not capabilities outstanding.
 
+> **M2-02's acceptance is staged by Repository Owner ruling RO-08 — see §4.1.** It remains **one capability and remains OPEN**: Sprint M2.01B may build the persistent FAISS-backed foundation without discharging it, and Sprint M2.01C completes the `VectorStore` Protocol. **No derivative identifier was created, no row was duplicated, and no capability was reallocated.** The count above is unaffected.
+
 > **Criterion A-5 — the embedding-library portion lapsed at Sprint M2.01A.** `docs/MILESTONE_1A.md` criterion A-5 (*"Zero imports of any embedding, vector-store, or LLM-evaluation library anywhere in the codebase"*) was binding through Milestone 1A and **remained binding throughout Milestone 1B**, as §3's exit condition states and as it continues to state — that sentence is a Milestone 1B fact and is unaltered.
 >
 > Discharging **M2-01** required importing an embedding library, which is the transition Milestone 2 was always going to make: `docs/architecture.md` §9 places *"Real `EmbeddingProvider` implementation (BGE-small-en-v1.5 default)"* at Milestone 2, and a real implementation cannot exist under a zero-import rule. **The lapse is confined to the embedding library, in `sample_rag/embedding.py`, from Sprint M2.01A.** The **vector-store** portion (**M2-02**) and the **LLM-evaluation** portion (**M2-07**, **M2-08**, **M3-06**) are untouched and still hold, and `tests/test_indexer.py` enforces both structurally by AST allowlist rather than by convention. No criterion was amended: `docs/MILESTONE_1A.md` is a completed Milestone 1 artifact and is not edited here.
@@ -153,7 +155,7 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 | id | Capability | Class | Blocking status | P3.7.2 class | Auth. | Originating repository authority | Rationale (full reasoning at) |
 |---|---|---|---|---|---|---|---|
 | **M2-01** | BGE embeddings — real `EmbeddingProvider` | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | ✅ **DISCHARGED at Sprint M2.01A (Real Embedding Foundation).** `sample_rag/embedding.py` implements `BGEEmbeddingProvider` over **`BAAI/bge-small-en-v1.5`**, pinned at revision **`5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`**; `sample_rag/indexer.py` supplies it as the Index stage's default, so every committed chunk carries a real 384-component semantic embedding. **The contract was unchanged** — the `EmbeddingProvider` Protocol frozen at Sprint 1B.2 was not touched, which is what §4.1 R-1B-01/02 existed to make possible. The first probabilistic component; replaces 1B-01's stub behind an unchanged contract — §4.2. Evidence: `docs/M2.01A_Real_Embedding_Foundation_Report.md` |
-| **M2-02** | Vector store implementation | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | **A6** | `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | Replaces 1B-02's interface. **Implementation unresolved** — see §6 | §4.2 R-M2-02 |
+| **M2-02** | Vector store implementation | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | **A6**, **RO-08** | `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | Replaces 1B-02's interface. Implementation elected — **FAISS**, §6. **OPEN — acceptance staged by Repository Owner ruling RO-08** (§4.1): Sprint **M2.01B** may establish the persistent FAISS-backed foundation and **shall not discharge this capability**; Sprint **M2.01C** establishes the remaining Protocol conformance, `query(vector, top_k) -> list[str]`. **Discharged only when the complete repository-defined `VectorStore` contract is satisfied.** One capability, staged — not split — §4.2 R-M2-02 |
 | **M2-03** | Real BM25 | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `sample_rag/retriever.py` docstring | A ranking function replacing plain distinct-term overlap — §4.2 |
 | **M2-04** | Hybrid retrieval — SQL + BM25 + Vector → RRF | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/architecture.md` §10; `docs/roadmap.md` §4 | Fusion is meaningful only once all three routes return real results — §4.2 |
 | **M2-05** | Reranking | Probabilistic Runtime | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/P3.7.1_…` §5.2 | Retrieval-quality optimization — §4.2 |
@@ -169,6 +171,67 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 | **M2-15** | Embedding benchmarking; retrieval-quality optimization; prompt optimization | Probabilistic Runtime | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/P3.7.1_…` §5.6 | Optimization of implementations — what the 1A Governing Principle excludes by definition — §4.2 |
 | **M2-16** | Semi-structured sources (LinkedIn / Greenhouse / Lever JSON) | Corpus | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope | Deferred *"until JobOps genuinely ingests these"* — an external precondition — §4.2 |
 | **M2-17** | Chunk-size / overlap benchmarking | Deterministic Runtime | Non-blocking | *(not in §5)* | — | `docs/architecture.md` §5 | Requires a retrieval-quality signal sensitive enough to distinguish configurations — §4.2 R-M2-17 |
+
+### 4.1 Repository Owner ruling RO-08 — Sprint RO-08
+
+Issued at Sprint **RO-08 (M2-02 VectorStore Contract and Milestone 2A Freshness Semantics)**, after Sprint **M2.01B** STOPped before implementation on three authority ambiguities it could not resolve without inventing repository authority. It is fixed repository authority. **This section records it; it does not interpret it.**
+
+**On the section number.** This is the register's own §4.1. It is **not** the `§4.1` / `§4.2` that the *Rationale* column of the tables above cites — those point at `docs/P3.7.3_…` **Decision 4**, as §2.3 states. The same distinction already applies to §3.1 and is disclosed here rather than left to be inferred.
+
+| Ruling | Title | Effect |
+|---|---|---|
+| **RO-08** | **M2-02 VectorStore Contract and Milestone 2A Freshness Semantics** | Authorizes an **index-local chunk-content fingerprint**; **stages M2-02's acceptance across Sprints M2.01B and M2.01C without splitting the capability**; and fixes the **Milestone 2A freshness/compatibility basis** for the resume-only corpus. Adds, removes and renames no capability, alters no `VectorStore` method or signature, and changes no milestone allocation |
+
+#### Decision 1 — index-local chunk-content fingerprint
+
+Sprint **M2.01B** is authorized to introduce a fingerprint over the ordered `(chunk_id, chunk_text)` sequence used to construct a persisted vector index. It exists to detect chunk-content drift that document identity, the document content hash, position-derived chunk ids and chunk count alone cannot detect.
+
+| The fingerprint SHALL | The fingerprint SHALL NOT |
+|---|---|
+| Live in the persisted vector-index metadata | Modify `sample_rag/chunks.json` |
+| Identify the exact chunk material used by that index | Modify the existing chunk contract |
+| Participate in M2.01B stale-index validation | Redefine chunk ids |
+| | Introduce corpus-level metadata into the chunk container |
+| | Amend **ADR-0001 §2** |
+| | Replace the repository's existing document identity model |
+
+**It is an index-local identity mechanism and is not a new canonical corpus identity.** RO-08 authorizes the identity **concept and its scope only**. The algorithm, canonical serialization and storage layout are **M2.01B implementation concerns**: that sprint may select a reasonable deterministic hashing algorithm and serialization by following the nearest existing repository identity/hash conventions, without a further Repository Owner ruling, provided the choice stays inside the scope above. **M2.01B SHALL record the exact algorithm, serialization and input construction in its engineering evidence**, and SHALL NOT treat either as Repository Owner authority unless existing repository conventions separately establish it.
+
+#### Decision 2 — M2-02 remains one capability, staged
+
+**M2-02 remains exactly one repository capability.** No `M2-02a`, no `M2-02b`, no derivative identifier, and no duplicate row. Its **acceptance** is staged:
+
+| Sprint | May establish | M2-02 status |
+|---|---|---|
+| **M2.01B** | Persistent FAISS-backed `VectorStore` foundation; persistence; loading; index identity; source/chunk mapping; compatibility validation; freshness / stale-index validation; deterministic rebuild semantics | **SHALL NOT discharge M2-02.** M2-02 remains **OPEN** after M2.01B |
+| **M2.01C** | The remaining `VectorStore` protocol conformance required by existing repository authority — `query(vector, top_k) -> list[str]` and the associated query-time nearest-neighbour behaviour | **M2-02 may be discharged only when the complete repository-defined `VectorStore` contract is satisfied** |
+
+**The existing `VectorStore` Protocol is unchanged.** RO-08 adds, removes, renames and alters no method, signature, return type or protocol requirement; `docs/architecture.md` §5 and §7 and `sample_rag/vector_store.py` stand exactly as written. The ruling permits **staged implementation of one capability**; it does not redefine M2-02 as two.
+
+**M2-02's milestone allocation is unchanged.** It remains a Milestone 2A capability under **RO-07**. RO-08 governs *how* it is implemented, not *which* milestone owns it.
+
+#### Decision 3 — Milestone 2A freshness semantics
+
+For the **resume-only Milestone 2A corpus**, M2.01B stale-index detection is authorized to use, and is bounded to:
+
+- document content hash
+- ordered chunk-id set
+- chunk count
+- the index-local ordered `(chunk_id, chunk_text)` fingerprint of Decision 1
+- embedding model identity
+- embedding model revision
+- embedding dimension
+- relevant FAISS index configuration / type
+
+**Timestamp-based freshness is not required for M2.01B**, and that sprint SHALL NOT introduce `created_at` as a deterministic artifact field, `documents[].indexed` as persisted state, last-indexed timestamps in the manifest, or timestamp-based manifest identity. **JobOps SQLite freshness semantics remain deferred to Milestone 2B**, where JobOps integration is allocated (**1B-06**, reallocated by **RO-06**).
+
+This is a **scoped execution rule for the resume-only Milestone 2A implementation**. `docs/architecture.md` §9's broader JobOps-oriented freshness design is neither deleted nor redesigned by it.
+
+#### What RO-08 does not amend
+
+**R-01**, **R-02**, **RO-06**, **RO-07**, **ADR-0001 §2**, the chunk contract, the manifest contract, the `VectorStore` Protocol, and the approved Hybrid Retrieval architecture — all unchanged. RO-08 establishes only the authority needed for M2.01B to proceed without inventing missing identity or lifecycle semantics.
+
+**Where the stage allocation lives.** As with RO-06 / RO-07, §1.2 bars this register from carrying sequence within a milestone. **The M2.01B / M2.01C staging of M2-02 within Milestone 2A is recorded in `docs/roadmap.md` §1.1**; this register continues to record only that M2-02 is one capability, allocated to Milestone 2, and still open.
 
 ---
 
@@ -187,7 +250,7 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 
 ---
 
-## 6. Unresolved implementation choice — M2-02 vector store
+## 6. Resolved implementation choice — M2-02 vector store
 
 **RESOLVED at Sprint RO-06 / RO-07.** `docs/P3.7.3_…` authorization **A6** required an explicit Repository Owner election. **That election has now been made: the Milestone 2 vector-store implementation is FAISS.** The record of the divergence is retained below under **CP-3**; the election is recorded beneath it.
 

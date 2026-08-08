@@ -118,7 +118,7 @@ Resume corpus only. Introduces the first probabilistic components against a full
 | Capability | Register id |
 |---|---|
 | BGE embeddings — real `EmbeddingProvider` | **M2-01** |
-| Vector store implementation | **M2-02** |
+| Vector store implementation | **M2-02** *(staged implementation — see below)* |
 | Real BM25 | **M2-03** |
 | Hybrid retrieval — semantic and lexical routes, RRF over two routes | **M2-04** *(staged activation — see below)* |
 | Assemble stage — Context Builder, `Prompt` artifact | **M2-12** |
@@ -131,6 +131,16 @@ Resume corpus only. Introduces the first probabilistic components against a full
 | `requirements.txt` → real imports; `ragas/` and `deepeval/` populated | **M3-06** *(Milestone 2 portion; `promptfoo/` remains Milestone 3)* |
 
 **Structured SQL retrieval is part of the approved architecture and is deliberately not exercised at 2A**, because no JobOps corpus is connected. That is a corpus state, not an architectural exclusion.
+
+**M2-02 is implemented in two stages within 2A**, under Repository Owner ruling **RO-08 — M2-02 VectorStore Contract and Milestone 2A Freshness Semantics** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.1). It is **one capability**, staged like M2-04 rather than divided:
+
+| Sprint | Establishes | M2-02 |
+|---|---|---|
+| **M2.01A** *(complete)* | Real `EmbeddingProvider` — **M2-01**, discharged | — |
+| **M2.01B** | Persistent FAISS-backed `VectorStore` foundation: persistence, loading, index identity, source/chunk mapping, compatibility validation, freshness / stale-index validation, deterministic rebuild semantics | **OPEN** — shall not be discharged |
+| **M2.01C** | Remaining `VectorStore` Protocol conformance — `query(vector, top_k) -> list[str]` and query-time nearest-neighbour behaviour | Dischargeable once the complete contract is satisfied |
+
+**RO-08 changes no stage allocation.** M2-02 remains a Milestone 2A capability under RO-07, the `VectorStore` Protocol is unchanged, and no capability was added, split or renamed. **Milestone 2A freshness is bounded** to document content hash, ordered chunk-id set, chunk count, an index-local ordered `(chunk_id, chunk_text)` fingerprint, embedding model identity, model revision, embedding dimension and the relevant FAISS index configuration. **Timestamp-based and JobOps SQLite freshness remain deferred to Milestone 2B**, with JobOps integration (**1B-06**, reallocated by **RO-06**).
 
 ### Milestone 2B — Structured corpus integration (JobOps activation)
 
