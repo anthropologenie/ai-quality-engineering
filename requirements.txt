@@ -10,3 +10,9 @@ python-dotenv
 # loads BAAI/bge-small-en-v1.5 through it. Every other entry above remains a
 # declaration only (docs/DEFERRED_ITEMS_REGISTER.md M3-06).
 sentence-transformers
+
+# Sprint M2.01B — register M2-02 (persistence/foundation stage, RO-08).
+# Imported by sample_rag/vector_index.py alone. CPU build deliberately:
+# docs/roadmap.md §7 places GPU optimization out of scope, and the embedding
+# provider already fixes execution to CPU. Never faiss-gpu.
+faiss-cpu
