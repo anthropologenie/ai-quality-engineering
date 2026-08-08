@@ -140,9 +140,9 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 
 ## 4. Milestone 2 — AI-Enabled Retrieval & Generation
 
-**17 capabilities.** Every one affirmed at Milestone 2 by an existing authority; **none was moved here by `docs/P3.7.3_…`.** **One — M2-01 — is discharged and retained here with its discharge recorded**, per §1.3 (*a capability is never deleted*), by Sprint M2.01A. The count is unchanged for that reason: it counts capabilities allocated, not capabilities outstanding.
+**17 capabilities.** Every one affirmed at Milestone 2 by an existing authority; **none was moved here by `docs/P3.7.3_…`.** **Two — M2-01 and M2-02 — are discharged and retained here with their discharges recorded**, per §1.3 (*a capability is never deleted*), by Sprints M2.01A and M2.01C respectively. The count is unchanged for that reason: it counts capabilities allocated, not capabilities outstanding.
 
-> **M2-02's acceptance is staged by Repository Owner ruling RO-08 — see §4.1.** It remains **one capability and remains OPEN**: Sprint M2.01B may build the persistent FAISS-backed foundation without discharging it, and Sprint M2.01C completes the `VectorStore` Protocol. **No derivative identifier was created, no row was duplicated, and no capability was reallocated.** The count above is unaffected.
+> **M2-02's acceptance was staged by Repository Owner ruling RO-08 — see §4.1.** It remained **one capability** throughout: Sprint M2.01B built the persistent FAISS-backed foundation without discharging it, and Sprint M2.01C supplied the `query` side. **No derivative identifier was created, no row was duplicated, and no capability was reallocated.** The count above is unaffected. **M2-02 is now DISCHARGED by Repository Owner ruling RO-10 — see §4.3**, which fixes the Milestone 2A discharge scope as `query(vector, top_k)` plus the whole-corpus rebuild lifecycle and **defers `upsert`** without implementing, stubbing or allocating it.
 >
 > **The artifacts M2-02 produces are governed by Repository Owner ruling RO-09 — see §4.2.** The FAISS index and its metadata are **derived, rebuildable runtime/build state**, not Git source artifacts; the canonical corpus remains authoritative; and **M2.01C owns the concrete runtime location and consumption lifecycle**. RO-09 discharges nothing and allocates nothing — M2-02's status above is unaffected by it.
 
@@ -163,7 +163,7 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 | id | Capability | Class | Blocking status | P3.7.2 class | Auth. | Originating repository authority | Rationale (full reasoning at) |
 |---|---|---|---|---|---|---|---|
 | **M2-01** | BGE embeddings — real `EmbeddingProvider` | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | ✅ **DISCHARGED at Sprint M2.01A (Real Embedding Foundation).** `sample_rag/embedding.py` implements `BGEEmbeddingProvider` over **`BAAI/bge-small-en-v1.5`**, pinned at revision **`5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`**; `sample_rag/indexer.py` supplies it as the Index stage's default, so every committed chunk carries a real 384-component semantic embedding. **The contract was unchanged** — the `EmbeddingProvider` Protocol frozen at Sprint 1B.2 was not touched, which is what §4.1 R-1B-01/02 existed to make possible. The first probabilistic component; replaces 1B-01's stub behind an unchanged contract — §4.2. Evidence: `docs/M2.01A_Real_Embedding_Foundation_Report.md` |
-| **M2-02** | Vector store implementation | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | **A6**, **RO-08** | `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | Replaces 1B-02's interface. Implementation elected — **FAISS**, §6. **OPEN — acceptance staged by Repository Owner ruling RO-08** (§4.1). ▶ **Persistence/foundation stage DELIVERED at Sprint M2.01B**, not discharging: `sample_rag/vector_index.py` builds, persists, loads and identity-validates a `faiss-cpu` `IndexFlatIP` artifact over the committed corpus, with the RO-08 Decision 1 fingerprint and the RO-08 Decision 3 signal set. **`query` is not implemented and the `VectorStore` Protocol is untouched**, so the capability is **not satisfied** — Sprint **M2.01C** establishes the remaining Protocol conformance, `query(vector, top_k) -> list[str]`. **Discharged only when the complete repository-defined `VectorStore` contract is satisfied.** One capability, staged — not split — §4.2 R-M2-02. Stage evidence: `docs/M2.01B_FAISS_VectorStore_Foundation_Report.md` |
+| **M2-02** | Vector store implementation | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | **A6**, **RO-08**, **RO-10** | `docs/architecture.md` §5, §9; `docs/roadmap.md` §7 | ✅ **DISCHARGED at Sprint M2.01C (Semantic Query Foundation), by Repository Owner ruling RO-10** (§4.3). Replaces 1B-02's interface. Implementation elected — **FAISS**, §6. Acceptance was staged across two sprints by **RO-08** (§4.1), one capability and not split. ▶ **M2.01B** — `sample_rag/vector_index.py` builds, persists, loads and identity-validates a `faiss-cpu` `IndexFlatIP` artifact over the committed corpus, with the RO-08 Decision 1 fingerprint and the RO-08 Decision 3 signal set. ▶ **M2.01C** — `query(vector, top_k) -> list[str]` and the query-time nearest-neighbour behaviour, plus the RO-09 runtime lifecycle in `sample_rag/vector_runtime.py`: locate, exists-check, compatibility validation, stale detection, load, rebuild. **The `VectorStore` Protocol is untouched by both sprints.** **Discharge basis, per RO-10 Decision 1: `query(vector, top_k)` plus the whole-corpus rebuild lifecycle** — the scope at which the Milestone 2A capability is satisfied. **`upsert` is NOT implemented, NOT stubbed, and NOT required for this discharge**; it is **deferred** until a real caller requires incremental mutation, is owned by no register capability, and must be explicitly allocated if revisited. **M2.01C correctly recorded M2-02 as OPEN when it completed**; RO-10 is the subsequent authority that changes the status — §4.2 R-M2-02. Evidence: `docs/M2.01B_FAISS_VectorStore_Foundation_Report.md`; `docs/M2.01C_Semantic_Query_Foundation_Report.md` |
 | **M2-03** | Real BM25 | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `sample_rag/retriever.py` docstring | A ranking function replacing plain distinct-term overlap — §4.2 |
 | **M2-04** | Hybrid retrieval — SQL + BM25 + Vector → RRF | Probabilistic Runtime | **Blocks 2** | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/architecture.md` §10; `docs/roadmap.md` §4 | Fusion is meaningful only once all three routes return real results — §4.2 |
 | **M2-05** | Reranking | Probabilistic Runtime | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/P3.7.1_…` §5.2 | Retrieval-quality optimization — §4.2 |
@@ -285,6 +285,64 @@ The FAISS index is therefore **not canonical source material**.
 #### On `.gitignore`
 
 **No `.gitignore` change is made by this ruling, and none is implied.** Item 3 states that generated FAISS artifacts are not committed; expressing that as an ignore rule requires naming a path, and item 9 reserves the concrete runtime location to M2.01C. An ignore rule written now would prescribe what this ruling declines to prescribe. Whether one is warranted is therefore a question for M2.01C, once the location exists.
+
+### 4.3 Repository Owner ruling RO-10 — Sprint RO-10
+
+Issued at Sprint **RO-10**, after Sprint **M2.01C** completed the query stage and reported **M2-02 OPEN** on unresolved `upsert` semantics (`docs/M2.01C_Semantic_Query_Foundation_Report.md` §16). It is fixed repository authority. **This section records it; it does not interpret it.**
+
+**On the section number.** This is the register's own §4.3, in the same sense §4.1 and §4.2 are the register's own — **not** the `§4.3` the *Rationale* column of §5's table cites, which points at `docs/P3.7.3_…` **Decision 4** (§2.3). The distinction is the one §4.1 and §4.2 already disclose.
+
+**On the identifier.** **RO-10 is the next available unique Repository Owner ruling identifier**: RO-01 through RO-05 are in use in §7, RO-06 and RO-07 in §3.1, RO-08 in §4.1 and RO-09 in §4.2. No identifier is reused and no historical ruling is renamed.
+
+**On its standing relative to M2.01C.** This ruling was made **after** M2.01C completed and is not represented as having existed during it. **M2.01C recorded M2-02 as OPEN correctly**, on the authority available to it; RO-10 is the subsequent authority that changes the registered status. Neither M2.01B's nor M2.01C's report is rewritten by this section, and **CP-3** governs both.
+
+| Ruling | Title | Effect |
+|---|---|---|
+| **RO-10** | **M2-02 Discharge Scope and Register-Editing Precedent** | Fixes the Milestone 2A **discharge scope** for M2-02 — `query(vector, top_k)` plus the whole-corpus rebuild lifecycle — and **discharges M2-02 as of Sprint M2.01C**; **defers `upsert`** without implementing, stubbing or allocating it; and fixes **M2.01C's stricter reading of §1.3** as the governing register-editing standard. Alters no `VectorStore` method or signature, amends neither RO-08 nor RO-09, authorizes no retrieval beyond the completed query stage, and changes no milestone allocation |
+
+#### Decision 1 — `upsert` scope
+
+**M2-02's `VectorStore` capability is satisfied at Milestone 2A by `query(vector, top_k) -> list[str]` plus the whole-corpus rebuild lifecycle established by Sprints M2.01B and M2.01C.**
+
+The reasoning, recorded as the ruling states it:
+
+- Every artifact in this repository's pipeline — the Knowledge Manifest, the Chunk Corpus and the FAISS index — is **rebuilt whole** from the canonical corpus.
+- **Nothing in the current architecture performs incremental mutation.**
+- **No caller in any milestone currently in scope** needs to upsert a single vector into a live index.
+- The corpus-rebuild lifecycle authorized by **RO-09** already handles every current case — a **missing**, **stale** or **incompatible** index → **rebuild**.
+- Sprint M2.01C's finding **F-1** establishes that the frozen `upsert` signature — `(chunk_id, vector)` — **cannot carry two of the identity signals RO-08 Decision 3 requires an index to track**: `chunk_fingerprint` and `document_hashes`.
+
+Defining correct `upsert` semantics would therefore require **either** widening the Protocol / changing the architecture, **or** accepting an index whose identity could silently drift. **Neither is required by the current Milestone 2A capability.**
+
+| `upsert` at Milestone 2A |
+|---|
+| **Deferred** |
+| **NOT implemented** |
+| **NOT stubbed** |
+| **NOT required for M2-02 discharge** |
+
+It **may be revisited only if a real caller requires incremental mutation**, most plausibly when a later milestone introduces genuinely incremental corpus updates. **No existing register capability owns that future work.** If revisited, it **must be explicitly allocated at that time** rather than inferred from this ruling.
+
+**Consequence.** **M2-02 is DISCHARGED as of Sprint M2.01C**, on the basis of `query(vector, top_k)` **plus** the whole-corpus rebuild lifecycle. **The discharge does not imply implementation or acceptance of `upsert`.**
+
+#### Decision 2 — register-editing precedent
+
+Sprint **M2.01B** edited its own **M2-02** register row while discharging nothing. Sprint **M2.01C** read §1.3 more strictly:
+
+> a sprint may synchronize the canonical register row only when the sprint **actually discharges** the registered capability **and** the sprint is **authorized** to perform that synchronization.
+
+**M2.01C's stricter interpretation is the governing interpretation going forward.**
+
+| | |
+|---|---|
+| A sprint that does **not** discharge a capability | **may propose** register language for Repository Owner review |
+| The same sprint | **may NOT** itself edit the canonical capability row |
+| M2.01B's historical edit | **Not reopened, not reversed** — **CP-3** applies |
+| Future sprints | Follow the stricter **M2.01C** standard |
+
+#### What RO-10 does not do
+
+**The `VectorStore` Protocol, RO-08 and RO-09 are all unchanged**, in every part. RO-10 **does not implement `upsert`**; **authorizes no retrieval beyond the already completed query stage** — no BM25, no RRF, no hybrid retrieval, no generation; and **changes no milestone allocation.**
 
 ---
 

@@ -137,8 +137,8 @@ Resume corpus only. Introduces the first probabilistic components against a full
 | Sprint | Establishes | M2-02 |
 |---|---|---|
 | **M2.01A** *(complete)* | Real `EmbeddingProvider` — **M2-01**, discharged | — |
-| **M2.01B** | Persistent FAISS-backed `VectorStore` foundation: persistence, loading, index identity, source/chunk mapping, compatibility validation, freshness / stale-index validation, deterministic rebuild semantics | **OPEN** — shall not be discharged |
-| **M2.01C** | Remaining `VectorStore` Protocol conformance — `query(vector, top_k) -> list[str]` and query-time nearest-neighbour behaviour | Dischargeable once the complete contract is satisfied |
+| **M2.01B** *(complete)* | Persistent FAISS-backed `VectorStore` foundation: persistence, loading, index identity, source/chunk mapping, compatibility validation, freshness / stale-index validation, deterministic rebuild semantics | **OPEN** — shall not be discharged |
+| **M2.01C** *(complete)* | Remaining `VectorStore` Protocol conformance — `query(vector, top_k) -> list[str]` and query-time nearest-neighbour behaviour | ✅ **DISCHARGED**, by Repository Owner ruling **RO-10** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.3) |
 
 **RO-08 changes no stage allocation.** M2-02 remains a Milestone 2A capability under RO-07, the `VectorStore` Protocol is unchanged, and no capability was added, split or renamed. **Milestone 2A freshness is bounded** to document content hash, ordered chunk-id set, chunk count, an index-local ordered `(chunk_id, chunk_text)` fingerprint, embedding model identity, model revision, embedding dimension and the relevant FAISS index configuration. **Timestamp-based and JobOps SQLite freshness remain deferred to Milestone 2B**, with JobOps integration (**1B-06**, reallocated by **RO-06**).
 

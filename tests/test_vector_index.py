@@ -814,6 +814,21 @@ def test_m201b_the_artifact_exposes_no_retrieval_surface():
 
     Asserted over the module's own source, so it covers functions as well as
     methods.
+
+    **Amended at Sprint M2.01C — one name moved, and only one.** `query` was
+    barred here because RO-08 Decision 2 assigns it to M2.01C, and M2.01C is
+    the sprint that has now arrived: the ruling authorizes exactly this method,
+    exactly this signature, in this module. Removing it from the list is the
+    authorized transition, not a weakening — every other barred name is
+    retained unchanged, and `upsert` in particular, because M2-02 remains
+    **OPEN** on precisely that method. What `query` may and may not be is now
+    specified by `tests/test_vector_query.py`, which is a stricter statement
+    than this one's silence: this file said only that the name was absent,
+    where that file says what the behaviour must be.
+
+    The specification's own name is left as written. It records which sprint
+    drew the line, and renaming it would break the traceability the `m201b_`
+    prefix carries throughout this file.
     """
     import sample_rag.vector_index as module
 
@@ -825,7 +840,6 @@ def test_m201b_the_artifact_exposes_no_retrieval_surface():
             declared.add(node.name)
 
     for barred in (
-        "query",
         "search",
         "similarity_search",
         "nearest",
@@ -842,14 +856,21 @@ def test_m201b_the_artifact_exposes_no_retrieval_surface():
 def test_m201b_the_vector_store_protocol_is_not_implemented_here():
     """M2.01B / RO-08 Decision 2 — the staged state, asserted rather than assumed.
 
-    The persistence component is deliberately **not** a `VectorStore`: it has no
-    `query`, and `tests/test_indexer.py::test_1b02_a_partial_store_does_not_satisfy_the_protocol`
+    The persistence component is deliberately **not** a `VectorStore`, and
+    `tests/test_indexer.py::test_1b02_a_partial_store_does_not_satisfy_the_protocol`
     already establishes that a partial implementation is not conformance.
 
     RO-08 records that non-conformance as authorized and deliberate. This
-    specification pins it, so the day M2.01C supplies `query` is a visible
-    change here rather than a silent one — and so nothing in this sprint can be
-    mistaken for discharging M2-02.
+    specification pins it, so that nothing in this sprint can be mistaken for
+    discharging M2-02.
+
+    **Still true after Sprint M2.01C, and for a different reason.** At M2.01B
+    the component had neither method. It now has `query`, exactly as
+    `docs/architecture.md` §7 declares it, and still has no `upsert` — so it is
+    still not a `VectorStore`, and **M2-02 is still OPEN**. The assertion is
+    unchanged because the fact is unchanged; what moved is which half is
+    missing. `tests/test_vector_query.py` records why `upsert` was not
+    supplied.
     """
     from sample_rag.vector_store import VectorStore
 

@@ -5,8 +5,14 @@ capability **M2-02** (*Vector store implementation*), under authorization
 **A6**, the FAISS election of Sprint RO-06 / RO-07, and Repository Owner
 ruling **RO-08** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.1).
 
-This module builds, persists, loads and identity-validates a vector index. It
-performs **no retrieval of any kind**.
+Sprint M2.01C: adds the **query stage** RO-08 Decision 2 assigns to it —
+`query(vector, top_k) -> list[str]` and the query-time nearest-neighbour
+behaviour behind it. The runtime lifecycle that locates, validates, rebuilds
+and loads this artifact is `sample_rag/vector_runtime.py`, under **RO-09**.
+
+This module builds, persists, loads and identity-validates a vector index, and
+answers nearest-neighbour queries against one. It performs **no lexical
+retrieval, no rank fusion, no reranking and no query rewriting**.
 
 Why this is a new module and not `sample_rag/vector_store.py`
 --------------------------------------------------------------
@@ -14,16 +20,26 @@ Why this is a new module and not `sample_rag/vector_store.py`
 `upsert(chunk_id, vector) -> None` and `query(vector, top_k) -> list[str]` —
 and `tests/test_indexer.py::test_1b02_no_vector_store_implementation_is_shipped`
 asserts that `sample_rag/vector_store.py` declares that Protocol **and nothing
-else**. **RO-08 Decision 2** stages M2-02 rather than splitting it: this sprint
-builds the persistence foundation and **shall not discharge M2-02**, and
-Sprint M2.01C supplies `query` and the query-time nearest-neighbour behaviour.
+else**. **RO-08 Decision 2** stages M2-02 rather than splitting it: M2.01B
+built the persistence foundation without discharging M2-02, and Sprint M2.01C
+supplies `query` and the query-time nearest-neighbour behaviour.
 
-So this module is deliberately **not** a `VectorStore`. It implements no
-`query`, and it therefore does not satisfy the Protocol — which
+So this module is still deliberately **not** a `VectorStore`, and after Sprint
+M2.01C it is *half* of one. It implements `query` exactly as §7 declares it and
+implements **no `upsert`**, so it does not satisfy the Protocol — which
 `test_1b02_a_partial_store_does_not_satisfy_the_protocol` already states is
-not conformance. RO-08 records that non-conformance as the authorized,
-deliberately staged state, not as a contract violation. The seam is left
-exactly as frozen, with no implementation shipped beside it.
+not conformance. The seam is left exactly as frozen, with no implementation
+shipped beside it.
+
+**Why `upsert` is still absent, at the sprint that completes the query side.**
+Not an omission and not a scoping preference: the frozen signature
+`upsert(chunk_id: str, vector: list[float]) -> None` carries neither the chunk
+*text* that RO-08 Decision 1's `chunk_fingerprint` is computed from nor the
+document identity that `document_hashes` records, so no implementation of it
+can maintain the very identity this artifact's compatibility validation is
+defined over. Supplying one would require the Repository Owner to state what
+happens to an index's identity under mutation, and **M2-02 therefore remains
+OPEN** — see `docs/M2.01C_Semantic_Query_Foundation_Report.md` §16.
 
 Criterion A-5 — the vector-store-library transition, recorded
 --------------------------------------------------------------
@@ -84,9 +100,11 @@ not offer without a trained, seed-dependent structure.
 
 Inner product is chosen because `sample_rag/embedding.py`'s provider returns
 **unit-norm** vectors by the published checkpoint's own `Normalize` module, and
-for unit-norm vectors inner product is cosine similarity. **Selecting a metric
-is an index-construction property, not a retrieval act**: nothing in this
-module searches, ranks or returns neighbours.
+for unit-norm vectors inner product is cosine similarity. At Sprint M2.01B that
+was purely an index-construction property; from Sprint M2.01C it is also what
+`query` means by *nearest*, and the metric is unchanged by that — no new index
+type, no IVF, no HNSW, no quantization, and no second metric was introduced to
+serve the query path.
 
 Determinism — what is claimed, and what is not
 ------------------------------------------------
@@ -133,10 +151,13 @@ INDEX_METADATA_FILENAME = "index_metadata.json"
 # §P7 records as family-scoped rather than repository-wide.
 METADATA_SCHEMA_VERSION = "1.0"
 
-# The default location for a built artifact, expressed so callers agree on one
-# path rather than each inventing one. **No artifact is committed at Sprint
-# M2.01B** — this constant names where one would be written, and every
-# specification writes to a temporary directory instead.
+# The runtime location of a built artifact, expressed so callers agree on one
+# path rather than each inventing one. Named at Sprint M2.01B; **confirmed as
+# the runtime artifact location at Sprint M2.01C**, which RO-09 item 9 leaves to
+# that sprint. Nothing under it is committed: RO-09 items 3–5 make the FAISS
+# binary and its metadata derived, rebuildable state, `.gitignore` carries the
+# corresponding rule, and every specification writes to a temporary directory
+# instead. See `sample_rag/vector_runtime.py` for the lifecycle around it.
 VECTOR_INDEX_ROOT = Path(__file__).resolve().parent / "vector_index"
 
 
@@ -308,17 +329,20 @@ def identity_for(index, chunks, documents, embedding_provider) -> VectorIndexIde
 class FaissVectorIndex:
     """A FAISS index plus the repository identity that says what it holds.
 
-    The minimum lifecycle Sprint M2.01B was briefed to establish, and no more:
+    The lifecycle Sprint M2.01B established, and the query Sprint M2.01C adds:
 
         build   -> from an `Index` (`sample_rag/indexer.py`) and its inputs
         save    -> two files in one directory
         load    -> back from that directory, cross-validated
         validate-> against the identity the intended inputs would produce
+        query   -> the ids of the nearest stored chunks           (M2.01C)
 
-    There is no `query`, no `search`, no `upsert`. `upsert` is absent because
-    this artifact is built whole from a chunk corpus and rebuilt when that
-    corpus changes — incremental mutation is a `VectorStore` behaviour whose
-    contract Sprint M2.01C completes.
+    There is still no `search`, no `upsert` and no ranking surface beyond the
+    ordering FAISS itself returns. `upsert` is absent because this artifact is
+    built whole from a chunk corpus and rebuilt when that corpus changes, and
+    because its frozen signature cannot carry the chunk text and document
+    identity that this artifact's own identity is computed from — see the
+    module docstring.
     """
 
     def __init__(self, faiss_index, identity: VectorIndexIdentity):
@@ -583,3 +607,81 @@ class FaissVectorIndex:
         neighbourhood.
         """
         return [float(component) for component in self._faiss_index.reconstruct(position)]
+
+    def query(self, vector: list[float], top_k: int) -> list[str]:
+        """Return the ids of the `top_k` nearest stored chunks to `vector`.
+
+        **Sprint M2.01C.** The signature, the parameter names and the return
+        type are `docs/architecture.md` §7's, restated by
+        `sample_rag/vector_store.py` — *"Return the ids of the `top_k` nearest
+        stored vectors to `vector`"* — and asserted by
+        `tests/test_indexer.py::test_1b02_vector_store_declares_both_architecture_methods`.
+        Nothing here redesigns them. RO-08 Decision 2 assigns this method and
+        *"the associated query-time nearest-neighbour behaviour"* to this
+        sprint, which is why it appears in this module and did not at M2.01B.
+
+        The whole operation, and nothing beyond it::
+
+            query vector -> FAISS nearest-neighbour search -> ordinals
+                         -> identity.chunk_ids[ordinal]    -> list[str]
+
+        **Ordering** is FAISS's own, nearest first. The metric is the index's —
+        inner product, which is cosine for the unit-norm vectors
+        `sample_rag/embedding.py` produces — so "nearest" means most similar.
+        No re-ordering, weighting, normalization, fusion or reranking is
+        applied to what FAISS returns: those are **M2-03**, **M2-04** and
+        **M2-05**, and this method's contract has no room for them.
+
+        **Similarity scores are deliberately not exposed.** `search` returns
+        distances alongside ordinals and this method discards them, because the
+        frozen return type is `list[str]`. Publishing scores would widen the
+        contract, and the only current consumer of a score would be the rank
+        fusion this sprint may not implement.
+
+        Edge cases, and where each answer comes from
+        ---------------------------------------------
+        * **`top_k <= 0`** — the empty list. *"The ids of the `top_k` nearest"*
+          for zero or fewer is no ids, and the answer stays total rather than
+          raising an error no repository authority defines. It also matches the
+          nearest existing behaviour: `sample_rag/retriever.py` reaches top-k by
+          slicing, and a zero slice is empty. **An engineering decision, not
+          repository authority.**
+        * **`top_k` greater than the number of stored vectors** — every stored
+          id, and no more. FAISS pads a short result with the ordinal `-1`;
+          those slots are dropped rather than mapped, because `-1` addresses no
+          chunk and mapping it would return `chunk_ids[-1]`, the *last* chunk,
+          as if it were a neighbour.
+        * **An empty index** — the empty list, by the same padding rule. A
+          corpus that produced no chunks is legal at every earlier stage
+          (`docs/CHUNK_CONTRACT.md` §11's *"zero or more"*), so it is answered
+          rather than guarded.
+        * **A vector of the wrong width** — `VectorIndexCompatibilityError`.
+          `dimension` is already one of RO-08 Decision 3's compatibility
+          signals and this exception already means *this index does not
+          identify the inputs it is being used for*; a 16-component query
+          against a 384-component index is exactly that fact, arriving from the
+          query side. No new exception type is introduced for it. The check is
+          made here rather than left to FAISS so the failure names the
+          repository's fact instead of a third-party assertion.
+
+        **Duplicate ids cannot arise from this method.** FAISS returns each
+        ordinal at most once per search, and `chunk_ids` is a corpus whose ids
+        `docs/CHUNK_CONTRACT.md` §17 makes globally unique and DQ-2 / DQ-5
+        validate. No de-duplication is performed, because performing one would
+        silently absorb a corpus defect the validation layer exists to report.
+        """
+        if top_k <= 0:
+            return []
+
+        if len(vector) != self._identity.dimension:
+            raise VectorIndexCompatibilityError(
+                f"query vector is {len(vector)} components wide but this index holds "
+                f"{self._identity.dimension}-component vectors"
+            )
+
+        query_matrix = numpy.array([vector], dtype=numpy.float32)
+        _, ordinals = self._faiss_index.search(query_matrix, top_k)
+
+        return [
+            self.chunk_id_at(int(ordinal)) for ordinal in ordinals[0] if ordinal != -1
+        ]

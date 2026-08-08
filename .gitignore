@@ -8,3 +8,11 @@ reports/regressions/*.csv
 !reports/regressions/.gitkeep
 *.log
 .DS_Store
+
+# Sprint M2.01C — the derived vector-index runtime artifact (RO-09 items 3-5).
+# The FAISS binary and its generated metadata are rebuildable runtime state, not
+# repository source; the canonical corpus remains the source of truth. RO-09
+# reserved this rule for M2.01C, once the runtime location existed. The path is
+# sample_rag/vector_index/ (VECTOR_INDEX_ROOT) — the directory, not
+# sample_rag/vector_index.py, which is source and is committed.
+sample_rag/vector_index/
