@@ -49,6 +49,7 @@ RO-09 and is not a place a specification may leave residue.
 import ast
 import inspect
 import json
+import subprocess
 
 import pytest
 
@@ -703,17 +704,35 @@ def test_m201c_the_runtime_artifact_is_not_a_repository_source_artifact(reposito
     specification is what keeps the two agreeing.
 
     Both halves are asserted: the ignore rule names the runtime **directory**,
-    and nothing under that directory is present in the committed tree. The
-    trailing separator matters — `sample_rag/vector_index.py` is source and is
-    committed; only the directory beside it is derived.
+    and nothing under that directory is tracked by Git. The trailing separator
+    matters — `sample_rag/vector_index.py` is source and is committed; only the
+    directory beside it is derived.
+
+    **Tracking, not presence.** *Not committed* is a property of the Git index,
+    not of the filesystem. RO-09 item 6 expects a caller to generate the
+    artifact in place and says *"a caller who deletes it loses nothing but the
+    time to rebuild"*, so the artifact is **allowed** to exist at the runtime
+    location RO-09 item 9 fixes — a populated `sample_rag/vector_index/` is a
+    correct execution, not a policy breach. This specification therefore asks
+    Git what it tracks rather than asking the filesystem what exists.
+    Corrected at Sprint **RO-12** from the filesystem-absence assertion it
+    originally carried, which stated a stricter property than the policy it
+    cites; see `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §3.5 **M2.04-F-1**.
     """
     ignored = (repository_root / ".gitignore").read_text(encoding="utf-8").splitlines()
 
     assert "sample_rag/vector_index/" in ignored
 
-    committed = repository_root / "sample_rag" / "vector_index"
-    assert not (committed / FAISS_INDEX_FILENAME).exists()
-    assert not (committed / INDEX_METADATA_FILENAME).exists()
+    tracked = subprocess.run(
+        ["git", "ls-files", "--", "sample_rag/vector_index/"],
+        cwd=repository_root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+    )
+
+    assert tracked.stdout == ""
 
 
 # --- query-side embedding (M2.01A's provider, unchanged) ---------------------
