@@ -29,6 +29,20 @@ to **Milestone 2A** by `docs/roadmap.md` §1.1 under Repository Owner ruling
           v
     M2-06 real generation                  NOT this sprint
 
+Sprint M2.06 — the one extension this module has taken since
+--------------------------------------------------------------
+`Prompt` gained a fourth field, `provenance`, under Repository Owner ruling
+**RO-13** (`docs/GENERATION_CONTRACT.md` §24.4, the **U-2** resolution).
+**Everything else below is unchanged**, and the paragraphs that follow remain
+accurate: `ContextBuilder`'s interface is untouched (§24.4: *"`ContextBuilder`'s
+interface is otherwise unchanged"*), no ranking, budget, score or model
+behaviour arrived with it, and **M2-12's discharge is not reopened**. The
+extension is not this module's own decision: §24.4 names the four provenance
+fields, their sources and their ordering, and bars every other field. It exists
+because `Prompt.chunk_ids` alone cannot construct the `SupportingEvidence` that
+`docs/GENERATION_CONTRACT.md` §8.3 already required, and G-13/§18 bars the
+consumer from fetching the remainder from the corpus.
+
 The interface is `docs/architecture.md` §5's, implemented exactly as that table
 states it — `ContextBuilder.assemble(chunks, query) -> Prompt`, dependency
 *Retriever*, responsibility *"Assemble retrieved chunks into a prompt within
@@ -124,16 +138,55 @@ class ContextAssemblyError(Exception):
 
 
 @dataclass(frozen=True)
+class ChunkProvenance:
+    """One assembled chunk's evidence metadata — `docs/GENERATION_CONTRACT.md` §24.4.
+
+    Added at Sprint M2.06 under Repository Owner ruling **RO-13**, which
+    resolved **U-2**. **Exactly the four fields §24.4 authorizes, and no
+    other.** The section names them and their sources, and bars every field
+    that was considered beside them: `token_count`, `context_window`,
+    `token_budget`, `citations`, `system_prompt`, `diagnostics`, retrieval
+    scores, BM25 scores, FAISS similarity, RRF scores, model configuration,
+    memory and conversation history.
+
+    **Chunk text is deliberately absent.** §24.4: *"Chunk text SHALL NOT be
+    duplicated into `provenance`"* — `Prompt.context` already carries it, and a
+    second copy would be two sources of truth for one string. The
+    `SupportingEvidence.text` a consumer needs remains derivable from `context`
+    and these offsets, which is what §24.4 means by *"remains derivable without
+    it"*: `character_end - character_start` is the block's length, because
+    `docs/CHUNK_CONTRACT.md` §17 invariant 3 freezes `text ==
+    document_text[character_start:character_end]` for every chunk.
+
+    **`chunk_id` is the canonical `chunks[].id`** — the identity **M2-04**
+    fuses on and `docs/CHUNK_CONTRACT.md` §17 makes globally unique. **No
+    second identity system is introduced**, which §24.4 states in those words.
+
+    Offsets are **document-frame** — zero-based, inclusive start, exclusive
+    end, Unicode code points — the repository's only offset coordinate system
+    (`docs/CHUNK_CONTRACT.md` §13), and the same frame
+    `SupportingEvidence.character_start` uses.
+
+    Frozen, and field order is §24.4's table order.
+    """
+
+    chunk_id: str
+    document_id: str
+    character_start: int
+    character_end: int
+
+
+@dataclass(frozen=True)
 class Prompt:
     """The Assemble stage's output artifact — `docs/architecture.md` §4, §5.
 
-    **No repository authority defines this artifact's fields.** `Prompt` is
-    named by `docs/architecture.md` §5 and §7 and by `docs/glossary.md`, and
-    `docs/GENERATION_CONTRACT.md` §21 excludes it from Milestone 1A by name; no
-    committed text anywhere states a field, a schema or a serialization for it.
-    The three fields below are therefore an **engineering decision of this
-    sprint**, recorded in `docs/M2.12_Context_Builder_Report.md`, and each is
-    the smallest thing an existing authority requires to exist:
+    **No repository authority defined this artifact's fields at M2-12.**
+    `Prompt` is named by `docs/architecture.md` §5 and §7 and by
+    `docs/glossary.md`, and `docs/GENERATION_CONTRACT.md` §21 excludes it from
+    Milestone 1A by name. The first three fields below were therefore an
+    **engineering decision of Sprint M2.12**, recorded in
+    `docs/M2.12_Context_Builder_Report.md`, and each is the smallest thing an
+    existing authority requires to exist:
 
     - `query` — `docs/architecture.md` §4 gives the Assemble stage the inputs
       *"Ranked chunks, query"* and §5 gives `assemble` the argument. A prompt
@@ -150,14 +203,25 @@ class Prompt:
       on and `docs/CHUNK_CONTRACT.md` §17 makes globally unique. **No second
       identity system is introduced.**
 
+    The fourth is **not** an engineering decision of any sprint. `provenance`
+    is required, and named field for field, by `docs/GENERATION_CONTRACT.md`
+    §24.4 under Repository Owner ruling **RO-13** — the **U-2** resolution:
+
+    - `provenance` — the ordered per-chunk `ChunkProvenance` records that make a
+      conforming `SupportingEvidence` (§8.3) constructible by a consumer that
+      **cannot reach back into retrieval or corpus state**, which G-13/§18 bars
+      it from doing. §24.4 records that `chunk_ids` alone cannot construct one,
+      and that the extension is therefore *"required by the already-existing
+      artifact contract, not added speculatively"*.
+
     Nothing else is carried. No score, no rank, no token count, no budget, no
     timestamp, no separator marker and no template — each would be this module
     asserting something no authority asked for, and a score or rank in
     particular would be retrieval's decision re-expressed as though assembly
-    had a view on it. `diagnostics`, the open mapping `RetrievalResult` and
-    `GenerationResult` both carry, is **deliberately absent**: it exists in
-    those artifacts to hold per-request detail a named authority requires, and
-    no authority requires any of it here.
+    had a view on it. §24.4 bars each of them by name. `diagnostics`, the open
+    mapping `RetrievalResult` and `GenerationResult` both carry, is
+    **deliberately absent**: it exists in those artifacts to hold per-request
+    detail a named authority requires, and no authority requires any of it here.
 
     Frozen, and field order is the declaration order above — the convention
     `docs/GENERATION_CONTRACT.md` §13.1 fixed for `GenerationResult` and
@@ -171,6 +235,7 @@ class Prompt:
     query: str
     context: str
     chunk_ids: list
+    provenance: list
 
 
 class ContextBuilder:
@@ -321,6 +386,28 @@ class ContextBuilder:
         That is what keeps `ALTM-ASSEMBLE-1`'s diff exact: the assembled prompt
         can be split back into the blocks that went into it.
 
+        **`provenance` is positional, and is derived from the same sequence in
+        the same pass** — `docs/GENERATION_CONTRACT.md` §24.4: *"Ordering SHALL
+        correspond to assembled chunk ordering, the same positional alignment
+        `chunk_ids` already holds with the blocks of `context`."* Record *i*
+        describes chunk *i*, whose text is block *i*. No sort, no key function
+        and no comparison participates, exactly as none participates in
+        `chunk_ids`: all three sequences are built by iterating `chunks` once,
+        so they cannot fall out of step with one another.
+
+        Each record's four values are **read from the canonical chunk record**
+        and copied unchanged. Nothing is computed, re-derived, normalized or
+        defaulted, so a provenance entry cannot disagree with the corpus about
+        the chunk it names, and this module introduces no offset arithmetic of
+        its own — `docs/CHUNK_CONTRACT.md` §17 invariant 3 already relates those
+        offsets to the chunk's text, and restating that relationship here would
+        put one invariant in two owners.
+
+        **No chunk text enters `provenance`** (§24.4), and no field beyond the
+        four §24.4 authorizes. Adding a score, a rank, a token count or a
+        citation marker here would be the Assemble stage carrying a decision no
+        authority asked it to make — and §24.4 bars each by name.
+
         Reads the chunk mappings; never writes to one.
         """
         chunks = list(chunks)
@@ -329,4 +416,20 @@ class ContextBuilder:
             query=query,
             context=CONTEXT_SEPARATOR.join(chunk["text"] for chunk in chunks),
             chunk_ids=[chunk["id"] for chunk in chunks],
+            provenance=[self._provenance(chunk) for chunk in chunks],
+        )
+
+    def _provenance(self, chunk: dict) -> ChunkProvenance:
+        """Derive one chunk's `ChunkProvenance` record — §24.4.
+
+        A copy of four canonical values, and nothing else. The chunk mapping is
+        read, never written, and the record it produces shares no mutable state
+        with it, so a consumer holding the `Prompt` cannot reach the corpus
+        through the provenance it carries.
+        """
+        return ChunkProvenance(
+            chunk_id=chunk["id"],
+            document_id=chunk["document_id"],
+            character_start=chunk["character_start"],
+            character_end=chunk["character_end"],
         )

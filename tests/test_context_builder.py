@@ -30,6 +30,7 @@ import pytest
 
 from sample_rag.context_builder import (
     CONTEXT_SEPARATOR,
+    ChunkProvenance,
     ContextAssemblyError,
     ContextBuilder,
     Prompt,
@@ -289,17 +290,20 @@ def test_m212_assembly_applies_no_sort(builder):
 # ---------------------------------------------------------------------------
 
 
-def test_m212_prompt_carries_exactly_three_fields(builder):
-    """Query, context, provenance — and nothing speculative beside them.
+def test_m212_prompt_carries_exactly_four_fields(builder):
+    """Query, context, chunk ids, provenance — and nothing speculative beside them.
 
-    No repository authority defines `Prompt`'s fields, so the artifact's
-    surface is an engineering decision of this sprint and is pinned exactly.
-    A specification that only checked the three were *present* would not notice
-    a fourth arriving; this one names the whole set. In particular no `score`,
-    no `rank`, no token count, no budget, no timestamp and no `diagnostics` —
-    the last deliberately, because it exists in `RetrievalResult` and
-    `GenerationResult` to hold detail a named authority requires, and none is
-    required here.
+    The first three were an engineering decision of Sprint M2.12, taken when no
+    repository authority defined `Prompt`'s fields. **The fourth is not a
+    decision of any sprint**: `docs/GENERATION_CONTRACT.md` §24.4, under
+    Repository Owner ruling **RO-13**, states the shape as
+    `Prompt(query, context, chunk_ids, provenance)` and resolves **U-2**.
+
+    A specification that only checked the four were *present* would not notice
+    a fifth arriving; this one names the whole set. In particular no `score`,
+    no `rank`, no token count, no budget, no timestamp, no `system_prompt`, no
+    `citations` and no `diagnostics` — §24.4 bars each by name, and *"No other
+    field is authorized."*
     """
     prompt = builder.assemble(builder.resolve(["c0"]), "a query")
 
@@ -307,6 +311,7 @@ def test_m212_prompt_carries_exactly_three_fields(builder):
         "query",
         "context",
         "chunk_ids",
+        "provenance",
     ]
 
 
@@ -356,6 +361,290 @@ def test_m212_chunk_ids_are_aligned_with_the_context_blocks(builder):
     assert len(blocks) == len(supplied)
     for block, chunk_id in zip(blocks, supplied):
         assert block == builder.resolve([chunk_id])[0]["text"]
+
+
+# ---------------------------------------------------------------------------
+# 3b. `Prompt.provenance` — RO-13 / `docs/GENERATION_CONTRACT.md` §24.4
+#
+# The U-2 resolution, added at Sprint M2.06. These specifications state what
+# §24.4 authorizes and — at least as importantly — what it bars, because the
+# section's operative sentence is *"No other field is authorized."*
+# ---------------------------------------------------------------------------
+
+
+def test_m206_provenance_records_carry_exactly_the_four_authorized_fields(builder):
+    """§24.4 — `chunk_id`, `document_id`, `character_start`, `character_end`.
+
+    Named as a whole set in §24.4's own table order, so a fifth field arriving
+    is a visible failure rather than a silent contract widening. §24.4 bars by
+    name: `token_count`, `context_window`, `token_budget`, `citations`,
+    `system_prompt`, `diagnostics`, retrieval scores, BM25 scores, FAISS
+    similarity, RRF scores, model configuration, memory and conversation
+    history.
+    """
+    prompt = builder.assemble(builder.resolve(["c0", "c1"]), "a query")
+
+    for record in prompt.provenance:
+        assert isinstance(record, ChunkProvenance)
+        assert [field for field in record.__dataclass_fields__] == [
+            "chunk_id",
+            "document_id",
+            "character_start",
+            "character_end",
+        ]
+
+
+def test_m206_provenance_length_matches_the_assembled_chunk_sequence(builder):
+    """One record per assembled chunk — no more, no fewer.
+
+    `provenance`, `chunk_ids` and the blocks of `context` are three views of one
+    sequence. A length disagreement between any two of them would mean a
+    consumer constructing `SupportingEvidence` from record *i* could not know
+    which block it describes, which is the whole property §24.4's ordering
+    clause exists to guarantee.
+    """
+    for supplied in ([], ["c0"], ["c0", "c1"], ["c4", "c3", "c2", "c1", "c0"]):
+        prompt = builder.assemble(builder.resolve(supplied), "a query")
+
+        assert len(prompt.provenance) == len(supplied)
+        assert len(prompt.provenance) == len(prompt.chunk_ids)
+
+
+def test_m206_provenance_ordering_matches_chunk_ordering(builder):
+    """§24.4 — *"Ordering SHALL correspond to assembled chunk ordering."*
+
+    Exercised on an order that contradicts corpus order in every position, so a
+    builder that sorted, re-ranked or fell back to corpus order would fail here
+    rather than pass by coincidence. Record *i* describes chunk *i*, whose text
+    is block *i*.
+    """
+    supplied = ["c3", "c0", "c4", "c1"]
+
+    prompt = builder.assemble(builder.resolve(supplied), "a query")
+    blocks = prompt.context.split(CONTEXT_SEPARATOR)
+
+    assert [record.chunk_id for record in prompt.provenance] == supplied
+    assert [record.chunk_id for record in prompt.provenance] == prompt.chunk_ids
+    for record, block in zip(prompt.provenance, blocks):
+        assert record.character_end - record.character_start == len(block)
+
+
+def test_m206_each_provenance_entry_identifies_its_own_canonical_chunk(builder):
+    """Every value is the canonical chunk record's own, copied unchanged.
+
+    Not re-derived, not defaulted, not normalized: the four values are read from
+    the chunk `resolve` returned, so a provenance entry cannot disagree with the
+    corpus about the chunk it names. `chunk_id` is the canonical `chunks[].id`
+    **M2-04** fuses on — §24.4: *"not a second identity system"*.
+    """
+    supplied = ["c2", "c0", "c4"]
+    resolved = builder.resolve(supplied)
+
+    prompt = builder.assemble(resolved, "a query")
+
+    for record, source in zip(prompt.provenance, resolved):
+        assert record.chunk_id == source["id"]
+        assert record.document_id == source["document_id"]
+        assert record.character_start == source["character_start"]
+        assert record.character_end == source["character_end"]
+
+
+def test_m206_provenance_carries_the_document_identity_of_its_chunk():
+    """§24.4 — `document_id` is *"that chunk's `document_id`"*.
+
+    Stated over a corpus spanning two documents, because a single-document
+    corpus cannot distinguish "carries the right document" from "carries the
+    only document". This is the identity `docs/GENERATION_CONTRACT.md` §8.3
+    requires of `SupportingEvidence.document_id`, and the join key T-2 makes
+    traceable to a Knowledge Manifest `documents[]` entry.
+    """
+    builder = ContextBuilder(
+        [
+            chunk("a0", "alpha", document_id="doc-a", start=0),
+            chunk("b0", "bravo", document_id="doc-b", start=100),
+            chunk("a1", "charlie", document_id="doc-a", start=40),
+        ]
+    )
+
+    prompt = builder.assemble(builder.resolve(["b0", "a1", "a0"]), "a query")
+
+    assert [record.document_id for record in prompt.provenance] == [
+        "doc-b",
+        "doc-a",
+        "doc-a",
+    ]
+
+
+def test_m206_provenance_offsets_are_the_document_frame_offsets():
+    """§24.4 — inclusive start, exclusive end, in the document frame.
+
+    `docs/CHUNK_CONTRACT.md` §13's frame, which is the repository's only offset
+    coordinate system and the one `SupportingEvidence.character_start` uses. A
+    chunk-frame offset would be a second, incompatible system over one corpus.
+
+    Exercised on chunks that do **not** start at zero, because a chunk-frame
+    implementation is indistinguishable from a document-frame one when every
+    chunk begins at the document's start.
+    """
+    builder = ContextBuilder(
+        [
+            chunk("c0", "alpha text", document_id="doc-a", start=400),
+            chunk("c1", "bravo", document_id="doc-a", start=900),
+        ]
+    )
+
+    prompt = builder.assemble(builder.resolve(["c0", "c1"]), "a query")
+
+    assert [(record.character_start, record.character_end) for record in prompt.provenance] == [
+        (400, 410),
+        (900, 905),
+    ]
+    for record in prompt.provenance:
+        assert record.character_end > record.character_start
+
+
+def test_m206_chunk_text_is_not_duplicated_into_provenance(builder):
+    """§24.4 — *"Chunk text SHALL NOT be duplicated into `provenance`."*
+
+    `Prompt.context` already carries it, and a second copy would be two sources
+    of truth for one string. Asserted two ways: no field holds a chunk's text,
+    and no field is a string other than the two identities — so a `text`,
+    `snippet`, `excerpt` or `preview` field under any name fails here.
+    """
+    prompt = builder.assemble(builder.resolve(["c0", "c1"]), "a query")
+    texts = {record["text"] for record in builder.resolve(["c0", "c1"])}
+
+    for record in prompt.provenance:
+        values = [getattr(record, field) for field in record.__dataclass_fields__]
+        assert not texts & set(value for value in values if isinstance(value, str))
+        assert sum(isinstance(value, str) for value in values) == 2
+
+
+def test_m206_supporting_evidence_text_is_derivable_from_context_and_provenance(builder):
+    """§24.4 — *"`SupportingEvidence.text` remains derivable without it."*
+
+    The claim that justifies omitting chunk text, made executable. `context` is
+    the separator-joined block sequence and `character_end - character_start` is
+    block *i*'s length (`docs/CHUNK_CONTRACT.md` §17 invariant 3), so a consumer
+    holding only the `Prompt` can recover every span's text by arithmetic — with
+    no corpus read, which is exactly what G-13/§18 bars it from performing.
+
+    Exercised on text containing the separator itself, because a consumer that
+    recovered blocks by splitting on `CONTEXT_SEPARATOR` would be wrong there
+    while an offset-driven one stays exact.
+    """
+    builder = ContextBuilder(
+        [
+            chunk("c0", "alpha" + CONTEXT_SEPARATOR + "still alpha", start=0),
+            chunk("c1", "bravo", start=200),
+        ]
+    )
+    supplied = ["c0", "c1"]
+
+    prompt = builder.assemble(builder.resolve(supplied), "a query")
+
+    cursor = 0
+    for record, source in zip(prompt.provenance, builder.resolve(supplied)):
+        length = record.character_end - record.character_start
+        assert prompt.context[cursor : cursor + length] == source["text"]
+        cursor += length + len(CONTEXT_SEPARATOR)
+    assert cursor - len(CONTEXT_SEPARATOR) == len(prompt.context)
+
+
+def test_m206_empty_retrieval_produces_empty_provenance(builder):
+    """The degenerate input stays total, and gains no sentinel.
+
+    M2-12's empty-context decision is unchanged: `Prompt` remains a total
+    function of its inputs, no branch and no `None` enters the artifact, and
+    **no abstention decision is made or implied** — `docs/GENERATION_CONTRACT.md`
+    §9.3 places that judgement in the Generator, and §24 does not move it.
+    """
+    prompt = builder.assemble([], "a query")
+
+    assert prompt.provenance == []
+    assert prompt.chunk_ids == []
+    assert prompt.context == ""
+
+
+def test_m206_duplicate_chunk_ids_produce_duplicate_provenance_records(builder):
+    """Duplicate handling remains governed by M2-12's existing semantics.
+
+    `resolve` preserves duplicates rather than collapsing them, which is what
+    keeps it positional and length-preserving. `provenance` is derived in the
+    same pass as `chunk_ids`, so it inherits that behaviour exactly — the
+    alternative, a `provenance` that deduplicated while `chunk_ids` did not,
+    would break the positional alignment §24.4 requires.
+
+    **M2-04 cannot produce a duplicate** (`rank_candidates` keys candidates by
+    chunk id), so this states the seam's behaviour on a caller's sequence rather
+    than a fused one.
+    """
+    supplied = ["c1", "c1", "c0"]
+
+    prompt = builder.assemble(builder.resolve(supplied), "a query")
+
+    assert [record.chunk_id for record in prompt.provenance] == supplied
+    assert len(prompt.provenance) == len(prompt.context.split(CONTEXT_SEPARATOR))
+
+
+def test_m206_a_missing_chunk_id_still_raises_before_any_provenance_exists(builder):
+    """Missing-chunk behaviour remains governed by M2-12's existing semantics.
+
+    `resolve` raises `ContextAssemblyError`; no partial `Prompt`, no partial
+    provenance and no placeholder record is produced. The M2-12 reasoning is
+    unchanged — a shorter list would drop evidence silently, which is
+    `docs/architecture.md` §4's named Assemble-stage failure — and §24.4 adds no
+    fallback, no substitution and no re-retrieval to it.
+    """
+    with pytest.raises(ContextAssemblyError):
+        builder.assemble(builder.resolve(["c0", "absent", "c1"]), "a query")
+
+
+def test_m206_provenance_is_deterministic_across_repeated_assembly(builder):
+    """Identical corpus + identical ids + identical query ⇒ identical provenance.
+
+    §24.3's **structural determinism** half, which v2.0.0 keeps normative:
+    provenance mapping *"SHALL remain deterministic, and byte-identical-checkable
+    wherever the implementation permits"*. Nothing here is externally generated,
+    so the guarantee applies in full — this is the assembly stage, and no model
+    participates in it.
+    """
+    supplied = ["c3", "c1", "c4"]
+
+    first = builder.assemble(builder.resolve(supplied), "a query")
+    second = builder.assemble(builder.resolve(supplied), "a query")
+
+    assert first.provenance == second.provenance
+    assert first == second
+
+
+def test_m206_provenance_records_are_frozen(builder):
+    """The record states what was assembled; no consumer may edit it after.
+
+    The same convention `Prompt`, `GenerationResult` and `RetrievalResult`
+    already hold. A mutable provenance record would let a consumer rewrite the
+    identity its own `SupportingEvidence` is built from, which is precisely the
+    traceability G-12 and T-1…T-5 exist to keep recoverable from the artifact.
+    """
+    prompt = builder.assemble(builder.resolve(["c0"]), "a query")
+
+    with pytest.raises(Exception):
+        prompt.provenance[0].chunk_id = "rewritten"
+
+
+def test_m206_provenance_does_not_alias_the_corpus_chunk_mappings(builder):
+    """The record copies four values; it does not hand out the chunk mapping.
+
+    A consumer holding the `Prompt` must not be able to reach the corpus through
+    it — G-13/§18 bars the Generator from corpus access, and a provenance entry
+    that carried the live chunk dict would have handed that access over the
+    boundary rather than through it.
+    """
+    prompt = builder.assemble(builder.resolve(["c0"]), "a query")
+    record = prompt.provenance[0]
+
+    for field in record.__dataclass_fields__:
+        assert not isinstance(getattr(record, field), dict)
 
 
 # ---------------------------------------------------------------------------
@@ -802,16 +1091,22 @@ def test_m212_no_retrieval_generation_or_evaluation_name_is_declared():
         )
 
 
-def test_m212_the_generator_does_not_consume_the_prompt():
-    """The frozen Generation Contract is untouched by this sprint.
+def test_m212_the_milestone_1a_generator_does_not_consume_the_prompt():
+    """The Milestone 1A quotation `Generator` is untouched — by M2-12 and by M2-06.
 
-    `docs/GENERATION_CONTRACT.md` is frozen at v1.0.0 and §22/G-2 approved
-    `Generator.generate(query, retrieval: RetrievalResult)`. §6.2 records
-    `generate(prompt: Prompt)` as *"the Milestone 2 target, reached when a
-    Context Builder exists"* — this sprint makes the Context Builder exist and
-    changes nothing about the Generator. **Which sprint changes the Generator's
-    input is M2-06 / M2-14 authority**, and this specification records that it
-    has not happened yet rather than asserting it never should.
+    `docs/GENERATION_CONTRACT.md` v1.0.0 remains authoritative for *"the
+    historical Milestone 1A deterministic quotation-generator contract"*
+    (§24.1), which §22/G-2 approved as `Generator.generate(query, retrieval:
+    RetrievalResult)`. RO-13 did **not** withdraw v1.0.0, and this specification
+    records that `sample_rag/generator.py` still conforms to it byte for byte.
+
+    **The Milestone 2 model-backed generator is a different module**, governed
+    by v2.0.0 (§24) and specified in `tests/test_model_generator.py`. Its
+    coexistence with this one, and which of the two is the
+    `docs/architecture.md` §5 `Generator` row, is **M2-14** authority — RO-13
+    §24.2 kept that row's synchronization open and separate. This specification
+    therefore keeps the v1.0.0 component pinned rather than asserting anything
+    about the v2 one.
     """
     import sample_rag.generator
 
@@ -823,21 +1118,25 @@ def test_m212_the_generator_does_not_consume_the_prompt():
     assert parameters == ["self", "query", "retrieval"]
 
 
-def test_m212_no_pipeline_module_imports_the_context_builder():
-    """The seam is independently testable and nothing was rewired to reach it.
+def test_m206_the_context_builder_is_reached_only_by_the_model_backed_generator():
+    """The seam has exactly one pipeline consumer, and it is the one M2-06 added.
 
     Stated over the package by glob, mirroring
     `tests/test_vector_index.py::test_m201b_no_other_pipeline_module_imports_faiss`
     and `tests/test_lexical_bm25.py::test_m203_the_semantic_route_is_untouched_by_the_lexical_one`,
     so a module added later is covered without anyone remembering to add it.
 
-    **M2-12 introduced no orchestration layer.** The repository's one
-    retrieval→generation caller is `scripts/cli.py`, whose chain is
-    `Retriever.retrieve -> Generator.generate` and which does not use fusion at
-    all; wiring assembly into it would have changed that path's retrieval route
-    and its generator input, neither of which is this sprint's to change. The
-    Context Builder is therefore reached only by its own specifications until a
-    consumer exists, which is **M2-06**.
+    **M2-12 recorded that the Context Builder was reached only by its own
+    specifications *"until a consumer exists, which is M2-06"*.** That consumer
+    now exists, and this is the same specification narrowed to name it: an
+    **allowlist**, so a second consumer arriving fails here whether or not
+    anyone thought to forbid it. The property M2-12 was protecting — that
+    assembly is not wired into arbitrary pipeline modules — is preserved, not
+    relaxed: the count moved from zero to exactly one, and the one is named.
+
+    **No orchestration layer was introduced**, and `scripts/cli.py` is
+    unchanged: its chain is still `Retriever.retrieve -> Generator.generate`
+    over the Milestone 1A quotation path.
     """
     import sample_rag.context_builder
 
@@ -852,16 +1151,20 @@ def test_m212_no_pipeline_module_imports_the_context_builder():
         if "context_builder" in inspect.getsource(module):
             borrowers.append(path.name)
 
-    assert borrowers == [], f"the context builder is reached from: {borrowers}"
+    assert borrowers == ["model_generator.py"], (
+        f"the context builder is reached from: {borrowers}"
+    )
 
 
 def test_m212_the_prompt_is_a_representation_and_not_an_invocation(builder):
     """A `Prompt` is data. Nothing here calls a model — **M2-06** does that.
 
     No credential, no endpoint, no client and no callable field: the artifact is
-    three plain values, and a consumer must exist elsewhere for it to mean
-    anything. That is precisely what the register records as this capability's
-    deferral reason, and it remains true after this sprint.
+    four plain values, and a consumer must exist elsewhere for it to mean
+    anything. **That remains true after M2-06**: the provenance §24.4 added is
+    four scalars per chunk, and the module that invokes a provider is a
+    different one. `docs/GENERATION_CONTRACT.md` §24.4 bars `system_prompt` and
+    model configuration from this artifact by name.
     """
     prompt = builder.assemble(builder.resolve(["c0"]), "a query")
 
@@ -870,3 +1173,6 @@ def test_m212_the_prompt_is_a_representation_and_not_an_invocation(builder):
     assert isinstance(prompt.context, str)
     assert isinstance(prompt.chunk_ids, list)
     assert all(isinstance(chunk_id, str) for chunk_id in prompt.chunk_ids)
+    assert isinstance(prompt.provenance, list)
+    assert all(isinstance(record, ChunkProvenance) for record in prompt.provenance)
+    assert not any(callable(getattr(prompt, field)) for field in prompt.__dataclass_fields__)
