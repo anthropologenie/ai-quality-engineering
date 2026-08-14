@@ -9,6 +9,10 @@
 >
 > This contract is frozen following Repository Owner approval. Behavioural or structural changes belong to Milestone 2 unless correcting a repository defect.
 
+> **Milestone 2 supersession — added at Sprint RO-13**
+>
+> **Generation Contract v2.0.0 is authorized for model-backed Milestone 2 generation and is recorded at §24**, under Repository Owner ruling **RO-13** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.5). **Sections 1–23 remain v1.0.0 and are byte-for-byte unchanged** — they are the frozen and still-accurate record of what the Milestone 1A deterministic quotation Generator guaranteed, and nothing in them is withdrawn or corrected. v2.0.0 supersedes v1.0.0 **only for model-backed Milestone 2 generation**, and only in the four guarantees §24.3 names (**G-7**, **G-9**, **G-13/§18**, **G-14**). The version and milestone metadata above describe v1.0.0 and are deliberately left as written; §24 carries v2.0.0's own. **Nothing is implemented by that section** — **M2-06** remains OPEN.
+
 **Related authorities:** `docs/architecture.md` §5/§9, `docs/MILESTONE_1A.md` build items 4–6, `docs/altm.md` §3–§5, `docs/roadmap.md` §2.4/§5, `docs/CHUNK_CONTRACT.md` §5/§13/§17, `docs/glossary.md`, `docs/AI_Quality_Metrics_Reference.md` Layer 4
 
 ---
@@ -659,3 +663,149 @@ Formerly *Outstanding Questions*. Q-1 and Q-2 were dispositioned by the Reposito
 ---
 
 *This document defines what Generation **is** for Milestone 1A. It defines no implementation. It is a frozen repository authority: Repository Owner approval of §6's two gaps was recorded at Sprint P3.5.1-G (§22).*
+
+---
+
+## 24. Generation Contract v2.0.0 — Model-Backed Milestone 2 Generation
+
+*Added under Repository Owner ruling **RO-13 — M2-06 Generation Contract Transition** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.5). **Sections 1 through 23, and the v1.0.0 closing statement above, are byte-for-byte unchanged**, following the precedent `docs/DOCUMENT_CONTRACT.md` §8.9 and §8.10 set for an adjacent, non-destructive contract addition under a named ruling. This section **authorizes and defines**; it implements nothing, and **no runtime file is changed by it.***
+
+| | |
+|---|---|
+| **Generation Contract Version** | `2.0.0` |
+| **Status** | **Approved (Normative)** — Repository Owner, ruling **RO-13** |
+| **Milestone** | 2 |
+| **Scope** | **Model-backed generation only** |
+| **Implemented by** | **M2-06**, which remains **OPEN**. Nothing below is implemented at the time of this ruling |
+
+### 24.1 The relationship between v1.0.0 and v2.0.0
+
+**v1.0.0 is not withdrawn, corrected, or falsified.** It remains the accurate, frozen record of what the Milestone 1A deterministic quotation Generator guaranteed, and every guarantee it states was true of the component it described. **v2.0.0 supersedes it only for model-backed Milestone 2 generation**, and only in the four guarantees §24.3 names.
+
+| | Authoritative for |
+|---|---|
+| **v1.0.0** (§1–§23) | The historical Milestone 1A deterministic quotation-generator contract |
+| **v2.0.0** (this section) | Model-backed Milestone 2 generation |
+
+**Why an adjacent section rather than an edit.** `docs/DOCUMENT_CONTRACT.md` §8.10 states the discipline: an erratum records that earlier text is *"superseded as a statement of the current schema"* while *"each remains accurate as the observation it was when recorded, and none is edited."* The same applies here at contract scale. Rewriting §12 or §16 to describe a model would make v1.0.0 claim something the Milestone 1A stub never did, destroying the record of what was actually built and validated — and `docs/CHUNK_CONTRACT.md` already anticipates this route, reserving revision for when *"Milestone 2 formally supersedes this contract."*
+
+**`docs/M2.12_Context_Builder_Report.md`, the M2-12 discharge record, and every M2-01…M2-04 report are unchanged by this section**, and none is reopened.
+
+### 24.2 Interface — the resolution of U-1
+
+```text
+Generator.generate(prompt: Prompt) -> GenerationResult
+```
+
+This is `docs/architecture.md` §5's original signature and the *"Milestone 2 target, reached when a Context Builder exists"* that §6.2 recorded. The Context Builder exists (**M2-12**, discharged), so the condition §6.2 named is satisfied.
+
+**There is exactly one authoritative generation input path.** The v2 Generator **SHALL NOT** consume a `RetrievalResult`, and **SHALL NOT** reach the `Retriever`, BM25, FAISS, the `VectorStore`, the chunk store, the corpus, or `ContextBuilder.resolve()`. The pipeline is:
+
+```text
+retrieval -> ordered chunk ids -> ContextBuilder -> Prompt -> Generator -> provider -> GenerationResult
+```
+
+`docs/architecture.md` §5's `Generator` row still records the v1.0.0 signature. **Synchronizing it is authorized by RO-13 and owned by M2-14**, which remains a separate open capability; §20.3's bar on implementing sprints amending §5 is unchanged.
+
+### 24.3 Guarantee transitions
+
+Four guarantees change. **G-1, G-2, G-3, G-4, G-5, G-6, G-8, G-10, G-11 and G-12 are unchanged in every part**, as are §7's data model, §8's field definitions, §9's outcome domain, §10's traceability requirements, §11's ordering semantics and §13's serialization form.
+
+#### G-14 — the I/O boundary
+
+| v1.0.0 | v2.0.0 |
+|---|---|
+| *"no filesystem I/O, no network I/O"* | **Exactly one sanctioned external provider interaction**, at the generation boundary |
+
+The permission is **deliberately narrow, and is a permission for one call — not a category of access.** The v2 Generator **SHALL NOT** acquire: filesystem access, corpus access, retrieval access, indexing access, arbitrary network access, tool access, memory, or model-routing behaviour. Filesystem I/O remains barred outright. No mutation of the consumed `Prompt` is permitted, and the observational-purity property v1.0.0 established for the consumed artifact carries forward unchanged.
+
+#### G-9 — determinism, split into two claims
+
+v1.0.0's single determinism guarantee is **divided**, not weakened. Both halves are normative:
+
+| | v2.0.0 status |
+|---|---|
+| **Structural determinism** — `Prompt` structure and provenance, request construction, provider request shape, response parsing, schema mapping, error classification, and every `GenerationResult` field other than externally generated answer content | **SHALL** remain deterministic, and byte-identical-checkable wherever the implementation permits |
+| **Model output reproducibility** — `answer_text` as produced by the provider | **NOT guaranteed.** `answer_text` is externally generated and is **not** required to be byte-identical across executions |
+
+**The two SHALL NOT be conflated.** Repeated identical requests producing identical responses is *request reproducibility*, and does **not** establish model-output determinism. Provider-specific deterministic sampling may be evaluated later as an **implementation property**; **RO-13 establishes no such guarantee**, and no sprint may claim one from repeated calls alone.
+
+`ALTM-INDEX-1` — *"Contradictory answer across repeated runs on the same input"* — was made unreachable by construction under v1.0.0. **Under v2.0.0 it becomes reachable**, and is a property to be *observed*, not a property the contract asserts away.
+
+#### G-7 — support by construction, narrowed to provenance
+
+v1.0.0 required `answer_text` to be *"derivable from its `supporting_evidence` spans by verbatim quotation and deterministic template assembly alone."* That was a **stub-era construction guarantee**, and it does not survive synthesis.
+
+| | v2.0.0 |
+|---|---|
+| `answer_text` | **MAY be synthesized by the model.** The quotation-only derivation requirement no longer applies to it |
+| `SupportingEvidence` | **SHALL remain grounded in the assembled `Prompt` context and its provenance**, and in nothing else |
+
+**G-7 is narrowed, not deleted.** Its load-bearing purpose — that evidence is structurally traceable rather than asserted — is preserved in full. The v2 Generator **SHALL NOT** obtain evidence from an independent retrieval or corpus path; every `SupportingEvidence` it emits **SHALL** derive from the provenance the `Prompt` carried in. The chain is:
+
+```text
+retrieved chunk -> ContextBuilder -> Prompt context + provenance -> Generator -> SupportingEvidence
+```
+
+**RO-13 does not claim the model will be faithful.** Three things are kept distinct, and conflating them would be the error this section exists to prevent:
+
+| | What it is | Established by |
+|---|---|---|
+| **Structural evidence provenance** | The evidence chain above, checkable from the artifact | This contract |
+| **Model answer synthesis** | That `answer_text` is generated, not quoted | This contract |
+| **Faithfulness / Groundedness** | Whether the synthesized answer is actually supported by its evidence | **Later evaluation work — neither established nor claimed here.** §21's exclusion of the Layer 3/4 metric set stands |
+
+#### G-13 / §18 — the runtime dependency boundary
+
+| v1.0.0 | v2.0.0 |
+|---|---|
+| **Permitted:** the request `query` and a `RetrievalResult` | **Permitted:** a `Prompt` (§24.4), and the single sanctioned provider interaction of G-14 |
+
+§18's **barred** list is carried forward **unchanged and in full** — the Knowledge Manifest, Golden Dataset, QA Dataset, Chunk Corpus as a file, Evidence Trace Dataset, Retrieval Evaluation, Retrieval Metrics, Retrieval Diagnosis and ALTM rules remain unreadable by the Generator, for the reason §18 records: a Generator that reads any of them can answer the repository's own 22 benchmark questions and nothing else while appearing to work. `sample_rag/` still SHALL NOT import from `scripts/`.
+
+### 24.4 `Prompt` provenance — the resolution of U-2
+
+`SupportingEvidence` (§8.3) requires `chunk_id`, `document_id`, `character_start`, `character_end` and `text`. The M2-12 `Prompt` carries `query`, `context` and `chunk_ids` — **`chunk_ids` alone cannot construct a conforming `SupportingEvidence`**, and G-13 bars the Generator from reaching back into the corpus for the remainder. A minimal provenance extension is therefore **required by the already-existing artifact contract**, not added speculatively.
+
+```text
+Prompt(query, context, chunk_ids, provenance)
+```
+
+`provenance` is an **ordered per-chunk metadata structure carrying exactly four fields**:
+
+| Field | Source |
+|---|---|
+| `chunk_id` | the canonical `chunks[].id` **M2-04** fuses on — **not a second identity system** |
+| `document_id` | that chunk's `document_id` |
+| `character_start` | document-frame, inclusive (`docs/CHUNK_CONTRACT.md` §13) |
+| `character_end` | document-frame, exclusive |
+
+**Ordering SHALL correspond to assembled chunk ordering**, the same positional alignment `chunk_ids` already holds with the blocks of `context`.
+
+**Chunk text SHALL NOT be duplicated into `provenance`** — `Prompt.context` already carries it, and a second copy would be two sources of truth for one string. `SupportingEvidence.text` remains derivable without it.
+
+**No other field is authorized.** Specifically barred, absent separate future governance: `token_count`, `context_window`, `token_budget`, `citations`, `system_prompt`, `diagnostics`, retrieval scores, BM25 scores, FAISS similarity, RRF scores, model configuration, memory, and conversation history. **No new `GenerationResult` field is authorized either**, and §15's explicit omissions — including `generation_time_ms` — stand: latency may be *measured and reported as sprint evidence*, and does not enter the artifact.
+
+**`ContextBuilder`'s interface is otherwise unchanged.** `assemble(chunks, query) -> Prompt` and `resolve(chunk_ids)` keep their `docs/architecture.md` §5 shapes, and **M2-12's discharge is not reopened** — this extends the artifact M2-12 delivered, on its consumer's evidenced requirement, exactly as M2-12's own discharge record anticipated when it handed U-2 forward.
+
+### 24.5 The Milestone 1A stub marker
+
+§8.4's `stub` key **remains required**, and `diagnostics` still carries `query`, `retrieval_route` and `stub`. Under v2.0.0 its value is **`False`**, because generation is no longer a stub.
+
+**The Milestone 1A record is not rewritten.** §8.4's *"`True` throughout Milestone 1A"* remains true **of Milestone 1A**, and `docs/architecture.md` §9's record of Generation as a Milestone 1A stub stands as the historical statement it is. **No historical `stub = True` statement is restated as `False`.**
+
+**`retrieval_route`** continues to record which retrieval path fed the generation. Under v2 it is carried on the `Prompt`'s provenance chain rather than copied from a consumed `RetrievalResult`; **how it reaches the artifact is M2-06's implementation concern**, and no new required key is added here.
+
+### 24.6 What v2.0.0 does not do
+
+It **implements nothing** — no `Generator` change, no `Prompt` change, no provider integration, no HTTP or SDK dependency, no test change. It **selects no provider, no library, no endpoint, no model identifier and no request format**; those are M2-06's, after repository inspection, under the A-5 exception RO-13 authorizes (§4.5 Decision 4).
+
+It **does not resolve U-3**: `REACHABLE_STAGES` is not widened, no orchestration layer, runtime adapter, pipeline coordinator or `ContextEngine` is authorized, and `scripts/cli.py` is unchanged. **How the runtime reaches this contract is M2-06's** — §23's Q-3 reasoning that widening is *"a deliberate scope decision, not a side effect of implementing a component"* is unchanged.
+
+It **activates no evaluation tooling** — Ragas (**M2-07**), DeepEval (**M2-08**) and Promptfoo (**M3-01**) are untouched, and no Faithfulness, Groundedness, Hallucination Rate, Answer Relevancy, Context Precision or Context Recall claim is authorized. It **changes no retrieval** — no BM25, RRF, FAISS, embedding or chunking change, and **M2-05**, **M2-15** and **M2-17** are untouched. It **introduces no context-window or token-budget policy**, no context compression, no memory, no agent runtime, no tool calling and no model routing.
+
+It **discharges nothing** — **M2-06** and **M2-14** both remain **OPEN**, and **RO-06 through RO-12** are unchanged in every part.
+
+---
+
+*Section 24 is the Milestone 2 model-backed generation contract, authorized by Repository Owner ruling **RO-13**. Sections 1–23 are Generation Contract v1.0.0 and remain the frozen Milestone 1A authority, unedited.*
