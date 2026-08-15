@@ -49,6 +49,10 @@ These are binding constraints on all design and implementation decisions in this
 | Small, demonstrable milestones | Each milestone produces an inspectable, testable artifact — not a partial, unverifiable state. |
 | Repository separation of concerns | Production data ownership and evaluation logic are never combined in one repository. |
 
+> **Interface-first design — one recorded exception, Sprint M2-14.** Repository Owner ruling **RO-14** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.6, Decision 1) authorizes **two** generation components rather than one component with two implementations: `Generator` (Milestone 1A, `generate(query, retrieval)`) and `ModelGenerator` (Milestone 2, `generate(prompt: Prompt)`) — §5. **Their signatures differ, so neither is substitutable for the other at a call site, and the interface-first principle above is NOT satisfied between them.** RO-14 states this plainly and does not claim otherwise; it is disclosed here rather than silently corrected, following the same discipline §5 and §9 already apply to their own divergences.
+>
+> **The principle is not weakened, and §10 is deliberately unchanged.** It continues to govern `EmbeddingProvider`, `VectorStore`, `Retriever` and every other component, and it governed the Milestone 1A `Generator` for the milestone it was written for. §10's locked *Interface-first design* decision is **not revised**: that section requires a locked decision be revisited only by *"a deliberate redesign discussion, not an incidental change made while implementing a later milestone"*, and **RO-14 is that deliberate decision** — taken by the Repository Owner outside any implementing sprint, after Sprint M2-14 stopped rather than deciding it. **No abstraction, adapter, router or common superclass is introduced between the two components**, and none is authorized.
+
 ---
 
 ## 3. Repository Boundary
@@ -107,9 +111,10 @@ This is a summary for architectural context. Stage-by-stage failure diagnosis, a
 | **VectorStore** | Persist and query vector representations | `VectorStore.upsert(...)`, `VectorStore.query(...)` | EmbeddingProvider | **1B** — interface only, no implementation | FAISS (Milestone 2 default) |
 | **Retriever** | Return ranked evidence for a query | `Retriever.retrieve(query, filters) -> RetrievalResult` | Indexer, VectorStore | 1A — SQL-filter stage implemented, exercised at 1B; semantic stage stubbed | Real BM25 + Vector + RRF fusion |
 | **Context Builder** | Assemble retrieved chunks into a prompt within budget | `ContextBuilder.assemble(chunks, query) -> Prompt` | Retriever | 1A | Context-overflow handling under real token budgets |
-| **Generator** | Produce an answer from an assembled prompt | `Generator.generate(query, retrieval: RetrievalResult) -> GenerationResult` | Retriever | 1A — deterministic stub generator | DeepSeek API integration |
+| **Generator** | Produce an answer from a completed retrieval, by verbatim quotation — the **frozen Milestone 1A deterministic / reference** generation component | `Generator.generate(query, retrieval: RetrievalResult) -> GenerationResult` — **Generation Contract v1.0.0** (§1–§23) | Retriever | **1A — frozen.** Deterministic, credential-free, network-free, byte-reproducible. Executed by `scripts/cli.py` | **None — preserved, not superseded.** Model-backed generation is the `ModelGenerator` row below, not a replacement of this one (**RO-14**) |
+| **ModelGenerator** | Produce an answer from an assembled prompt, through one sanctioned provider interaction — the **Milestone 2 model-backed** generation component | `ModelGenerator.generate(prompt: Prompt) -> GenerationResult` — **Generation Contract v2.0.0** (§24) | Context Builder; DeepSeek provider boundary | **2 — model-backed.** `answer_text` is externally non-deterministic; request construction, response parsing and evidence derivation remain structurally deterministic. Executed by `scripts/run_generation.py` | Generation-quality evaluation at Layer 3 (DeepEval — register **M2-08**, not activated) |
 | **Evaluation Engine** | Score outputs against the Golden Dataset across all four layers | Layer-specific: pytest / Ragas / DeepEval / Promptfoo | Golden Dataset, Generator, Retriever | 1A — Layer 1 (pytest) only | Layers 2–4 activated in Milestone 2–3 |
-| **CLI** | Provide a reproducible local entry point tying the pipeline together | Command-line invocation | All of the above | 1A | — |
+| **CLI** | Provide a reproducible local entry point tying the **Milestone 1A** pipeline together | Command-line invocation | Retriever, `Generator` — the Milestone 1A chain | 1A | — |
 
 > **Component synchronization — Sprint P3.7.4.** Four rows above were amended under `docs/P3.7.3_Repository_Owner_Constitutional_Decision.md`.
 >
@@ -120,6 +125,16 @@ This is a summary for architectural context. Stage-by-stage failure diagnosis, a
 > **`docs/architecture.md` §7's Protocol sketch is deliberately unchanged**, and consequently still shows the superseded `Generator.generate(prompt)` and `Retriever.retrieve(...) -> list["Chunk"]` shapes. Authorization A5 explicitly bars amending it: it illustrates interface *shape* and is amended only when the interface set changes. The binding signatures are the contracts and this table. Recorded as a known divergence in `docs/P3.7.4_Repository_Authority_Synchronization_Report.md`, not as an oversight.
 >
 > **The `Context Builder` row is deliberately unchanged**, and still reads *Current Milestone 1A* although `docs/GENERATION_CONTRACT.md` §21 excludes the Assemble stage from Milestone 1A and register **M2-12** allocates it to Milestone 2. No P3.7.3 authorization covers this row, and inferring one would broaden constitutional intent. Recorded as a residual divergence, deferred.
+
+> **Generation component synchronization — Sprint M2-14.** Performed under Repository Owner ruling **RO-14 — Generator / ModelGenerator Architectural Identity** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.6), which authorizes the **dual-path generation architecture** and authorizes this synchronization without prescribing its text. **The Sprint P3.7.4 note above is historical and is unchanged**; this note records a later, separate event and does not restate it.
+>
+> - **The single `Generator` row is now two rows.** `Generator` and `ModelGenerator` are **two authorized architectural components**, not two implementations of one current interface, not aliases, and not a merge candidate — RO-14 Decision 1. This is what RO-13 Decision 5's singular-row synchronization target could no longer express once Sprint M2.06 delivered two concrete components; **RO-14 supersedes that target only, and RO-13 otherwise stands in full.**
+> - **`Generator` keeps the Milestone 1A signature and the Milestone 1A execution surface.** `scripts/cli.py` is **not migrated**, `tests/test_generator.py` stays frozen at 48 specifications and `tests/test_cli.py` at 27, and the byte-identical answer/abstain reproducibility of `docs/P3.7.6_…` §4 remains valid Milestone 1A acceptance evidence — RO-14 Decision 2. Its *Future Evolution* column is amended here, which is precisely the revisit the P3.7.4 note above deferred to register **M2-14**.
+> - **`ModelGenerator` is the Milestone 2 model-backed component**, implemented at Sprint M2.06 against Generation Contract **v2.0.0** and executed by `scripts/run_generation.py`. **Register M2-06 remains OPEN** and is not discharged by this synchronization.
+> - **The two components share `GenerationResult`, `GeneratedStatement` and `SupportingEvidence`**, because §24.3 leaves §7's data model and §8's field definitions unchanged across the transition. **Shared artifact types are not a shared component**, and no second definition of the artifact exists.
+> - **The `CLI` row's dependency is corrected** from *"All of the above"* to the Milestone 1A chain it actually composes. With a second generation component in this table, the former wording would have implied the CLI drives `ModelGenerator`, which RO-14 Decision 2 expressly forbids.
+> - **§7's Protocol sketch remains deliberately unchanged**, under authorization **A5** as the P3.7.4 note above records. It shows interface *shape* only; its `Generator` Protocol is a statement about neither component's binding signature, and it is not evidence that `Generator` consumes a `Prompt`. **The binding signatures are this table and the Generation Contract.**
+> - **The `Context Builder` row is again deliberately unchanged.** Its interface `assemble(chunks, query) -> Prompt` remains exact, and its residual *Current Milestone 1A* divergence is the one recorded immediately above — RO-14 does not cover it, and inferring authority for it here would repeat the error P3.7.4 declined to make.
 
 **Knowledge Manifest.** The Knowledge Source owns the Knowledge Manifest. `knowledge_manifest.json` is an artifact produced from the corpus, containing metadata that describes the corpus — it is not a separate pipeline component or interface. Corpus integrity and freshness validation consume this artifact directly. The canonical schema is defined in `docs/MILESTONE_1A.md`.
 
@@ -218,19 +233,24 @@ sequenceDiagram
     participant C as Chunker
     participant IDX as Indexer
     participant R as Retriever
-    participant CB as Context Builder
     participant G as Generator
+    participant CB as Context Builder
+    participant MG as ModelGenerator
     participant E as Evaluation Engine
 
     K->>C: Validated documents
     C->>IDX: Chunks
     U->>R: Query + filters
     IDX->>R: Indexed chunks
-    R->>CB: Ranked chunks
-    CB->>G: Assembled prompt
-    G->>E: Generated answer
+    R->>G: RetrievalResult - Milestone 1A path
+    G->>E: GenerationResult
+    R->>CB: Ranked chunk ids - Milestone 2 path
+    CB->>MG: Assembled Prompt
+    MG->>E: GenerationResult
     E->>E: Score against Golden Dataset (Layers 1-4)
 ```
+
+**Two generation paths, not one path drawn twice.** The diagram above was synchronized at Sprint **M2-14** under Repository Owner ruling **RO-14** (§5). It previously showed a single participant named `Generator` receiving an *assembled prompt* from the Context Builder — a shape that, after RO-14, describes `ModelGenerator` rather than `Generator`. The Milestone 1A path (`scripts/cli.py`) runs `Retriever → Generator` and does not reach the Context Builder; the Milestone 2 path (`scripts/run_generation.py`) runs `Retriever → Context Builder → Prompt → ModelGenerator → provider`, which is `docs/GENERATION_CONTRACT.md` §24.2's pipeline. **Both paths exist concurrently; neither replaces the other.**
 
 | Stage | Milestone 1A | Milestone 2 |
 |---|---|---|
@@ -264,7 +284,7 @@ sequenceDiagram
 - FAISS `VectorStore` implementation, with content-hash + last-indexed-timestamp freshness tracking against JobOps SQLite
 - Real BM25 implementation
 - Hybrid retrieval fully wired: SQL + BM25 + Vector → RRF
-- DeepSeek `Generator` implementation
+- DeepSeek `ModelGenerator` implementation — the Milestone 2 model-backed generation component, added **alongside** the frozen Milestone 1A `Generator` rather than replacing it (**RO-14**; §5)
 - Ragas evaluation activated (Layer 2 — retrieval quality)
 - DeepEval evaluation activated (Layer 3 — generation quality)
 
