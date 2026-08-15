@@ -16,3 +16,13 @@ reports/regressions/*.csv
 # sample_rag/vector_index/ (VECTOR_INDEX_ROOT) — the directory, not
 # sample_rag/vector_index.py, which is source and is committed.
 sample_rag/vector_index/
+
+# Sprint M2.18 — the derived execution-evidence runtime artifact (RO-15
+# Decision 8). Trace records are query-derived evidence about completed runs,
+# not repository source: RO-15 classifies them in the same class RO-09 fixed
+# for the FAISS index, and requires them to be excluded from Git tracking. The
+# rule mirrors that precedent structurally — the path is scripts/execution_trace/
+# (TRACE_ROOT), the directory, not scripts/execution_trace.py, which is source
+# and is committed. Traces may also carry resume/job corpus content, which is a
+# second and separate reason not to track them.
+scripts/execution_trace/
