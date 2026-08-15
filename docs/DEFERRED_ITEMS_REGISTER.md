@@ -179,7 +179,7 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 | **M2-11** | Document Recall | Metric | Non-blocking | Does not block Milestone 1A | — | `docs/P3.3.5_…` §3 | Derivable post-enrichment and *"deliberately not implemented"* — §4.2 |
 | **M2-12** | Assemble stage — Context Builder, `Prompt` artifact | Interface + Deterministic Runtime | **Blocks 2** | *(not in §5)* | — | `docs/GENERATION_CONTRACT.md` §21; `docs/architecture.md` §4, §5 | A prompt has no meaning until a model consumes one — §4.2 R-M2-12/13. ✅ **DISCHARGED at Sprint M2.12 (Context Builder / Prompt Foundation).** `sample_rag/context_builder.py` implements the `docs/architecture.md` §5 `Context Builder` row **at that row's interface exactly** — `ContextBuilder.assemble(chunks, query) -> Prompt` — with `resolve(chunk_ids) -> list[chunk record]` bridging **M2-04**'s `list[str]` of canonical chunk ids to §5's `chunks` argument, and `ContextAssemblyError` following the repository's existing named-error convention. **The `Prompt` artifact is `query`, `context`, `chunk_ids`** — a frozen dataclass, and an **engineering decision**, because no committed authority states a field, schema or serialization for the artifact `docs/architecture.md` §5/§7 and `docs/glossary.md` only name. **The pipeline seam is preserved:** the supplied RRF order is the emitted order (no sort, no key, no score read anywhere — AST-verified), the canonical `chunks[].id` identity is the one **M2-04** fuses on and **no second identity system was introduced**, duplicates are preserved rather than collapsed, a missing id **raises rather than dropping evidence silently** — the Assemble-stage failure `docs/architecture.md` §4 names — and an empty retrieval assembles to an empty-context `Prompt` **without making an abstention decision**, which `docs/GENERATION_CONTRACT.md` §9.3/§20.2 places in the `Generator`. **No retrieval, reranking or fusion logic** — the module imports `dataclasses` alone, so **M2-02**, **M2-03**, **M2-04** and **M2-05** are unreachable from it and untouched. **No context-window or token-budget heuristic**, none being derivable: a context window is a property of a generation model, `docs/architecture.md` §5 records *"Context-overflow handling under real token budgets"* as this row's **Future Evolution**, and no model is connected until **M2-06**. **No `Generator` invocation, and no end-to-end model-backed RAG path is established by this discharge.** **The Generation contract is unchanged in every part:** `docs/GENERATION_CONTRACT.md` remains frozen at v1.0.0, §17/§22 **G-2**'s `Generator.generate(query, retrieval: RetrievalResult)` is untouched, and no runtime path consumes a `Prompt` — **the Context Builder has no runtime consumer**, recorded as **M2.12-F-1** in `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §3.5. **Discharge basis: the Context Builder / Assemble boundary** — the scope at which this capability, as its originating authorities state it, is satisfied. **The Generator input transition is NOT decided by this discharge**: §6.2 records `generate(prompt: Prompt)` as *"the Milestone 2 target, reached when a Context Builder exists"*, and which sprint performs it, whether the frozen contract is amended or superseded, whether `Prompt` must then carry further fields, and whether the Assemble stage becomes runtime-reachable are **handed to M2-06** (with the §5 `Generator` row owned by **M2-14**). **No field was added in anticipation of an answer**, none of those questions is owned by any register capability beyond M2-06, and each must be **explicitly allocated** if it requires more. **No Repository Owner ruling was created**: the discharge rests on the originating authorities already named in this row, as **M2-01**'s and **M2-03**'s do — no authority contradiction was found (`docs/M2.12_…` §1.6). **Sprint M2.12 correctly recorded M2-12 as OPEN when it completed** and edited no register, contract, roadmap or architecture document; this row is the subsequent Repository Owner synchronization, under §1.3 as RO-10 Decision 2 reads it. **45 new specifications; 639/639 passing.** Evidence: `docs/M2.12_Context_Builder_Report.md`; `tests/test_context_builder.py` |
 | **M2-13** | Post-Process guardrail layer | Deterministic Runtime | Non-blocking | *(not in §5)* | — | `docs/GENERATION_CONTRACT.md` §21; `docs/altm.md` §4 | 1A exercises no guardrail; a guardrail constrains a model's output — §4.2 R-M2-12/13 |
-| **M2-14** | `docs/architecture.md` §5 `Generator` row — Milestone 2 restatement | Governance | Non-blocking | Does not block Milestone 1A | — | `docs/P3.7.2_…` §5.3; `docs/GENERATION_CONTRACT.md` §22 | The row's *Future Evolution* column, revisited when DeepSeek lands. **Distinct from RO-03**, which is discharged — §4.2 R-M2-14 |
+| **M2-14** | `docs/architecture.md` §5 `Generator` row — Milestone 2 restatement, and **`Generator` / `ModelGenerator` component identity** | Governance | Non-blocking | Does not block Milestone 1A | **RO-14** | `docs/P3.7.2_…` §5.3; `docs/GENERATION_CONTRACT.md` §22, §24.2 | The row's *Future Evolution* column, revisited when DeepSeek lands. **Distinct from RO-03**, which is discharged — §4.2 R-M2-14. **Scope widened by Repository Owner ruling RO-14** (§4.6). **The original wording above is retained and is not deleted** — the *Future Evolution* column remains in scope; RO-14 **adds** to this capability rather than replacing it. M2-14 now additionally owns: **`Generator` / `ModelGenerator` component identity**; the **dual-path architectural disposition** RO-14 authorizes; the relationship between the Milestone 1A and Milestone 2 generation components; and the synchronization of `docs/architecture.md` with that authorized identity. **RO-14 supersedes RO-13 Decision 5 ONLY as to its singular-row synchronization target** — the instruction to synchronize one `Generator` row to `Generator.generate(prompt: Prompt) -> GenerationResult`, which the two concrete components Sprint M2.06 delivered make inapplicable as literal text. **Every other part of RO-13 stands, and RO-13 is not rewritten.** **RO-14 authorizes the synchronization and deliberately does not prescribe its text** — the minimum coherent set of documentation changes is M2-14's to determine (§4.6 Decision 4). **M2-14 remains OPEN and is NOT discharged by RO-14**; `docs/architecture.md` is unmodified by the ruling; blocking status is unchanged; and **no derivative identifier is created** — no `M2-14a`, no `M2-14b`, no `M2-14.1` |
 | **M2-15** | Embedding benchmarking; retrieval-quality optimization; prompt optimization | Probabilistic Runtime | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/P3.7.1_…` §5.6 | Optimization of implementations — what the 1A Governing Principle excludes by definition — §4.2 |
 | **M2-16** | Semi-structured sources (LinkedIn / Greenhouse / Lever JSON) | Corpus | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope | Deferred *"until JobOps genuinely ingests these"* — an external precondition — §4.2 |
 | **M2-17** | Chunk-size / overlap benchmarking | Deterministic Runtime | Non-blocking | *(not in §5)* | — | `docs/architecture.md` §5 | Requires a retrieval-quality signal sensitive enough to distinguish configurations — §4.2 R-M2-17 |
@@ -473,6 +473,136 @@ Criterion **A-5** (*"Zero imports of any embedding, vector-store, or LLM-evaluat
 #### What RO-13 does not do
 
 **RO-06 through RO-12 are unchanged in every part**, as are `docs/roadmap.md` §1.1's stage allocation, `docs/architecture.md`, every retrieval contract, and the `VectorStore`, `EmbeddingProvider` and `Chunk` contracts. **It implements nothing** — `sample_rag/generator.py`, `sample_rag/context_builder.py`, `tests/test_generator.py` and `scripts/cli.py` are untouched, no dependency is added, and no provider call was made. **It discharges no capability** — **M2-06** and **M2-14** both remain **OPEN**, and **M2-12 is not reopened, its discharge row is not edited, and `docs/M2.12_Context_Builder_Report.md` is unchanged.** It **creates no capability and no derivative identifier** — no `M2-06a`, no `M2-06b`. It **activates no evaluation tooling**, **changes no retrieval**, **triggers neither M2-15 nor M2-17**, and introduces **no context-window policy, context compression, token budget, memory, agent runtime, tool calling or model routing.**
+
+### 4.6 Repository Owner ruling RO-14 — Sprint RO-14
+
+Issued at Sprint **RO-14**, after the **M2-14** sprint STOPped without making any repository modification: it established from the repository itself that two concrete generation components had come to exist, that no committed authority decided whether they are one architectural component or two, and that selecting between the alternatives required a Repository Owner decision rather than an implementing agent's inference. It is fixed repository authority. **This section records it; it does not interpret it.**
+
+**On the section number and the identifier.** This is the register's own §4.6, in the same sense §4.1 through §4.5 are — not the `§4.x` the *Rationale* column of §4's table cites. **RO-14 is the next available unique Repository Owner ruling identifier**: RO-01 through RO-05 are in use in §7, RO-06 and RO-07 in §3.1, RO-08 in §4.1, RO-09 in §4.2, RO-10 in §4.3, RO-12 in §4.4 and RO-13 in §4.5. **`RO-11` remains a sprint label, not a ruling.** No identifier is reused, no historical ruling is renamed, and **no `RO-15` is created.**
+
+**On its standing relative to the M2-14 STOP.** That sprint **made no repository change** — it modified no file, created no report, invented no authority and correctly stopped at the authority boundary. **There is therefore no committed M2-14 STOP document, and none is cited below as though there were.** Every fact this ruling rests on is verifiable at commit `b6579a9` by direct inspection of the files named. **No sprint report is rewritten**, and **CP-3** governs. The chronology is **M2.12 → M2-12 discharge → M2-06 STOP → RO-13 → M2-06 implementation → M2-14 STOP (no change) → RO-14**.
+
+**On the authorization to synchronize the M2-14 row.** Under **RO-10 Decision 2** a sprint that discharges nothing may not itself edit a canonical capability row. **RO-14 discharges nothing either**; the Repository Owner supplied that authorization explicitly at this sprint, which is what permits the **M2-14** row synchronization recorded in §4. **RO-10 Decision 2 is applied here, not amended**, exactly as RO-12 and RO-13 applied it before.
+
+| Ruling | Title | Effect |
+|---|---|---|
+| **RO-14** | **Generator / ModelGenerator Architectural Identity** | Authorizes the **dual-path generation architecture**: **`Generator`** is the frozen Milestone 1A deterministic/reference generation component and **`ModelGenerator`** is the Milestone 2 model-backed generation component, and **both are authorized architectural components**. Preserves the `docs/P3.7.6_…` Milestone 1A frozen baseline and keeps `scripts/cli.py` on the Milestone 1A path. **Supersedes RO-13 Decision 5 only as to its singular-row architectural synchronization target.** Widens **M2-14**'s scope to include component identity and authorizes — without prescribing — the subsequent `docs/architecture.md` synchronization. Resolves **M2.06-F-2** (`answer_text` under v2.0.0) and clarifies **G-5** for the v2 boundary, both recorded adjacently at `docs/GENERATION_CONTRACT.md` **§25**. **Discharges no capability**, creates, splits and renames no capability, creates no milestone, amends **RO-06** through **RO-13** in no other part, reopens **M2-12** in no part, and **implements nothing** |
+
+#### Decision 1 — the dual-path generation architecture is authorized
+
+**The repository intentionally contains two generation components across two contract eras, and both are authorized architectural components.**
+
+| Component | Architectural identity | Interface | Contract era | Execution surface |
+|---|---|---|---|---|
+| **`Generator`** (`sample_rag/generator.py`) | The **frozen Milestone 1A deterministic / reference** generation component | `generate(query: str, retrieval: RetrievalResult) -> GenerationResult` | **v1.0.0** — `docs/GENERATION_CONTRACT.md` §1–§23 | `scripts/cli.py` |
+| **`ModelGenerator`** (`sample_rag/model_generator.py`) | The **Milestone 2 model-backed** generation component | `generate(prompt: Prompt) -> GenerationResult` | **v2.0.0** — `docs/GENERATION_CONTRACT.md` §24 | `scripts/run_generation.py` |
+
+**They are distinct architectural components, not two implementations of one current interface.** Their signatures differ, so neither is substitutable for the other at a call site.
+
+**Grounded in repository authority, not in preference.** §24.1 already holds two contracts live at once and states that v1.0.0 *"is not withdrawn, corrected, or falsified"* and *"remains the accurate, frozen record"* of the Milestone 1A quotation Generator — a component that still exists and is still executed. `docs/P3.7.6_…` §3 requires subsequent milestones to *"**extend**"* and not *"**redefine**"* that baseline, and §3.2 and §4 freeze the specifications and the byte-identical CLI reproducibility that depend on the v1.0.0 component continuing to exist. Dual path is the arrangement under which both of those authorities remain true simultaneously.
+
+**They may share the artifact types the implementation already shares.** `sample_rag/model_generator.py` imports `GenerationResult`, `GeneratedStatement`, `SupportingEvidence` and the outcome literals from `sample_rag/generator.py` rather than redefining them. **That sharing is authorized and is not a component merger**: §24.3 keeps §7's data model, §8's field definitions and §9's outcome domain unchanged across the transition, so one artifact definition serving both components is the contract's own position. A second copy would be the defect §20.4 exists to avoid.
+
+**Two things are disclosed rather than glossed.** First, **the interface-first principle (`docs/architecture.md` §2, §10) is NOT retroactively satisfied between these two components**, and RO-14 does not claim that it is: the principle's *"Implementations are swapped in later without changing calling code"* describes one component's implementations being exchanged, which is not what these two are. Second, `docs/architecture.md` §10 requires that a locked decision be revisited only by *"a deliberate redesign discussion, not an incidental change made while implementing a later milestone."* **RO-14 is that deliberate decision**, taken outside any implementing sprint and after the implementing sprint declined to take it. How — and whether — §2 and §10 need a corresponding note is a documentation question belonging to **M2-14** under Decision 4, and **RO-14 does not prescribe it.**
+
+#### Decision 2 — the Milestone 1A frozen baseline is preserved
+
+**`docs/P3.7.6_Milestone_1A_Closure_and_Frozen_Baseline.md` is preserved in full and is not edited by this ruling.** Specifically:
+
+- **`scripts/cli.py` remains on `Generator`** and is not migrated.
+- **`tests/test_generator.py` remains frozen at 48 specifications** and `tests/test_cli.py` **at 27**, as §3.2 froze them.
+- **§4's byte-identical answer and abstain reproducibility remains valid Milestone 1A acceptance evidence.**
+- **The deterministic / reference path is not retired, renamed, relocated or superseded.**
+- **No provider call is introduced into the deterministic pytest suite**, and none may be.
+- **No Milestone 1A contract is redefined**, silently or otherwise.
+
+**The existence of `ModelGenerator` does not invalidate the Milestone 1A baseline.** It is an extension of the repository, which is what §3 requires of a subsequent milestone.
+
+#### Decision 3 — RO-13 Decision 5, disposed of precisely
+
+**RO-13 Decision 5 was valid when issued.** Against the authority and repository state known at Sprint RO-13 — where exactly one generation component existed and nothing consumed a `Prompt` — synchronizing the single `docs/architecture.md` §5 `Generator` row to `Generator.generate(prompt: Prompt) -> GenerationResult` was the correct and sufficient instruction.
+
+**Sprint M2.06 subsequently produced two concrete generation components**, and the class implementing the v2 signature is named `ModelGenerator`. The singular-row target therefore **cannot be applied literally**: written as authorized, the row would assert a signature that the only class named `Generator` in the repository does not have.
+
+| | |
+|---|---|
+| **Superseded** | RO-13 **Decision 5**, and **only** its singular-row architectural synchronization target |
+| **Not superseded** | RO-13 **Decisions 1, 2, 3 and 4** — Generation Contract v2.0.0, the four guarantee transitions, the U-1 / U-2 resolutions and the open U-3, and the third A-5 dependency exception — all of which **remain in force in every part** |
+| **Not done** | **RO-13 is not withdrawn**, is not invalidated as a whole, and **is not rewritten**. §4.5 stands as the historical record of what was ruled and when |
+
+The relationship, stated exactly:
+
+```text
+RO-13 D-5
+    ↓  superseded ONLY as to its singular-row architectural synchronization target
+RO-14
+    ↓
+dual-component architecture authorized
+```
+
+**No new Generation Contract version is created by this** — no v2.1.0, no v3.0.0. §24.2's `Generator.generate(prompt: Prompt) -> GenerationResult` remains the v2.0.0 **method contract**, and it is implemented literally by `ModelGenerator.generate`. What RO-14 changes is which *component* the architecture document records as carrying it, not what the contract requires.
+
+#### Decision 4 — M2-14 is authorized to synchronize the architecture, and its text is not prescribed
+
+**M2-14's scope is widened** (row synchronized in §4) to include `Generator` / `ModelGenerator` component identity, the dual-path disposition, the M1A ↔ M2 component relationship, and the synchronization of `docs/architecture.md` with that identity. **M2-14 remains one capability** — no `M2-14a`, no `M2-14b`, no `M2-14.1`, and no new capability or milestone is created.
+
+**M2-14 is authorized to perform the minimum documentation synchronization necessary** for `docs/architecture.md` to accurately represent:
+
+1. `Generator` as the frozen Milestone 1A deterministic / reference component;
+2. `ModelGenerator` as the Milestone 2 model-backed component;
+3. their distinct contract eras — v1.0.0 and v2.0.0;
+4. their distinct execution paths — `scripts/cli.py` and `scripts/run_generation.py`;
+5. the preservation of the Milestone 1A CLI path.
+
+**RO-14 deliberately does not prescribe how.** It fixes no line count, table layout, §5 wording, row ordering, diagram change or *Future Evolution* prose. **Determining the minimum coherent set of document changes is M2-14's responsibility**, and §20.3's bar on *implementing* sprints amending §5 is unchanged — M2-14 is a Governance capability performing an authorized synchronization, which is the same standing P3.7.4 had under authorization **A5**.
+
+The governing separation:
+
+```text
+RO-14   — WHAT is authorized
+   ↓
+M2-14   — HOW docs/architecture.md records it
+```
+
+**`docs/architecture.md` is NOT modified by this ruling**, no architecture history is rewritten, and **M2-14 is NOT discharged.** `docs/architecture.md` §8's sequence-diagram divergence (**M2.12-F-3**) and the §5 `Context Builder` row's residual divergence are **not resolved here** and are not made part of RO-14's scope; whether M2-14 encounters them is M2-14's to report.
+
+#### Decision 5 — M2.06-F-2 resolved: `answer_text` under v2.0.0
+
+**The finding.** `docs/GENERATION_CONTRACT.md` §24.3 states that *"§8's field definitions"* are unchanged, while §8.1 defines `answer_text` on the Answer path as *"assembled from the `statements` below and contains no content not present in them."* The same §24.3 states, specifically and by name, that under v2.0.0 `answer_text` *"**MAY be synthesized by the model**"* and that *"the quotation-only derivation requirement no longer applies to it."* Surfaced as **F-2** of `docs/M2.06_Generation_Report.md` §6.2 and reported there *"for confirmation"*, not resolved.
+
+**Repository Owner interpretation — the specific G-7 transition governs.**
+
+- Under **v2.0.0**, `answer_text` **MAY be model-synthesized**. §16 is where guarantees are normative, and §24.3 names **G-7** as one of the four guarantees that transition; §8.1's sentence is the descriptive restatement of the guarantee, and it does not survive the guarantee's own transition.
+- **The structural field is unchanged.** `answer_text` keeps its name, its type, its required status, its non-emptiness (**G-3**) and its position in §7's field order and §13.2's serialization. **No field is added, removed or retyped.**
+- **The v1.0.0 quotation-only behaviour remains historical and remains accurate** of the Milestone 1A component that still exhibits it. §8.1 is **not edited**.
+- **`GeneratedStatement.text` is unaffected** and remains a verbatim quotation of its own span under both eras.
+- **`SupportingEvidence` remains grounded in the assembled `Prompt` context and provenance**, and in nothing else — the surviving half of G-7, unchanged.
+- **No faithfulness, groundedness, hallucination-absence or answer-relevancy guarantee is created by this decision.** §24.3's three-way distinction stands and §21's exclusion of the Layer 3/4 metric set stands; empirical evaluation remains **M2-07** / **M2-08** work.
+
+**Recorded at `docs/GENERATION_CONTRACT.md` §25.1**, through the repository's established adjacent-erratum mechanism — `docs/DOCUMENT_CONTRACT.md` §8.9 (**E-1**), whose own purpose is a contract that *"admits two readings of the same requirement"* and which *"resolves that, without editing either statement."* **§1 through §24 are byte-for-byte unchanged**, the contract version metadata is unchanged, and **no new contract version is created.**
+
+#### Decision 6 — G-5 clarified for the v2.0.0 boundary
+
+**The observation.** §24.3 lists **G-5** among the guarantees *"unchanged in every part"*, and G-5 (§16) reads: *"Every `SupportingEvidence` SHALL carry a `chunk_id` present in the consumed `RetrievalResult.chunks`, and a `document_id` equal to that chunk's `document_id`."* But §24.3's **G-13 / §18** transition makes a `Prompt` — not a `RetrievalResult` — the v2 Generator's permitted input, and §24.2 states the v2 Generator *"SHALL NOT consume a `RetrievalResult`."* The literal wording therefore names an artifact the v2 component is barred from consuming. **This was surfaced during the M2-14 re-anchoring, which produced no repository modification; RO-14 is its first repository record.**
+
+**Repository Owner interpretation — the intent is binding, the input citation is historical.**
+
+- **G-5's evidence-identity intent remains binding under v2.0.0**: every `SupportingEvidence` carries a `chunk_id` that resolves to a real committed corpus chunk, and a `document_id` equal to that chunk's own.
+- **The `RetrievalResult.chunks` phrase is a v1.0.0 input citation**, accurate for the component and the era it was written for, and **superseded as a statement of the v2.0.0 Generator boundary** — the same disposition `docs/DOCUMENT_CONTRACT.md` §8.10 (**E-2**) applies to a citation whose cited contract has since changed: *"Each remains accurate as the observation it was when recorded, and none is edited."*
+- **Under v2.0.0 the requirement is satisfied through `Prompt.provenance`**, the ordered four-field structure §24.4 authorizes — `chunk_id`, `document_id`, `character_start`, `character_end` — which **U-2** established precisely because `SupportingEvidence` could not otherwise be constructed without the Generator reaching back into the corpus.
+- **A `RetrievalResult` remains the upstream source of that provenance**, reached through `ContextBuilder` along §24.2's pipeline. It is **not** a direct v2 Generator input, and RO-14 does not make it one.
+- **G-6 is unchanged** — corpus membership continues to hold by construction, because chunk ids are carried through and *"the Generator never constructs a chunk id."*
+- **No evidence is fabricated, no runtime code changes, and no new contract version is created.** The existing implementation already satisfies the intent; this decision records why it does, and does not authorize any modification to make it so.
+
+**Recorded at `docs/GENERATION_CONTRACT.md` §25.2**, through the same adjacent mechanism and under the same byte-for-byte preservation of §1–§24.
+
+#### What RO-14 does not do
+
+**`docs/architecture.md` is unmodified** — that synchronization is M2-14's, under Decision 4. **`docs/roadmap.md` is unmodified.** **It implements nothing** — `sample_rag/generator.py`, `sample_rag/model_generator.py`, `sample_rag/context_builder.py`, `sample_rag/deepseek.py`, `scripts/cli.py`, `scripts/run_generation.py`, every `tests/` module and `requirements.txt` are untouched; **no dependency is added, no provider call was made, no credential was read, and no network access occurred.** **It renames nothing** — neither `Generator` nor `ModelGenerator`.
+
+**It discharges no capability** — **M2-06** and **M2-14** both remain **OPEN**, and **M2-06 is not discharged, staged, split or reclassified.** **M2-12 is not reopened, its discharge row is not edited, and `docs/M2.12_Context_Builder_Report.md` is unchanged.** It **creates no capability, no milestone and no derivative identifier** — no `M2-06a`, no `M2-06b`, no `M2-14a`, no trace or traceability capability, and no evaluation capability.
+
+**RO-06 through RO-13 are unchanged in every part except RO-13 Decision 5's singular-row synchronization target** (Decision 3), as are `docs/roadmap.md` §1.1's stage allocation, every retrieval contract, and the `VectorStore`, `EmbeddingProvider`, `Chunk` and `Document` contracts. **Generation Contract v1.0.0 (§1–§23) and v2.0.0 (§24) are byte-for-byte unchanged**, and **no v2.1.0 or v3.0.0 is created.** It **activates no evaluation tooling** — **M2-07**, **M2-08** and **M3-01** are untouched and no Faithfulness, Groundedness, Hallucination Rate, Answer Relevancy, Context Precision or Context Recall claim is authorized. It **changes no retrieval**, **does not widen `REACHABLE_STAGES`**, **does not resolve U-3**, **triggers neither M2-15 nor M2-17**, **does not dispose of M2.06-F-1 or M2.06-F-3**, and introduces **no orchestration layer, runtime adapter, pipeline coordinator, `ContextEngine`, context-window policy, context compression, token budget, memory, agent runtime, tool calling or model routing.**
 
 ---
 
