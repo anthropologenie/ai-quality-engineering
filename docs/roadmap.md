@@ -174,7 +174,9 @@ The four reallocated capabilities keep their `1B-` identifiers, which record whe
 
 **M2-18 is `Non-blocking`, and specifically does not block M2-07 or M2-08.** Both obtain their inputs in-process and remain independently executable at 2A; a persisted execution trace improves the **diagnostic explainability** of their results, which is not the same as being technically necessary to compute them. They **may** be sequenced after M2-18 for that diagnostic value, but they are **not** dependent on it, and neither becomes a trace-dependent capability. **M3-01 is likewise not made dependent on M2-18.**
 
-**RO-15 changes no other stage allocation.** No existing capability moves between 2A, 2B and 2C; the approved Hybrid Retrieval architecture is unchanged; no capability is added beyond M2-18, and none is removed, split or renamed. **M2-18 is allocated and OPEN — it is not implemented and not discharged.**
+**RO-15 changes no other stage allocation.** No existing capability moves between 2A, 2B and 2C; the approved Hybrid Retrieval architecture is unchanged; no capability is added beyond M2-18, and none is removed, split or renamed. **M2-18 was allocated and OPEN at RO-15 — RO-15 implemented nothing and discharged nothing.**
+
+> **▶ Status synchronized at Sprint M2.18.** The sentence above is retained as a statement about **RO-15**, which is what it was written to describe and which remains true of it. **M2-18 is now ✅ DISCHARGED at Sprint M2.18 (Execution Evidence / Traceability)** — canonical record and discharge evidence at `docs/DEFERRED_ITEMS_REGISTER.md` §4, implementation evidence at `docs/M2.18_Execution_Evidence_Report.md`. **Its stage allocation is unchanged**: M2-18 remains a Milestone **2C** capability, and no capability moved between 2A, 2B and 2C. **Four findings — `M2.18-F-1` … `M2.18-F-4` — remain OPEN and non-blocking**, dispositioned in `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §3.5; discharge does not mean every traceability concern is settled. **M2-07 and M2-08 remain OPEN, unactivated and — as RO-15 fixed — not blocked by M2-18.**
 
 ### M2-04 — one capability, staged activation
 
