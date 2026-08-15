@@ -166,8 +166,15 @@ The four reallocated capabilities keep their `1B-` identifiers, which record whe
 | Embedding benchmarking; retrieval-quality optimization; prompt optimization | **M2-15** |
 | Semi-structured sources (LinkedIn / Greenhouse / Lever JSON) | **M2-16** |
 | Chunk-size / overlap benchmarking | **M2-17** |
+| Execution Evidence / Traceability | **M2-18** *(allocated by RO-15)* |
 
 **M2-15 and M2-17 are placed here because both require a retrieval-quality signal to optimize against**, and that signal is Ragas (M2-07), which lands at 2A.
+
+**M2-18 is placed here by Repository Owner ruling RO-15 — M2-18 Execution Evidence / Traceability Allocation** (`docs/DEFERRED_ITEMS_REGISTER.md` §4.7), which allocates it as a **subsequent Repository Owner allocation** beyond the seventeen capabilities `docs/P3.7.3_…` affirmed at Milestone 2. It is recorded in this section because **RO-07** assigns *stage within Milestone 2* here, while the register owns *which milestone a capability belongs to*.
+
+**M2-18 is `Non-blocking`, and specifically does not block M2-07 or M2-08.** Both obtain their inputs in-process and remain independently executable at 2A; a persisted execution trace improves the **diagnostic explainability** of their results, which is not the same as being technically necessary to compute them. They **may** be sequenced after M2-18 for that diagnostic value, but they are **not** dependent on it, and neither becomes a trace-dependent capability. **M3-01 is likewise not made dependent on M2-18.**
+
+**RO-15 changes no other stage allocation.** No existing capability moves between 2A, 2B and 2C; the approved Hybrid Retrieval architecture is unchanged; no capability is added beyond M2-18, and none is removed, split or renamed. **M2-18 is allocated and OPEN — it is not implemented and not discharged.**
 
 ### M2-04 — one capability, staged activation
 

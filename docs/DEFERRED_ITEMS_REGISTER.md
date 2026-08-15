@@ -142,6 +142,8 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 
 **17 capabilities.** Every one affirmed at Milestone 2 by an existing authority; **none was moved here by `docs/P3.7.3_…`.** **Five — M2-01, M2-02, M2-03, M2-06 and M2-12 — are discharged and retained here with their discharges recorded**, per §1.3 (*a capability is never deleted*), by Sprints M2.01A, M2.01C, M2.03, M2.06 and M2.12 respectively. The count is unchanged for that reason: it counts capabilities allocated, not capabilities outstanding.
 
+> **▶ Count synchronized at Sprint RO-15 — the paragraph above is retained as written.** It was accurate when written and **CP-3** governs: **the seventeen capabilities it counts are exactly the seventeen `docs/P3.7.3_…` affirmed at Milestone 2**, and that statement — including *"none was moved here by `docs/P3.7.3_…`"* — remains true of those seventeen. **Repository Owner ruling RO-15 (§4.7) subsequently allocates an eighteenth — `M2-18`, Execution Evidence / Traceability** — which is a **subsequent Repository Owner allocation**, not a member of the affirmed set and not a reclassification of anything in it. **The section therefore now carries 18 capability rows.** No existing row is edited by that allocation, no capability is split, renamed or reallocated, and no derivative identifier is created. The corresponding total is recorded at §10.5.
+
 > **M2-02's acceptance was staged by Repository Owner ruling RO-08 — see §4.1.** It remained **one capability** throughout: Sprint M2.01B built the persistent FAISS-backed foundation without discharging it, and Sprint M2.01C supplied the `query` side. **No derivative identifier was created, no row was duplicated, and no capability was reallocated.** The count above is unaffected. **M2-02 is now DISCHARGED by Repository Owner ruling RO-10 — see §4.3**, which fixes the Milestone 2A discharge scope as `query(vector, top_k)` plus the whole-corpus rebuild lifecycle and **defers `upsert`** without implementing, stubbing or allocating it.
 >
 > **The artifacts M2-02 produces are governed by Repository Owner ruling RO-09 — see §4.2.** The FAISS index and its metadata are **derived, rebuildable runtime/build state**, not Git source artifacts; the canonical corpus remains authoritative; and **M2.01C owns the concrete runtime location and consumption lifecycle**. RO-09 discharges nothing and allocates nothing — M2-02's status above is unaffected by it.
@@ -185,6 +187,7 @@ Issued at Sprint **RO-02 / RO-03 (Repository Owner Governance Synchronization)**
 | **M2-15** | Embedding benchmarking; retrieval-quality optimization; prompt optimization | Probabilistic Runtime | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope; `docs/P3.7.1_…` §5.6 | Optimization of implementations — what the 1A Governing Principle excludes by definition — §4.2 |
 | **M2-16** | Semi-structured sources (LinkedIn / Greenhouse / Lever JSON) | Corpus | Non-blocking | Does not block Milestone 1A | — | `docs/MILESTONE_1A.md` Out of Scope | Deferred *"until JobOps genuinely ingests these"* — an external precondition — §4.2 |
 | **M2-17** | Chunk-size / overlap benchmarking | Deterministic Runtime | Non-blocking | *(not in §5)* | — | `docs/architecture.md` §5 | Requires a retrieval-quality signal sensitive enough to distinguish configurations — §4.2 R-M2-17 |
+| **M2-18** | Execution Evidence / Traceability | Deterministic Runtime | Non-blocking | *(not in §5)* | **RO-15** | `docs/DEFERRED_ITEMS_REGISTER.md` §4.7 (**RO-15**); `docs/altm.md` §5 `ALTM-ASSEMBLE-1`, `ALTM-INDEX-1`; `docs/GENERATION_CONTRACT.md` §24.3 **G-9** | **OPEN — ALLOCATED, NOT IMPLEMENTED.** **Allocated by Repository Owner ruling RO-15 (§4.7)**, which is this row's whole authority — it is a **subsequent Repository Owner allocation**, not one of the seventeen `docs/P3.7.3_…` affirmed (see the §4 preamble note and §10.5). Authorizes a **repository-native execution-evidence capability** that makes a completed pipeline execution inspectable and diagnostically traceable **after the process exits** — a **distinct execution-evidence envelope** observing the existing `Retrieve → Assemble → Infer` path, **not** a serialized `GenerationResult`, **not** an ALTM stage, and **not** production observability infrastructure. **Non-blocking for M2-07 and M2-08**, which obtain their inputs in-process and remain independently executable; trace presence improves the **diagnostic explainability** of their results, which is not the same as being **technically necessary to compute** them. **JSONL is the authorized v1 storage representation** — one execution, one record — and traces are **derived runtime artifacts** that **SHALL NOT be Git-tracked**. **No semantic similarity score is authorized**, and the `VectorStore` boundary (`sample_rag/vector_index.py`, `docs/architecture.md` §7) is **not widened** to expose one. **The trace schema is deliberately NOT frozen by RO-15**: the authorized content boundary is a capability boundary, and M2-18 determines the minimal concrete representation, module placement, wiring, runtime path and `.gitignore` mechanism from data **already available at existing boundaries** — no instrumentation may be invented to manufacture a field that does not exist. **Nothing is implemented at the time of this allocation** — `sample_rag/`, `scripts/`, `tests/`, `requirements.txt` and `.gitignore` are untouched by RO-15 — and **M2-18 is NOT discharged.** Milestone **2C**, recorded at `docs/roadmap.md` §1.1 under **RO-07**'s stage-allocation split. **Discharges, reopens and modifies no other capability** — **M2-06** stays ✅ DISCHARGED with **M2.06-F-1** and **M2.06-F-3** open and unresolved, and **M2-07**, **M2-08** and **M3-01** stay OPEN, unactivated and unblocked — §4.7 |
 
 ### 4.1 Repository Owner ruling RO-08 — Sprint RO-08
 
@@ -606,6 +609,217 @@ M2-14   — HOW docs/architecture.md records it
 
 **RO-06 through RO-13 are unchanged in every part except RO-13 Decision 5's singular-row synchronization target** (Decision 3), as are `docs/roadmap.md` §1.1's stage allocation, every retrieval contract, and the `VectorStore`, `EmbeddingProvider`, `Chunk` and `Document` contracts. **Generation Contract v1.0.0 (§1–§23) and v2.0.0 (§24) are byte-for-byte unchanged**, and **no v2.1.0 or v3.0.0 is created.** It **activates no evaluation tooling** — **M2-07**, **M2-08** and **M3-01** are untouched and no Faithfulness, Groundedness, Hallucination Rate, Answer Relevancy, Context Precision or Context Recall claim is authorized. It **changes no retrieval**, **does not widen `REACHABLE_STAGES`**, **does not resolve U-3**, **triggers neither M2-15 nor M2-17**, **does not dispose of M2.06-F-1 or M2.06-F-3**, and introduces **no orchestration layer, runtime adapter, pipeline coordinator, `ContextEngine`, context-window policy, context compression, token budget, memory, agent runtime, tool calling or model routing.**
 
+### 4.7 Repository Owner ruling RO-15 — Sprint RO-15
+
+Issued at Sprint **RO-15**, after an allocation investigation established that the repository can now execute a full `Retrieve → Assemble → Infer` path end to end and **retains nothing of what it executed** once the process exits: `RetrievalResult`, `Prompt` and `GenerationResult` are Runtime Artifacts (`docs/GENERATION_CONTRACT.md` §5, §13.3), and **no committed authority decided whether a durable execution-evidence artifact is authorized, what it may contain, or where it belongs.** Selecting among the alternatives is a Repository Owner decision rather than an implementing agent's inference. It is fixed repository authority. **This section records it; it does not interpret it.**
+
+**On the section number and the identifier.** This is the register's own §4.7, in the same sense §4.1 through §4.6 are — not the `§4.x` the *Rationale* column of §4's table cites, which points at `docs/P3.7.3_…` **Decision 4** (§2.3). **RO-15 is the next available unique Repository Owner ruling identifier**: RO-01 through RO-05 are in use in §7, RO-06 and RO-07 in §3.1, RO-08 in §4.1, RO-09 in §4.2, RO-10 in §4.3, RO-12 in §4.4, RO-13 in §4.5 and RO-14 in §4.6. **`RO-11` remains a sprint label, not a ruling.** No identifier is reused and no historical ruling is renamed.
+
+**On the two statements that say `RO-15` does not exist, and why neither is edited.** §4.6 records that RO-14 created *"no `RO-15`"*, and the **M2-06** discharge record in §4 states that *"no Repository Owner ruling was created by this discharge — there is no RO-15."* **Both were accurate as statements about the sprints that made them**, and **CP-3** governs: RO-14 created no ruling beyond itself, and Sprint M2.06's discharge created none at all. **RO-15 is a subsequent and separate Repository Owner act**, taken at its own sprint, and it neither contradicts nor amends either statement. **Neither sentence is edited, and no M2-06 or RO-14 evidence is rewritten** — this paragraph is the adjacent record, in the manner §4 already uses for a statement overtaken by a later sprint.
+
+**On its standing relative to the allocation investigation.** That investigation **made no repository change** — it created no module, no trace, no report and no register edit, and invented no authority. **There is therefore no committed investigation document, and none is cited below as though there were.** Every fact this ruling rests on is verifiable at commit `0bb76c6` by direct inspection of the files named. The chronology is **M2-06 STOP → RO-13 → M2-06 implementation → M2-14 STOP → RO-14 → M2-14 architecture synchronization → M2-06 DISCHARGED → allocation investigation → RO-15**.
+
+**On the authority to add a capability row.** §1.3 admits a capability *"only when a Repository Owner decision or a committed authority defers it"*, and reserves allocation to Repository Owner authority; **RO-10 Decision 2** separately bars a sprint that discharges nothing from editing a canonical capability row. **RO-15 is itself that Repository Owner decision** — it is the authority the **M2-18** row in §4 cites, and the Repository Owner supplied the row-synchronization authorization explicitly at this sprint, exactly as RO-12, RO-13 and RO-14 were supplied it. **RO-10 Decision 2 and §1.3 are applied here, not amended.**
+
+| Ruling | Title | Effect |
+|---|---|---|
+| **RO-15** | **M2-18 Execution Evidence / Traceability Allocation** | **Allocates one new capability — `M2-18`, Execution Evidence / Traceability — at Milestone 2, stage 2C**, as a **subsequent Repository Owner allocation** beyond the seventeen `docs/P3.7.3_…` affirmed. Authorizes a **distinct execution-evidence envelope** that is **not** a serialized `GenerationResult`; fixes it **Non-blocking** for **M2-07** and **M2-08**; resolves the `docs/GENERATION_CONTRACT.md` **§13.2 / §13.3** scope question; authorizes **JSONL** as the v1 storage representation; classifies traces as **derived runtime artifacts that SHALL NOT be Git-tracked**; and **excludes credentials, raw provider payloads and semantic similarity scores** from the authorized boundary. **Discharges no capability**, splits, renames and reallocates none, creates no milestone and no derivative identifier, amends **RO-06** through **RO-14** in no part, **implements nothing**, and **freezes no schema** |
+
+#### Decision 1 — M2-18 is allocated
+
+**The capability is allocated, and it is one capability.**
+
+| | |
+|---|---|
+| **Identifier** | **`M2-18`** |
+| **Name** | **Execution Evidence / Traceability** |
+| **Milestone** | **Milestone 2** — stage **2C**, recorded at `docs/roadmap.md` §1.1 under **RO-07** |
+| **Class** | **Deterministic Runtime** (§2.1) — it records what an execution did; it introduces no model and no probabilistic engine of its own |
+| **Status** | **OPEN — allocated, not implemented** |
+
+**Purpose.** To make a **completed** AI pipeline execution inspectable and diagnostically traceable **after the process exits**, by preserving sufficient evidence to answer questions the repository currently cannot answer once a run ends: what query was executed; which retrieval candidates participated; through which retrieval legs they entered; what ranks they held; which chunks reached `Prompt` construction; which provenance was attached; which generation component and contract era executed; which provider and model executed; what generation outcome and answer were produced; what evidence references supported the result; and what latency was observed.
+
+**What it is not, stated because each is a capability that already exists elsewhere or does not exist at all.** It is **not an evaluation capability** — **M2-07**, **M2-08**, **M2-09**, **M2-10** and **M3-01** are untouched and unactivated. It is **not an optimization capability** — **M2-05**, **M2-15** and **M2-17** are untriggered. It is **not a generation capability** and **not a retrieval capability** — no generation, retrieval, fusion, indexing or embedding behaviour changes. It is **not production observability infrastructure** — **no observability framework, database, OpenTelemetry integration, collector, dashboard, external telemetry sink or tracing infrastructure is created or authorized.**
+
+**On the identifier, specifically.** **`M2-16` is already allocated** (semi-structured sources) and **`M2-17` is already allocated** (chunk-size / overlap benchmarking); neither is reused, reinterpreted or displaced. **`M2-18` is the next available Milestone 2 identifier**, and **no new milestone taxonomy is created** — no `M2C-01`, no `M4`, no trace-milestone series, and no derivative identifier such as `M2-18a`.
+
+#### Decision 2 — M2-18 is NON-BLOCKING, and the reason is preserved
+
+**Blocking status: `Non-blocking`**, recorded in the existing *Blocking status* column of §4's table in the same convention **M2-05**, **M2-11** and **M2-13** use.
+
+**M2-18 SHALL NOT block M2-07, and SHALL NOT block M2-08.** Both remain **OPEN** and **independently executable**.
+
+**The reason, which is the part that must not be lost:**
+
+| | |
+|---|---|
+| **Why they are not blocked** | **M2-07** and **M2-08** can obtain every input they require **in-process** — a retrieval result, an assembled `Prompt` and a `GenerationResult` are all live objects at the moment a metric is computed. **Trace absence therefore does not prevent metric computation.** |
+| **What the trace adds instead** | **Diagnostic traceability of the metric.** A recorded execution explains *why* a score came out as it did — which candidates competed, which legs supplied them, which chunks reached the prompt — after the run is over. |
+
+**The distinction, stated exactly:**
+
+```text
+"technically necessary to calculate a metric"
+        ≠
+"valuable for explaining the metric"
+```
+
+**M2-18 is the second, not the first.** M2-07 and M2-08 **MAY** be sequenced after M2-18 for diagnostic value; that is a sequencing preference and **not a dependency**, and **neither is converted into a trace-dependent capability.** **M2-07 remains retrieval / context evaluation and M2-08 remains generation evaluation**, unchanged in scope, and **neither is discharged, modified or activated by this ruling.**
+
+#### Decision 3 — the trace is a distinct execution-evidence envelope
+
+**An M2-18 trace record is a cross-stage execution-evidence envelope. It is NOT a serialized instance of `GenerationResult`.**
+
+```text
+GenerationResult
+    = runtime generation artifact, produced by the generation component
+
+M2-18 Execution Trace
+    = cross-stage execution-evidence envelope, recorded about the execution
+```
+
+**The envelope observes the pipeline and records selected evidence about what it did.** It therefore:
+
+- **does not redefine `GenerationResult`** and **adds no field to it** — §15's omissions, `generation_time_ms` included, stand exactly as **RO-13 Decision 3** left them;
+- **does not change `Prompt`**, whose shape is fixed by **RO-13**'s **U-2** resolution at §24.4;
+- **does not change `RetrievalResult`** or its frozen four fields, and **does not change `SupportingEvidence`**;
+- **does not change `Generator`, `ModelGenerator`, `ContextBuilder` or any retrieval component**;
+- **does not touch the frozen Milestone 1A path** preserved by **RO-14 Decision 2** — `scripts/cli.py` stays on `Generator`, the frozen specification counts stand, and **no provider call may enter the deterministic pytest suite.**
+
+#### Decision 4 — §13.2 / §13.3 resolved, and JSONL authorized for v1
+
+**The question the investigation identified.** `docs/GENERATION_CONTRACT.md` **§13.2** fixes a serialized form — *"`json.dumps(result, indent=2) + "\n"`, UTF-8, insertion-order keys, one trailing newline"*, at §7 declaration order — and **§13.3** states that *"no persistence is required or defined by this contract."* A trace record containing a projection of generation evidence could be read as falling under that form.
+
+**Repository Owner interpretation.**
+
+- **§13.2 and §13.3 govern the serialization of a `GenerationResult`** — that artifact type, and approved persisted generation artifacts *of that type*.
+- **The M2-18 envelope is a different artifact.** It is **not** a `GenerationResult`, and it does not become one by containing a projection of generation evidence — a citation of evidence is not an instance of the artifact cited.
+- **The M2-18 envelope is therefore NOT governed by the `GenerationResult` serialization form**, and may use its own authorized representation.
+
+```text
+§13.2 / §13.3
+    ↓  govern
+GenerationResult serialization
+    ≠
+M2-18 ExecutionTrace serialization
+    ↓
+M2-18 may use its own authorized representation
+```
+
+**The previously identified ambiguity is resolved by this decision.** **§13.2 and §13.3 are not amended, not narrowed and not edited**; what is fixed is their **scope**, which is the `GenerationResult` artifact they were written about. **`docs/GENERATION_CONTRACT.md` is byte-for-byte unchanged by this ruling** — **no §26 is appended, no erratum is issued, and no v2.1.0 or v3.0.0 is created** — because no contract text is reinterpreted here: the ruling states that the contract does not reach a new artifact, not that it says something other than what it says.
+
+**JSONL is AUTHORIZED as the v1 storage representation for M2-18 execution traces.** **One execution = one JSON object = one record**, and records **MAY** be appended as executions occur.
+
+**Deliberately NOT prescribed, and belonging to the M2-18 implementation sprint:** concurrency and locking semantics, file rotation, retention policy, filename conventions, directory path, exact field ordering, key naming, and nesting shape. **RO-15 fixes the representation family; M2-18 fixes the representation.**
+
+#### Decision 5 — the authorized trace content boundary, and what is excluded
+
+**The governing principle is minimality.** The implementation **SHOULD** derive the **smallest useful trace projection** from data **already available at existing boundaries** — `RetrievalResult.diagnostics` is the contract's own open mapping and already carries per-query runtime detail; `sample_rag/fusion.py` already computes per-route positional ranks and `(chunk_id, score)` pairs; `Prompt` already carries `chunk_ids` and the four-field `provenance`. **A trace SHALL NOT become a serialized copy of every runtime object.**
+
+**AUTHORIZED as trace evidence, where available at an existing boundary:** execution identity; timestamp; query; the retrieval candidate union; semantic rank; BM25 rank; RRF rank; RRF score; source-leg attribution; selected chunk ids; `Prompt` provenance; generation component identity; generation contract version; provider; model; generation outcome; `answer_text`; supporting-evidence references; observed latency.
+
+**This list is a capability boundary, not a mandatory implementation schema.** **M2-18 MUST verify availability** for each item and determine the minimal concrete representation. **No instrumentation may be invented solely to manufacture a field that does not exist**, and an item that proves unavailable at an existing boundary is **omitted and reported**, not engineered into existence.
+
+**EXCLUDED from persistence, and not authorized by any reading of the list above:** API credentials; bearer tokens; `Authorization` headers; provider secrets; raw provider request payloads where they carry credentials; raw provider response payloads; **semantic similarity scores**; duplicated corpus or chunk text where existing ids plus provenance suffice; arbitrary `Prompt` duplication where the same information can be referenced; arbitrary library or version telemetry; unrelated system telemetry; and Git metadata recorded merely for convenience.
+
+**On semantic similarity scores, specifically — the frozen `VectorStore` boundary remains CLOSED.** `docs/architecture.md` §7's `VectorStore` Protocol and `sample_rag/vector_index.py` expose `query(vector, top_k) -> list[str]` — **ids, not distances** — and **RO-10** fixed exactly that as M2-02's discharge scope. **RO-15 authorizes NO widening of that contract, or of any equivalent retrieval contract, to expose a similarity score**, and **no alternative path to obtain one may be invented** — not by re-embedding, not by recomputing a distance outside the store, and not by a second index. **Semantic rank is authorized; semantic score is not.**
+
+#### Decision 6 — `GenerationResult` minimality, and why `answer_text` is authorized
+
+**RO-15 does NOT authorize persisting the complete `GenerationResult` object.** M2-18 determines the **minimum projection** that constitutes execution evidence.
+
+**The governing principle:**
+
+| | |
+|---|---|
+| **Persist** | Evidence that **cannot otherwise be recovered** once the process exits |
+| **Reference** | Evidence that **can be deterministically recovered** from the existing committed corpus and provenance |
+
+**`answer_text` is authorized as trace evidence**, and the reason is specific rather than general: it is a **genuine execution artifact** that **cannot be reconstructed by rerunning v2 generation**, because **RO-13 Decision 2**'s **G-9** split expressly declines to guarantee model-output reproducibility (`docs/GENERATION_CONTRACT.md` §24.3). Structural determinism holds; the answer's reproducibility does not. **Evidence text and `Prompt` context SHOULD NOT be blindly duplicated** where chunk ids plus the four-field provenance already give a deterministic reference back into the committed corpus — **G-6**'s corpus membership by construction is what makes that reference sound.
+
+**This decision prescribes no JSON structure.** It states which class of evidence must survive and which need only be referenced; **how that is represented is M2-18's.**
+
+#### Decision 7 — component and contract identity at the observation boundary
+
+**RO-14 Decision 1** established two distinct generation components:
+
+| Component | Contract era | Path |
+|---|---|---|
+| **`Generator`** | **v1.0.0** | frozen Milestone 1A deterministic / reference |
+| **`ModelGenerator`** | **v2.0.0** | Milestone 2 model-backed |
+
+**M2-18 is authorized to record trace evidence sufficient to distinguish these two execution identities**, so a trace can never be read ambiguously as to which component and which contract era produced it. **The preferred minimum conceptual identity is `component` and `contract_version`** — for the current M2-06 path, **`ModelGenerator`** and **`2.0.0`**.
+
+**The trace layer owns this identity, at the observation boundary.** **No field is added to `GenerationResult`**; **`sample_rag/generator.py` and `sample_rag/model_generator.py` are NOT modified to carry trace metadata**; and neither component is renamed, retired or made trace-aware by this ruling.
+
+#### Decision 8 — traces are derived runtime artifacts and SHALL NOT be Git-tracked
+
+**M2-18 traces are classified as DERIVED RUNTIME ARTIFACTS**, in the same class **RO-09** fixed for the FAISS index and its metadata: query-derived, run-local, rebuildable-or-discardable, and **not source artifacts**.
+
+**They SHALL be excluded from Git tracking**, through `.gitignore` or an equivalent repository-native mechanism, **during the M2-18 implementation**. **RO-15 prescribes no runtime path and edits no `.gitignore`** — the concrete location and exclusion mechanism are M2-18's, exactly as **RO-09** left M2.01C the runtime location of the index.
+
+**Two boundaries, kept distinct because conflating them would weaken both:**
+
+| | |
+|---|---|
+| **Credential safety** | **Absolute.** Credentials, tokens, `Authorization` headers and provider secrets **SHALL NEVER** enter a trace, under any configuration, in any environment, at any verbosity |
+| **Content sensitivity** | **Separate and real.** Query, context, answer and evidence may carry resume and job-corpus content, which makes a trace **potentially sensitive derived data** even when it holds no credential |
+
+**Neither is solved by the other.** **RO-15 introduces no redaction, anonymization, encryption, database storage, retention policy or external telemetry** — those are outside this ruling and are not authorized by it.
+
+#### Decision 9 — no ALTM stage is created
+
+**M2-18 is an EVIDENCE LAYER, not a pipeline stage.** It sits *across* the existing execution —
+
+```text
+Retrieve  →  Assemble  →  Infer
+        (observed by the evidence layer)
+```
+
+— and makes already-existing execution artifacts durable.
+
+**`docs/altm.md` is NOT modified**, **no ALTM stage is created or renamed**, **`REACHABLE_STAGES` is NOT widened** (`evaluation/altm_rules.py`), **U-3 is not resolved and is not converted into a capability**, and **M3-02 is untouched.** **M2-18 is not an orchestration capability** — no orchestration layer, runtime adapter, pipeline coordinator or `ContextEngine` is authorized by it.
+
+#### Decision 10 — the historical §10.5 reconciliation is preserved exactly
+
+**The historical statement stands, unedited and still true:**
+
+```text
+Historical state
+    51 capabilities  ↔  P3.7.3 reconciliation        (accurate as recorded; unedited)
+        +
+Subsequent Repository Owner allocation
+    M2-18                                            (RO-15, this section)
+        =
+Current capability count: 52
+```
+
+**§10.5's *"Matches `docs/P3.7.3_…` Decision 3 §3.6 exactly"* remains true of the original 51** and is **not rewritten.** **RO-15 does not claim, and no reader may infer, that `docs/P3.7.3_…` originally contained M2-18** — it did not, and the ruling that allocates M2-18 is this one. The count is synchronized through the repository's **adjacent-note** mechanism at §10.5, which is the same non-destructive form `docs/DOCUMENT_CONTRACT.md` §8.9 (**E-1**) and §8.10 (**E-2**) established for recording a change rather than silently applying one. **No historical wording is altered anywhere in §10.**
+
+#### Decision 11 — relationship to M2-06, and to M3-01
+
+**M2-06 is and remains ✅ DISCHARGED.** **RO-15 does not reopen it, does not modify its evidence, does not alter its acceptance, and does not reinterpret it as incomplete.** M2-18 **builds on** the real generation path M2-06 established; it does not revisit it.
+
+**M2.06-F-1 and M2.06-F-3 remain OPEN and non-blocking**, dispositioned at `docs/ENGINEERING_TRACEABILITY_REGISTER.md` §3.5 exactly as they are. **M2-18 resolves neither.** It **may make their behaviour more observable** — a recorded execution shows that no provider citation was returned, and shows the candidate set that made the Abstain path unreachable — and **observability is not repair.** Neither finding is marked fixed, and neither is dispositioned by this ruling.
+
+**On M3-01, recorded as architectural context and nothing more.** The investigation observed that Promptfoo (**M3-01**) may eventually benefit from persisted execution evidence, because **G-9** does not guarantee v2.0.0 answer reproducibility and a regression instrument compares runs. **That observation creates no dependency.** **M3-01 is not modified, M2-18 is not blocking for it, no capability is created from the observation, and it is recorded here only as future architectural context.**
+
+#### What RO-15 does not do
+
+**It implements nothing.** `sample_rag/generator.py`, `sample_rag/model_generator.py`, `sample_rag/deepseek.py`, `sample_rag/context_builder.py`, `sample_rag/retriever.py`, `sample_rag/fusion.py`, `sample_rag/vector_index.py`, `scripts/run_generation.py`, `scripts/cli.py`, every `tests/` module, `requirements.txt` and `.gitignore` are **untouched**. **No trace module, trace directory or instrumentation is created**; **no dependency is added**; **no provider call was made, no credential was read, and no network access occurred**; **no metric was computed**; and **Ragas, DeepEval and Promptfoo remain unactivated.**
+
+**It freezes no schema.** No JSON structure, field set, field ordering, key naming, module placement, concurrency semantics, retention policy or filename convention is dictated. **RO-15 fixes WHAT is authorized; M2-18 determines HOW**, within that boundary:
+
+```text
+RO-15   — WHAT is authorized
+   ↓
+M2-18   — HOW it is implemented, within those boundaries
+```
+
+**It discharges no capability** — **M2-18** is allocated **OPEN** and is **not** discharged by the ruling that allocates it; **M2-07**, **M2-08**, **M2-14** and **M3-01** are **not discharged**; and **M2-06** is **not reopened**. It **creates no capability beyond M2-18**, **no milestone**, **no milestone taxonomy** and **no derivative identifier** — no `M2-18a`, no `M2-18b`. **`M2-16` and `M2-17` are neither reused nor reinterpreted.**
+
+**RO-06 through RO-14 are unchanged in every part**, as are `docs/architecture.md`, `docs/altm.md`, `docs/MILESTONE_1A.md`, `docs/P3.7.3_…`, `docs/P3.7.6_…`, every retrieval contract, and the `VectorStore`, `EmbeddingProvider`, `Chunk` and `Document` contracts. **Generation Contract v1.0.0 (§1–§23), v2.0.0 (§24) and the §25 errata are byte-for-byte unchanged**, and **no new contract version is created.** `docs/roadmap.md` is amended **only** by the addition of **M2-18** to §1.1's Milestone 2C table, under **RO-07**'s split that assigns stage-within-milestone to that section; **no other roadmap line, and no stage allocation of any existing capability, is altered.** It **widens no contract**, **exposes no semantic similarity score**, **triggers neither M2-15 nor M2-17**, **does not widen `REACHABLE_STAGES`**, **does not resolve U-3**, **does not dispose of M2.06-F-1 or M2.06-F-3**, and **asserts no generation-quality, retrieval-quality, faithfulness, groundedness or hallucination claim** — a trace records what an execution did, and records nothing about whether it was correct.
+
 ---
 
 ## 5. Milestone 3 — Production Evaluation & Regression
@@ -814,6 +1028,31 @@ Twelve capabilities were surfaced by the constitutional audit from authorities t
 | Remaining in Milestone 1A | **0** |
 
 Matches `docs/P3.7.3_…` Decision 3 §3.6 exactly. **No capability was reclassified, reallocated or introduced by Sprint P3.7.4.**
+
+> **▶ Adjacent note — subsequent allocation recorded at Sprint RO-15. The table and the sentence above are retained exactly as written, and both remain true.**
+>
+> **The table above is the P3.7.3 reconciliation**, and it is a **historical** statement: those **51** capabilities are the ones `docs/P3.7.3_…` Decision 3 §3.6 allocated, and they **match it exactly**, as the sentence says. **Nothing in this note edits, reinterprets or weakens that.** In particular, **`docs/P3.7.3_…` did NOT contain M2-18**, and no reader may infer from this note that it did.
+>
+> **Repository Owner ruling RO-15 (§4.7) subsequently allocates one further capability — `M2-18`, Execution Evidence / Traceability**, at Milestone 2, stage 2C. It is a **subsequent Repository Owner allocation**, made at Sprint RO-15 on RO-15's own authority, and it is **not** a member of the reconciled set above.
+>
+> ```text
+> Historical state
+>     51 capabilities  ↔  P3.7.3 reconciliation     (unedited; still exact)
+>         +
+> Subsequent Repository Owner allocation
+>     M2-18                                         (RO-15, §4.7)
+>         =
+> Current capability count: 52
+> ```
+>
+> | | Section | Capabilities |
+> |---|---|---|
+> | Historical | §4 Milestone 2, as reconciled to P3.7.3 | **17** |
+> | Subsequent | **M2-18**, allocated by **RO-15** | **+1** |
+> | **Current** | **§4 Milestone 2** | **18** |
+> | **Current** | **Total** | **52** |
+>
+> **Remaining in Milestone 1A is still 0** — M2-18 is a Milestone 2 capability and touches no Milestone 1A obligation. **No capability was reclassified or reallocated by RO-15**, no existing row was edited, no identifier was reused, and the §10.1 through §10.4 reconciliations are unchanged in every part. This note is recorded in the repository's established **adjacent, non-destructive** form — `docs/DOCUMENT_CONTRACT.md` §8.9 (**E-1**) and §8.10 (**E-2**) — rather than by amending the table, precisely so the historical reconciliation stays verifiable against `docs/P3.7.3_…`.
 
 ---
 
