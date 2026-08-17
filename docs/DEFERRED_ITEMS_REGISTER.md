@@ -1129,6 +1129,304 @@ M2-07   — HOW it is implemented, within that boundary
 
 **RO-06 through RO-16 are unchanged in every part** — including **RO-16**, whose fourth A-5 exception stands as issued and simply goes untaken — as do `docs/architecture.md`, `docs/altm.md`, `docs/roadmap.md`, `docs/MILESTONE_1A.md`, `docs/P3.7.3_…`, `docs/P3.7.6_…`, **NA-07**, every retrieval contract, and the `VectorStore`, `EmbeddingProvider`, `Chunk` and `Document` contracts. **Generation Contract v1.0.0 (§1–§23), v2.0.0 (§24) and the §25 errata are byte-for-byte unchanged**, and **no new contract version is created.** **A-5 is not amended and no fifth exception is created.** It **does not widen `REACHABLE_STAGES`**, **triggers neither M2-15 nor M2-17**, **disposes of no finding**, and **asserts no retrieval-quality or context-quality claim** — rescoping how a measurement will be taken says nothing about what it will show.
 
+### 4.10 Repository Owner ruling RO-18 — Sprint RO-18
+
+Issued at Sprint **RO-18**, after the **M2-08 evaluation-framework reconnaissance** completed and reported. It is fixed repository authority. **This section records it; it does not interpret it.**
+
+**On the section number and the identifier.** This is the register's own §4.10, in the same sense §4.1 through §4.9 are. **RO-18 is the next available unique Repository Owner ruling identifier**, verified against this register rather than assumed: RO-01 through RO-05 are in use in §7, RO-06 and RO-07 in §3.1, RO-08 in §4.1, RO-09 in §4.2, RO-10 in §4.3, RO-12 in §4.4, RO-13 in §4.5, RO-14 in §4.6, RO-15 in §4.7, RO-16 in §4.8 and RO-17 in §4.9. **`RO-11` remains a sprint label, not a ruling**, and `RO-18` appeared nowhere in the repository before this section. No identifier is reused and no historical ruling is renamed.
+
+**On the evidence this ruling rests on.** The **M2-08 framework reconnaissance** is committed at `docs/M2.08_Evaluation_Framework_Reconnaissance_Report.md`, commit `81b373a`. That sprint **made no repository change** — it installed nothing, imported nothing, added no dependency, made no provider call, read no credential, transmitted no repository content, and removed its scratch material. Its findings are verifiable at that commit. **It is evidence about frameworks, not authority over metrics** — see Decision 8.
+
+**The chronology, stated explicitly because the ruling only makes sense as a sequence:**
+
+```text
+M2-08 allocated — "DeepEval activation — Layer 3"   (docs/roadmap.md §5; docs/altm.md §9, §12)
+        ↓
+RO-16 — DeepSeek judge authorized for M2-07 conditionally; D-3 expressly
+        withholds it "for M2-08 automatically"
+        ↓
+RO-17 — M2-07 rescoped to a native evaluation; D-4 independently authorizes the
+        DeepSeek judge for M2-07 only, expressly not M2-08
+        ↓
+M2-07 implemented natively — the judge seam proven without widening provider
+        architecture (evaluation/context_metrics.py; commit 6543bae)
+        ↓
+M2-08 framework reconnaissance — DeepEval and Promptfoo examined read-only;
+        no version of DeepEval implements Groundedness (commit 81b373a)
+        ↓
+RO-18 — the M2-08 implementation path is native; the DeepSeek judge seam is
+        authorized for M2-08 narrowly and independently
+```
+
+**On the authority to synchronize the M2-08 capability row.** Under **RO-10 Decision 2** a sprint that discharges nothing **may not itself edit a canonical capability row**, and **may propose** register language for Repository Owner review. **RO-18 discharges nothing**, and **no such row-editing authorization was supplied at this sprint** — unlike Sprint RO-17, where the Repository Owner supplied it explicitly and the **M2-07** row was synchronized on that basis. **The M2-08 row is therefore NOT edited here.** The synchronization it now owes is recorded, with proposed language, as this section's second Finding. **RO-10 Decision 2 is applied here, not amended.**
+
+| Ruling | Title | Effect |
+|---|---|---|
+| **RO-18** | **Native M2-08 Generation-Evaluation Authorization** | **Authorizes M2-08's implementation path as native and repository-owned** — Faithfulness, Groundedness, Hallucination Rate and Answer Relevancy — and records that **DeepEval is not adopted under the current repository constitution** and **Promptfoo is not part of M2-08**. **Independently and narrowly authorizes the existing `sample_rag/deepseek.py` boundary as the M2-08 judge seam**, without amending or extending RO-17 D-4. **Supersedes RO-16 Decision 3 only as to its specific *"for M2-08 automatically"* DeepSeek exclusion**, leaving every other RO-16 D-3 restriction binding and RO-16's historical wording unrewritten. Grants **no** new dependency, provider, embedding, vector-store, router or orchestration authority. **Changes no capability identity, identifier, milestone, stage or ownership**; **creates no capability and no new `M2-xx`**; **discharges nothing** — **M2-07**, **M2-08**, **M2-10**, **M3-01** and **M3-06** all remain **OPEN** and **M2-18** stays ✅ DISCHARGED and untouched; and **implements nothing** |
+
+#### Decision 1 — M2-08's implementation path is native
+
+**M2-08 is authorized to implement and exercise a native, repository-owned computation of the generation-quality metric set** against the existing generation pipeline and the authorized evaluation data.
+
+**The authorized metric set is exactly four, and no more:**
+
+| | Metric |
+|---|---|
+| 1 | **Faithfulness** |
+| 2 | **Groundedness** |
+| 3 | **Hallucination Rate** |
+| 4 | **Answer Relevancy** |
+
+**No metric may be added to this set, and none of the four may be dropped because an external framework does not provide it.** The second half of that sentence is the operative one: the reconnaissance established that **no released version of DeepEval implements Groundedness at all**, and `docs/AI_Quality_Metrics_Reference.md` deliberately holds Groundedness at **Primary** — *"Dropping it to secondary removes the single strongest differentiator available at this layer."* **Tool availability does not define the repository's metric set.**
+
+**M2-08 remains the same capability, under the same identifier.** **No new `M2-xx` is created**, the capability is **not renamed**, its **class (Evaluation Tooling)**, its **blocking status**, its **milestone (2)** and its ownership are unchanged. **Only the implementation mechanism is authorized as native** — what changes is *how* the layer becomes measurable, not *what* M2-08 is or where it sits.
+
+**On the layer number, recorded so this ruling creates no contradiction.** The repository numbers this layer twice, consistently within each document: `docs/roadmap.md` §5 and `docs/altm.md` §9 call generation quality **Layer 3**; `docs/AI_Quality_Metrics_Reference.md` calls the same metric set **Layer 4**, because its own scheme numbers Knowledge and Index separately. **Both numberings are correct in their own document and neither is amended here.** RO-18 authorizes **the generation-quality metric set named above**, which is `docs/roadmap.md` §5 Layer 3 and `docs/AI_Quality_Metrics_Reference.md` Layer 4 — the same layer under two schemes.
+
+**RO-18 authorizes the native path and prescribes no implementation detail** — not the algorithm, not the module structure, not the entry point, not the result shape, not the report schema, not the test strategy, not the fixture names, not the prompt wording, not the aggregation formula and not the CLI design.
+
+```text
+RO-18   — WHAT is authorized
+   ↓
+M2-08   — HOW it is implemented, within that boundary
+```
+
+**Native precedent exists and is not invented here:** **M2-07** computes Context Precision and Context Recall natively over the committed corpus, in the standard library alone, against an injected `judge(prompt: str) -> str` seam — `evaluation/context_metrics.py`, `tests/test_context_metrics.py` and `scripts/evaluate_context.py`, at commit `6543bae`. **M2-08 may follow that shape** — an observation about precedent, not a prescription of design.
+
+**RO-18 does not discharge M2-08.** The capability remains **OPEN**, and the later implementation sprint determines the concrete algorithm, module structure, tests, evidence schema and evaluation execution.
+
+#### Decision 2 — DeepEval is not adopted for M2-08 under the current repository constitution
+
+**The finding, from the package's own published metadata and source rather than from preference**, as recorded in `docs/M2.08_Evaluation_Framework_Reconnaissance_Report.md` across the **full 516-release history** of the package:
+
+- **No released version implements Groundedness.** The metric the repository holds at Primary is absent from every release ever published. This is a **capability** failure, and it is independent of every dependency question below.
+- **Releases 0.20.21 – 2.7.9 declare `langchain` among their core, non-extra dependencies** and import it unconditionally on the metric path. **NA-07** records LangChain as *"Excluded, not deferred."*
+- **Releases 2.5.6 – 4.1.8 declare `openai` as a core dependency** and import it at module level on the metric path, whether or not a custom judge is supplied. **RO-16 Decision 5** places further provider SDKs outside authority.
+- **`deepeval` is itself an LLM-evaluation library**, which **A-5** bars importing.
+
+**Therefore: DeepEval is NOT adopted for M2-08 under the current repository constitution.**
+
+**Recorded explicitly, as the operative reason:** **DeepEval is not required for M2-08, because the required capability can be implemented natively without introducing its dependency, provider, orchestration or architecture surface.** The repository is not choosing between a capability and a boundary; it is declining a framework it does not need.
+
+**Stated in exactly that form, and no wider.** This is **not** a finding that DeepEval is defective, unsuitable in general, or permanently prohibited. **It is a disposition of a previously named implementation mechanism**, and it is contingent on a constitution the Repository Owner may later change.
+
+**No new A-5 exception is created for DeepEval**, **NA-07 is not modified**, and the repository's dependency constitution is **not weakened**. **DeepEval is not installed and not imported**; `evaluation/deepeval/` remains an empty scaffold and the `deepeval` line in `requirements.txt` remains a declaration. **The committed reconnaissance report is preserved as the evidence artifact for this decision** and is not rewritten, superseded or removed.
+
+#### Decision 3 — Promptfoo is not part of M2-08
+
+**Promptfoo is NOT part of the M2-08 native generation-metric implementation, and RO-18 does not authorize it.**
+
+**No dependency exception is created for Promptfoo.** Its PyPI distribution is a subprocess wrapper over a Node.js CLI, so adopting it would introduce a **Node runtime**, a **second package ecosystem**, a **second evaluation runtime** and a **second credential boundary** — none of which any repository authority admits, and none of which M2-08 requires.
+
+**M3-01 — regression evaluation — remains a separate future capability and remains OPEN.** **It is not discharged here, its row is not edited, and its status is unchanged.** Whether Promptfoo, a native harness, or something else eventually implements it is a question for the ruling or sprint that disposes of **M3-01**, not for this one.
+
+#### Decision 4 — the DeepSeek judge seam, independently and narrowly authorized for M2-08
+
+**RO-18 independently authorizes the existing `sample_rag/deepseek.py` provider boundary as M2-08's evaluation-judge seam for the native generation-quality evaluation.**
+
+**This is an independent M2-08 authorization.** **It does not amend, widen, reinterpret or retroactively extend RO-17 Decision 4**, whose scope is *"M2-07 native evaluation only"* and which said so precisely in order not to be read this way. **RO-17 D-4 is untouched and keeps its own scope.** This equally **does not amend or expand RO-13 Decision 4**, which is scoped to M2-06 generation and remains untouched and untaken.
+
+**The authorized shape, and nothing wider:**
+
+```text
+native M2-08 evaluator
+        ↓
+injected judge seam
+        ↓
+existing sample_rag/deepseek.py
+```
+
+**This is NOT general authorization for DeepSeek in M2-08-related tooling, scripts, frameworks, orchestration, routers or any other capability.**
+
+**Not authorized, explicitly:** another provider SDK; another provider; a model router; arbitrary HTTP access; rewriting `sample_rag/deepseek.py` to satisfy an external framework; retry or orchestration architecture; a second provider client; and **a generalized LLM abstraction created merely for M2-08**.
+
+**The existing provider implementation must remain architecturally unchanged.** `sample_rag/deepseek.py` is not modified by this ruling and may not be rewritten to fit an evaluation caller. **The M2-08 sprint may reuse its existing provider boundary through an appropriate dependency-injection / judge seam** — the mechanism M2-07 already proved, where the metric engine takes a callable and holds no provider concept at all.
+
+| M2-08 finds | Then |
+|---|---|
+| The native judge can reach the existing boundary as it stands | **Use it.** The authorization is live |
+| It cannot, without architectural widening | **STOP** and report the exact incompatibility and the minimum further Repository Owner decision required |
+
+**RO-18 does not authorize forcing the provider into an incompatible interface.**
+
+**Credential safety is carried forward intact and is required to remain structural.** **`DEEPSEEK_API_KEY` SHALL NEVER be logged, printed, persisted, exposed in evaluation evidence, included in an M2-08 evaluation report, placed in an exception or error message, or present in any persisted raw provider payload.** That discipline is **structural today** — the client exposes no credential accessor and reads the variable inside `complete` alone — and **RO-18 requires it to remain structural**, on the terms **RO-16 Decision 7** fixed and which this decision restates rather than relaxes.
+
+#### Decision 5 — RO-16 Decision 3's M2-08 exclusion, disposed of precisely
+
+**RO-16 Decision 3 stated, among its restrictions, that DeepSeek was *"Not authorized: … for **M2-08** automatically"*, alongside its bars on arbitrary evaluation frameworks, any other provider and any provider SDK.**
+
+**That statement was correct and binding when RO-16 was recorded.** It was issued before the M2-08 framework reconnaissance existed and before a native M2-08 path had been established; on the authority and evidence available at that time, withholding an automatic M2-08 extension was the right decision. **RO-16 Decision 3 is not treated as having been wrong.**
+
+**RO-18 supersedes RO-16 Decision 3 ONLY AS TO THE SPECIFIC M2-08 DEEPSEEK EXCLUSION.**
+
+**The historical RO-16 wording is NOT rewritten.** §4.8 stands as issued, in every part. **RO-16 Decision 3 is not amended generally**, and it remains historically accurate as the authority that existed before the reconnaissance.
+
+**The basis for the supersession** is the evidence recorded at commit `81b373a`, which established, among other things, that:
+
+- the repository's required M2-08 capability **should be implemented natively**;
+- **DeepEval does not provide the required Groundedness capability** across the investigated release history;
+- **forcing the external evaluation framework into the repository would introduce dependency and architecture boundaries the constitution deliberately excludes**;
+- **the existing DeepSeek judge-reuse pattern has already been proven at M2-07** without widening provider architecture.
+
+**The resulting authority:**
+
+```text
+RO-18 D-4
+    ↓
+narrow M2-08 judge-seam authorization
+```
+
+**Every other RO-16 Decision 3 restriction remains binding**, and **RO-18 does NOT authorize:** arbitrary evaluation frameworks; another provider; another provider SDK; **LangChain**; **DeepEval**; **Promptfoo**; **Ragas**; model routers; orchestration; or arbitrary HTTP access.
+
+**This reconciliation is recorded so that the register contains no unexplained contradiction between RO-16 and RO-18.** A reader who reaches RO-16 D-3 and finds its M2-08 sentence should read it as historically accurate and **superseded on that one point by this section**, and as fully binding on every other point.
+
+#### Decision 6 — the deterministic-test provider boundary
+
+**`RO-14` Decision 2 is carried forward binding and is not relaxed by this ruling:** *"no provider call enters the deterministic suite."* **A judge call is a provider call.**
+
+**M2-08's deterministic specifications MUST exercise the evaluation path through deterministic injected judge doubles or fakes**, and **live judging MUST remain confined to an explicit, on-demand evaluation entry point** — the pattern `scripts/run_generation.py` established for the repository's one real provider call and `scripts/evaluate_context.py` carried into evaluation at M2-07.
+
+**The concrete fake classes, their names and the internal test structure are implementation decisions for the M2-08 sprint**, and are not prescribed here.
+
+**The test suite must remain deterministic.**
+
+#### Decision 7 — no new dependency is authorized
+
+**RO-18 authorizes NO new dependency.** Specifically and by name:
+
+| | |
+|---|---|
+| **DeepEval** | **NOT authorized** |
+| **Promptfoo** | **NOT authorized** |
+| **Ragas** | **NOT authorized for M2-08** |
+| **LangChain** | **NOT authorized** |
+| **LangGraph** | **NOT authorized** |
+| **OpenAI SDK** | **NOT authorized** |
+| **Any new HTTP SDK** | **NOT authorized** |
+| **Orchestration** | **NOT authorized** |
+| **Model router** | **NOT authorized** |
+
+**M2-08 must use the existing repository seams and a standard-library / native implementation where possible** — the reasoning `sample_rag/deepseek.py` already applied when it declined RO-13's authorized provider SDK because *"an HTTP POST carrying a JSON document"* did not warrant a dependency tree.
+
+**`requirements.txt` is not changed by this governance sprint**, and **no transitive dependency becomes authorized merely because it would be useful to an implementation** — **RO-16 Decision 5** governs, unamended: *"a dependency does not become authorized by being required."* If a faithful implementation genuinely requires a capability outside existing authority, **M2-08 STOPs and reports the exact authority conflict** — it does not resolve an authority question by installing something.
+
+**The embedding and vector-store boundaries remain closed.** RO-18 grants **no** new embedding exception and **no** new vector-store exception; `sentence-transformers` and `faiss-cpu` keep their existing scope and module, the `VectorStore` boundary stays closed as **RO-10** and **RO-15 Decision 5** left it, and **`BGEEmbeddingProvider` is not authorized for evaluation** merely because it exists in the repository for retrieval.
+
+#### Decision 8 — metric semantics are derived, not prescribed
+
+**RO-18 authorizes the four metrics and does not prescribe their algorithm.** The later sprint derives the semantics from the repository's authoritative material — `docs/AI_Quality_Metrics_Reference.md`, `docs/altm.md` §4, §5 and §6, `docs/GENERATION_CONTRACT.md`, and the existing native metric definitions — and **records the exact operational propositions in implementation evidence before implementing them**.
+
+**The M2-08 framework reconnaissance is NOT authoritative for metric definitions.** It is evidence about framework capability, dependency structure, architecture, provider requirements, telemetry and boundary behaviour, and compatibility with this repository — **and about nothing else**. **Generic framework terminology MUST NOT be adopted as a metric definition merely because it is familiar.**
+
+**Four conceptual boundaries MUST survive the implementation, because they are what the metric names mean:**
+
+| Metric | Boundary that must survive |
+|---|---|
+| **Faithfulness** | Whether claims made by the generated answer are **supported / entailed by the available retrieved context** |
+| **Groundedness** | Whether substantive answer claims can be **traced to the appropriate evidence passages**. **The repository distinction between whole-context support and per-passage attribution MUST be preserved** — `docs/AI_Quality_Metrics_Reference.md` defines Groundedness *"claim by claim"*, *"stricter than 'not contradicted'"*, and `docs/GENERATION_CONTRACT.md` §399 already makes the claim a first-class element for exactly this reason |
+| **Hallucination Rate** | **Derived from the repository-defined claim-level grounding / faithfulness semantics.** **No unrelated hallucination formula may be invented.** `docs/altm.md` §6 records it as a *"near-complement of Faithfulness in the simple case; not guaranteed to sum to 100% once partial/ambiguous claims exist"* |
+| **Answer Relevancy** | Whether the generated answer **addresses the user's question**. **It MUST NOT be collapsed into factual correctness or faithfulness** — `docs/altm.md` §6 records it as *"the only metric independent of truthfulness; a fully faithful, fully grounded answer can still fail here"* |
+
+**These are semantic boundaries, not implementation prescriptions.**
+
+**M2-08 MUST preserve enough evidence to explain a metric result**, so a score can be read as evidence rather than as an assertion. **RO-18 prescribes no evidence schema, no report format and no trace shape**, and **M2-18 is not modified to carry evaluation output** — see Decision 12.
+
+**No quality claim is created by this ruling.** `docs/GENERATION_CONTRACT.md` §24.3 records empirical Faithfulness / Groundedness as *"later evaluation work — neither established nor claimed here"*, and §21's exclusion of the Layer 3/4 metric set stands. **Authorizing a measurement says nothing about what it will show**, and **no threshold, target or acceptance score is invented here.**
+
+#### Decision 9 — the Milestone 1 / M2-07 / M2-08 / M2-18 progression is preserved
+
+**The evaluation layers answer different questions and are not substitutes for one another:**
+
+```text
+Milestone 1 — deterministic retrieval metrics
+    Hit Rate; Chunk Precision@K; Chunk Recall@K; coverage classification
+    "Did retrieval find the expected evidence?"
+        ↓
+M2-07 — Layer 2
+    Context Precision; Context Recall
+    "Is the retrieved context relevant to the information requested, and does it
+     contain the independently-authored evidence needed for the question?"
+        ↓
+M2-08 — Layer 3
+    Faithfulness; Groundedness; Hallucination Rate; Answer Relevancy
+    "Did generation produce an answer that is grounded, faithful and relevant
+     according to the repository's metric definitions?"
+        ↓
+M2-18 — execution evidence
+    "What execution evidence can explain why the evaluation behaved this way?"
+```
+
+**The newer metrics MUST NOT be used to redefine the older ones.** The Milestone 1 retrieval metrics are **not renamed and not reinterpreted** by this ruling.
+
+**M2-08 does not supersede the Milestone 1 retrieval metrics**, and **M2-07 does not supersede Chunk Precision@K or Chunk Recall@K.** `docs/P3.3.3_…` §3 already records the `chunk_`-prefixed metrics as **explicitly not proxies** for Context Precision and Context Recall, and that reservation runs in both directions: the deterministic set-arithmetic metrics measure something the LLM-judged metrics do not, and vice versa.
+
+**The repository retains both deterministic retrieval metrics and LLM-judged evaluation metrics.** **The layers are not collapsed.**
+
+#### Decision 10 — M2-10 remains separate and OPEN
+
+**M2-10 is not discharged by this ruling, its row is not edited, and its status is unchanged.**
+
+**Producing M2-08 metric results later does not automatically discharge M2-10.** **RO-16 Decision 8** and **RO-17 Decision 7** both recorded that a sprint which measures is not thereby a sprint which discharges the measurement capability; that reasoning applies unchanged here.
+
+**No M2-10 wording is edited**, and no existing governance precedent requires a strictly necessary synchronization of its row by this ruling. Any future M2-10 synchronization remains separately governed and requires its own Repository Owner decision.
+
+#### Decision 11 — M2-07 remains as implemented and governed
+
+**M2-07 remains exactly as previously implemented and governed, and is not reopened.**
+
+**Not redesigned, not rerun, not modified:** its **Context Precision / Context Recall semantics** are unchanged; its committed implementation and evidence artifacts — `evaluation/context_metrics.py`, `tests/test_context_metrics.py`, `scripts/evaluate_context.py` and `docs/M2.07_Native_Context_Metrics_Report.md`, verified at commit `6543bae` — are **untouched**; and **RO-17 is unamended in every part**.
+
+**No retrieval optimization is authorized on the strength of any M2-07 score.** A measurement is not a mandate to move the thing measured, and **RO-18 asserts no retrieval-quality or context-quality claim.**
+
+#### Decision 12 — M2-18 remains discharged and untouched
+
+**M2-18 remains ✅ DISCHARGED**, and **RO-15 is unamended in every part and is not reinterpreted.**
+
+**Not modified by this ruling, and not to be modified to suit evaluation:** `scripts/execution_trace.py`, `scripts/run_generation.py`, `tests/test_execution_trace.py` and `docs/M2.18_Execution_Evidence_Report.md`. **No trace field may be added merely to make M2-08 easier**, no `VectorStore` may be widened and no semantic similarity score exposed.
+
+**M2-08 MAY consume M2-18 execution evidence diagnostically** — the diagnostic explainability **RO-15 Decision 2** describes — but **M2-18 is not an M2-08 prerequisite, M2-08 may not redesign it, and RO-18 creates no new trace capability.**
+
+#### Decision 13 — what this ruling does not authorize
+
+**RO-18 authorizes only the native M2-08 evaluation path described in Decision 1 and the narrowly bounded existing DeepSeek judge seam described in Decision 4. Nothing else.**
+
+**Not authorized:** retrieval optimization; chunking changes; corpus deduplication; embedding changes; vector-store changes; RRF changes; top-k changes; prompt optimization; generation-model changes; provider-architecture changes; model routing; agent frameworks; **LangChain**; **DeepEval**; **Promptfoo**; **Ragas**; production observability; **OpenTelemetry**; dashboards; **M2-10** discharge; **M3-01** discharge; and **M3-06** discharge.
+
+Each remains governed by its own existing authority or by a future ruling.
+
+#### Finding — the DeepEval tool attribution in the wider documentation set
+
+**Recorded, deliberately not acted on**, on the precedent **RO-17**'s own Ragas finding set.
+
+Several committed documents attribute the generation-evaluation layer to **DeepEval** as the implementing tool: `docs/roadmap.md` §5's four-layer table (*Tool* column, Layer 3); `docs/altm.md` §3's lifecycle table (Infer-stage *Typical Metrics*), §4's Infer-stage correction note, §6's metric mapping, §9's layer mapping and §12's Milestone 2 row; `docs/AI_Quality_Metrics_Reference.md`'s *"Evaluated by: DeepEval"* lines and its Milestone 2 row; and `docs/GENERATION_CONTRACT.md` D-8 and §21, which cite the attribution as external context rather than asserting it.
+
+**RO-18 edits none of them**, for the three reasons RO-17 stated and which apply unchanged. **First**, `docs/GENERATION_CONTRACT.md` is a versioned contract and `docs/AI_Quality_Metrics_Reference.md` and `docs/P3.3.3_…` are completed artifacts; **CP-3** governs. **Second**, the substance of each statement survives the change of mechanism — the **layer**, the **metric set**, the **ALTM stage (Infer)**, the **capability**, the **milestone** and the **stage** are all unchanged, and `docs/roadmap.md` §5 itself states that its layers correspond *"to specific ALTM stages, not to a specific tool's marketing scope."* **Third**, and decisively, changing the *Tool* column of the repository's evaluation strategy — alongside §7's *"Tool scope remains fixed at three: DeepEval, Promptfoo, Ragas"* — would be a **semantic revision of the evaluation strategy**, which is a larger act than an implementation-path ruling should perform on its own authority.
+
+**RO-18 adds no evaluation tool**, so §7's three-tool ceiling is **not breached** by it. **`docs/roadmap.md`, `docs/altm.md`, `docs/architecture.md`, `docs/MILESTONE_1A.md`, `docs/AI_Quality_Metrics_Reference.md` and `docs/GENERATION_CONTRACT.md` are NOT modified by this ruling.**
+
+**This finding owes no implementation and allocates no capability.** Whether the wider documentation set is synchronized — and how — is a **separate Repository Owner documentation decision**, recorded here so that the divergence is visible rather than discovered later. **The facts to preserve in any such synchronization are fixed by Decision 1**: capability = **M2-08**; layer = **Layer 3** (`docs/roadmap.md` §5) / **Layer 4** (`docs/AI_Quality_Metrics_Reference.md`); metrics = **Faithfulness, Groundedness, Hallucination Rate, Answer Relevancy**; implementation mechanism = **native**. **The capability is not renamed merely because its implementation mechanism changed.**
+
+#### Finding — the M2-08 capability row synchronization this ruling does not perform
+
+**Recorded with proposed language, deliberately not applied.**
+
+§4's canonical **M2-08** row currently reads *"DeepEval activation — Layer 3"* in its **Capability** column and carries **`—`** in its **Ruling** column. **Decision 1 makes the mechanism half of that name overtaken**, exactly as RO-17 made *"Ragas activation — Layer 2"* overtaken for **M2-07**.
+
+**RO-18 does not edit the row**, because **RO-10 Decision 2** bars a non-discharging sprint from editing a canonical capability row and **no row-editing authorization was supplied at this sprint** — the authorization RO-17 recorded receiving explicitly, and on which its M2-07 row synchronization rested.
+
+**Proposed for Repository Owner review**, in the adjacent, non-destructive form the register already uses for M2-07: prefix the M2-08 row's *Rationale* column with a marker recording that **the implementation path is rescoped by RO-18 and the *Capability* name is to be read as the original mechanism label, not the current one**; set the *Ruling* column to **RO-18**; and leave the identifier, class, blocking status, milestone, stage and every other column **unchanged**. **No capability is created, renamed, merged or discharged by that proposal.**
+
+**Until the Repository Owner applies it, the row stands as written and this Finding is the explanation.** A reader who reaches the M2-08 row should read *"DeepEval activation"* as the **original mechanism label** and **§4.10 Decision 1** as the current authorized path.
+
+#### What RO-18 does not do
+
+**It implements nothing.** No package was installed — `deepeval`, `promptfoo`, `ragas`, `langchain` and `openai` are all absent from the environment — **no import was added anywhere**, and `requirements.txt` is **byte-identical**. `sample_rag/`, `scripts/`, `tests/`, `evaluation/`, `datasets/` and `.gitignore` are **untouched**; **no evaluation was executed, no metric computed, no judge call made, no credential read and no network access performed.**
+
+**It discharges no capability** — **M2-07**, **M2-08**, **M2-10**, **M3-01** and **M3-06** all remain **OPEN**, and **M2-18** stays ✅ DISCHARGED without being reopened or re-evidenced. It **creates no capability, no milestone, no derivative identifier and no new `M2-xx`** — **M2-08 keeps its identifier, its name, its class, its blocking status, its milestone and its stage.** It **allocates nothing**: no register row is added, and no register row is edited.
+
+**RO-06 through RO-17 are unchanged in every part** — including **RO-16**, whose Decision 3 stands as issued and is superseded only on the single M2-08 point Decision 5 names, and **RO-17**, whose Decision 4 keeps its own M2-07-only scope — as do `docs/architecture.md`, `docs/altm.md`, `docs/roadmap.md`, `docs/MILESTONE_1A.md`, `docs/AI_Quality_Metrics_Reference.md`, `docs/P3.7.3_…`, `docs/P3.7.6_…`, **NA-07**, every retrieval contract, and the `VectorStore`, `EmbeddingProvider`, `Chunk` and `Document` contracts. **Generation Contract v1.0.0 (§1–§23), v2.0.0 (§24) and the §25 errata are byte-for-byte unchanged**, and **no new contract version is created.** **A-5 is not amended and no fifth exception is created** — the repository remains a **two-taken-exception** repository, `sentence-transformers` and `faiss-cpu`, with RO-13's third and RO-16's fourth both authorized and untaken. It **does not widen `REACHABLE_STAGES`**, **triggers neither M2-15 nor M2-17**, **disposes of no finding**, and **asserts no generation-quality claim** — authorizing how a measurement will be taken says nothing about what it will show.
+
+
 ---
 
 ## 5. Milestone 3 — Production Evaluation & Regression
