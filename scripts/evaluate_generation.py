@@ -3,6 +3,7 @@
 The on-demand entry point Repository Owner ruling **RO-18** authorizes:
 
     committed golden dataset
+          ->  explicit selection: --case-id ID, or --all
           ->  real retrieval (semantic + lexical + RRF, unmodified)
           ->  ContextBuilder  ->  Prompt
           ->  ModelGenerator  ->  GenerationResult      (one provider call each)
@@ -19,6 +20,24 @@ engine against a non-networked substitute; this performs the real generation and
 the real judging, on demand, from a terminal. It is the seventh instance of the
 `scripts/run_*.py` / `scripts/evaluate_*.py` pattern (`docs/architecture.md` §6 —
 *"Operational scripts … not pipeline logic"*), not a new mechanism.
+
+Nothing runs without an explicit selection
+--------------------------------------------
+Every real run of this script spends provider budget — one generation call per
+selected case, plus judge calls per claim — so **there is no default and no
+implicit full-dataset run**. `--case-id ID` evaluates exactly one committed
+golden entry; `--all` is the only thing that authorizes the whole dataset; any
+other invocation, including none at all, is a usage error that exits before a
+model, an index or a provider exists.
+
+**The guard is structural, not a matter of statement order.** Argument parsing
+and selection are the first two things `main` does, and the two expensive
+imports — `sample_rag.vector_runtime` and `scripts.run_hybrid_retrieval`, which
+between them pull `torch`, `transformers`, `sentence_transformers` and `faiss`
+into the process at roughly 3.1 s — are performed **inside** the functions that
+need them rather than at module scope. So `--help`, an unknown flag, a missing
+selection and an unknown case id all cost a JSON read and nothing more. See the
+comment above the import block for the measured chains.
 
 Generation and retrieval are measured, never modified
 ------------------------------------------------------
@@ -133,13 +152,13 @@ does not require `answer_text` to be reproducible at all. Two runs may differ,
 and the printed evidence is what a reader checks a run against.
 """
 
+import argparse
 import sys
 
 from sample_rag.context_builder import ContextBuilder
 from sample_rag.deepseek import DeepSeekClient
 from sample_rag.model_generator import ModelGenerator
 from sample_rag.retriever import Retriever
-from sample_rag.vector_runtime import VectorIndexRuntime
 
 from evaluation.generation_metrics import (
     ABSTAIN_OUTCOME,
@@ -149,16 +168,47 @@ from evaluation.generation_metrics import (
     compute,
 )
 from scripts.build_evidence_trace import load_evidence_trace, validate_evidence_trace
-from scripts.run_hybrid_retrieval import (
-    FUSED_ROUTE,
-    ROUTE_TOP_K,
-    canonical_order,
-    fuse_routes,
-    lexical_route,
-    load_documents,
-    semantic_route,
-)
 from scripts.run_retrieval import load_canonical_documents, load_corpus
+
+# `sample_rag.vector_runtime` and `scripts.run_hybrid_retrieval` are **deliberately
+# absent from this import block**, and the absence is measured rather than assumed.
+#
+#     scripts/evaluate_generation.py
+#       └─ sample_rag.vector_runtime          3.14 s
+#            └─ sample_rag.embedding
+#                 └─ sentence_transformers  ->  torch, transformers
+#            └─ sample_rag.vector_index      ->  faiss
+#       └─ scripts.run_hybrid_retrieval       3.11 s
+#            └─ sample_rag.vector_runtime         (the same chain)
+#
+# Every other import in this module measures at or below 0.02 s and pulls no
+# machine-learning library at all. Importing those two costs ~3.1 s and loads
+# `torch`, `transformers`, `sentence_transformers` and `faiss` into the process
+# **merely because the module was imported** — before `main` runs, and therefore
+# before argument parsing could possibly refuse the invocation.
+#
+# `--help`, a missing selection, an unknown flag and an unknown case id must all
+# cost nothing, so the two heavy imports are performed **inside** the functions
+# that need them, which run only after selection has been validated. No model
+# weight is loaded at import time in either case — that happens later still, when
+# `VectorIndexRuntime` is constructed and indexed — but the library import is real
+# work and is what this arrangement defers.
+#
+# This is the whole of the laziness: no other import is moved, and nothing about
+# the pipeline below changes.
+
+
+class SelectionError(Exception):
+    """Raised when the requested selection cannot be resolved against the dataset.
+
+    A tenth independent, flat exception type, following the repository's
+    per-responsibility pattern (`GenerationMetricsError`, `ContextMetricsError`,
+    `RetrievalMetricsError`, …). It is raised **before** any model, index or
+    provider object exists, and `main` converts it into argparse's own usage
+    error so the process exits non-zero through the mechanism
+    `scripts/cli.py` already records as *"argument validation is argparse's
+    responsibility"*.
+    """
 
 
 def load_reference_entries() -> list:
@@ -202,7 +252,23 @@ def generate_cases(entries: list, client: DeepSeekClient) -> tuple:
     **`statements` and `supporting_evidence` leave this function as diagnostics
     only.** They are not placed in a case; the engine would refuse one that
     carried them.
+
+    **The two expensive imports happen here**, not at module scope, and this is
+    the first point in the process at which they are permitted: `main` has
+    already parsed the arguments and resolved `entries` against the committed
+    dataset, so nothing below can run for an invocation the selection layer
+    would have refused. Nothing else about this function changed.
     """
+    from sample_rag.vector_runtime import VectorIndexRuntime
+    from scripts.run_hybrid_retrieval import (
+        FUSED_ROUTE,
+        canonical_order,
+        fuse_routes,
+        lexical_route,
+        load_documents,
+        semantic_route,
+    )
+
     chunks = load_corpus()
     canonical_ids = load_canonical_documents()
     order = canonical_order(chunks, canonical_ids)
@@ -276,7 +342,16 @@ def report_scores(report: dict, cases: list, diagnostics: list, entries: list, c
     The system's own attribution is printed in its own section, labelled as
     diagnostic, so a reader can compare what the system cited against what the
     judge found without either being mistaken for the other.
+
+    The route constants are imported here for the same reason `generate_cases`
+    imports its own: they live in `scripts/run_hybrid_retrieval.py`, whose import
+    chain is expensive. This function only ever runs after an evaluation has
+    completed, so the module is already loaded and the import costs nothing at
+    this point — it is written this way so that **no path through this file can
+    reach the heavy chain without having been authorized first.**
     """
+    from scripts.run_hybrid_retrieval import FUSED_ROUTE, ROUTE_TOP_K
+
     expected = [entry["expected_outcome"] for entry in entries]
     observed = [case["outcome"] for case in cases]
     faithfulness = report["faithfulness"]
@@ -390,13 +465,131 @@ def report_scores(report: dict, cases: list, diagnostics: list, entries: list, c
         )
 
 
-def main(argv: list = None) -> int:
-    """Evaluate the whole golden dataset once and report what was measured.
+def build_parser() -> argparse.ArgumentParser:
+    """The selection/authorization parser — the first thing the process does.
 
-    Composition only: loading, retrieval, assembly, generation, judging,
-    aggregation, reporting. No branch decides anything about the domain, and no
-    argument selects a subset — the dataset is evaluated whole, every run, so a
-    reported figure is never a figure over cases someone chose.
+    **Two mutually exclusive selections, and neither is a default.** An
+    invocation that names no selection is a usage error, so **full-dataset
+    evaluation is unreachable without `--all`** and a subset is unreachable
+    without naming a case. `argparse` owns the usage text, the `--help` exit and
+    the exit code, exactly as `scripts/cli.py` records: *"argument validation is
+    argparse's responsibility"*, and its errors go to stderr with exit `2`.
+
+    **`--help` returns here and never reaches `main`'s body**, which is what
+    makes the guarantee structural rather than a matter of statement order.
+
+    `prog` names the module form because that is the repository's invocation
+    convention throughout — `python3 -m scripts.<name>`, as every other script's
+    docstring and every `docs/` reference uses. `scripts/` modules import one
+    another (`from scripts.run_retrieval import …`), so the package form is the
+    one under which this file's own imports resolve.
+
+    **No selection mode beyond these two is offered.** No `--limit`, `--subset`,
+    `--sample`, `--index` or `--ids`: a selection that is neither *one named case*
+    nor *the whole committed dataset* would produce a figure over cases someone
+    chose, which is the thing this guard exists to prevent.
+    """
+    parser = argparse.ArgumentParser(
+        prog="python3 -m scripts.evaluate_generation",
+        description=(
+            "Evaluate generation quality (M2-08) over the committed golden "
+            "dataset. Performs real provider calls: one generation call per "
+            "selected case, plus judge calls per claim. A selection is "
+            "required — there is no implicit full-dataset run."
+        ),
+    )
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument(
+        "--case-id",
+        metavar="ID",
+        help=(
+            "Evaluate exactly the one committed golden entry with this id. "
+            "The id is validated against the dataset before any model, index "
+            "or provider work begins."
+        ),
+    )
+    selection.add_argument(
+        "--all",
+        action="store_true",
+        help=(
+            "Evaluate every committed golden entry. This is the only way to "
+            "authorize a full-dataset run."
+        ),
+    )
+    return parser
+
+
+def select_entries(entries: list, arguments: argparse.Namespace) -> list:
+    """Resolve the requested selection against the committed golden entries.
+
+    **A pure function over data that is already in memory.** It constructs no
+    client, touches no index, loads no model and reaches no network, so every
+    refusal below costs nothing — which is the property that makes an unknown
+    case id cheap rather than expensive.
+
+    **Selection happens here, and generation happens after.** The returned list
+    is what `generate_cases` receives, so a single-case run generates one case;
+    it does not generate the dataset and filter afterwards, which would spend the
+    whole provider budget to report one row.
+
+    **The committed dataset is the source of truth.** No count, id or subset is
+    written into this function; it resolves against whatever
+    `datasets/golden/resume_evidence_trace.json` currently holds, so adding or
+    removing a golden entry changes what `--all` means without changing this
+    code.
+
+    Entry contents, ids and dataset order are preserved exactly — `--all`
+    returns the entries as loaded, and `--case-id` returns the one entry object
+    itself, not a copy or a projection of it.
+    """
+    if arguments.all:
+        return list(entries)
+
+    if not arguments.case_id:
+        raise SelectionError(
+            "a selection is required: pass --case-id ID to evaluate one "
+            "committed golden entry, or --all to authorize a full-dataset "
+            "evaluation"
+        )
+
+    selected = [entry for entry in entries if entry["id"] == arguments.case_id]
+    if not selected:
+        raise SelectionError(
+            f"unknown --case-id {arguments.case_id!r}; it is not an id in "
+            f"datasets/golden/resume_evidence_trace.json "
+            f"({len(entries)} entries)"
+        )
+    return selected
+
+
+def main(argv: list = None) -> int:
+    """Evaluate the selected golden entries and report what was measured.
+
+    Composition only: parsing, selection, loading, retrieval, assembly,
+    generation, judging, aggregation, reporting. No branch decides anything
+    about the domain.
+
+    **The order of the first four statements is the safety property**, and it is
+    the reason this function reads the way it does:
+
+        parse_args            `--help`, an unknown flag and `--case-id` with
+                              `--all` all exit here, inside argparse
+              ↓
+        load_reference_entries    a JSON read and its existing validation gate;
+                              no model, no index, no provider
+              ↓
+        select_entries        an unknown id or a missing selection exits here
+              ↓
+        DeepSeekClient        the first provider object in the process
+              ↓
+        generate_cases        the first expensive import, and the first model
+                              load, retrieval and generation — over the
+                              **selected** entries only
+
+    Nothing above `generate_cases` can load a model or reach a provider, so
+    every refusal is free. **`generate_cases` receives the selected entries**,
+    which is what makes a single-case run cost one generation rather than
+    twenty-two.
 
     **Failures are not caught**, deliberately and on `scripts/run_generation.py`'s
     precedent. `ProviderConfigurationError`, `ProviderRequestError`,
@@ -404,11 +597,21 @@ def main(argv: list = None) -> int:
     each propagate with their own name: a run that could not read a verdict
     produces no score rather than a score with a guess in it, and
     `sample_rag/deepseek.py` performs no retry, so neither does this.
+    `SelectionError` is the one exception this function does convert, into
+    argparse's own usage error, so a refused selection exits the way every other
+    bad invocation in this repository exits.
     """
+    parser = build_parser()
+    arguments = parser.parse_args(argv)
+
     entries = load_reference_entries()
+    try:
+        selected = select_entries(entries, arguments)
+    except SelectionError as refusal:
+        parser.error(str(refusal))
 
     client = DeepSeekClient()
-    cases, diagnostics, corpus_size = generate_cases(entries, client)
+    cases, diagnostics, corpus_size = generate_cases(selected, client)
 
     # The whole of the RO-18 Decision 4 reuse: the existing sanctioned boundary,
     # called through its existing method, adapted to the engine's provider-free
@@ -419,7 +622,10 @@ def main(argv: list = None) -> int:
 
     report = compute(cases, judge)
 
-    report_scores(report, cases, diagnostics, entries, corpus_size, client.model)
+    # `selected`, not `entries`: the provenance block states what was actually
+    # evaluated, so a single-case run reports one entry rather than describing a
+    # dataset it did not measure.
+    report_scores(report, cases, diagnostics, selected, corpus_size, client.model)
     return 0
 
 
